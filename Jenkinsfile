@@ -22,6 +22,7 @@ pipeline {
             post {
                 always {
                     junit 'target/surefire-reports/*.xml'
+                    step([ $class: 'GitHubCommitStatusSetter'])
                 }
             }
         }
