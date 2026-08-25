@@ -1,0 +1,11 @@
+services:
+  app:
+    build: .
+    depends_on:
+      - db
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_PASSWORD: lets_get_that_money
+    ports:
+     - "5432:5432"
