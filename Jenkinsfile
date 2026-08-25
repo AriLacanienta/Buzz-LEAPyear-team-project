@@ -17,7 +17,7 @@ pipeline {
         }
         stage('Smoke Test') {
             steps {
-                sh 'docker run --rm -d -p 8080:8080 buzz-leapyear:latest'
+                sh 'docker run --rm -d buzz-leapyear:latest'
             }
             post {
                 always {
