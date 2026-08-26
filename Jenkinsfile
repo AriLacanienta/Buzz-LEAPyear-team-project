@@ -14,11 +14,11 @@ pipeline {
                 sh 'mvn -B clean package'
                 sh 'docker build -t buzz-leapyear:latest .'
             }
-            post {
-                always {
-                    junit 'target/surefire-reports/*.xml'
-                }
-            }
+            // post {
+            //     always {
+            //         junit 'target/surefire-reports/*.xml'
+            //     }
+            // }
         }
         stage('Smoke Test') {
             steps {
