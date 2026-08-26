@@ -26,9 +26,9 @@ pipeline {
             }
         }
     }
-    post {
-        always {
-                    step([ $class: 'GitHubCommitStatusSetter'])
-        }
-    }
+    // post {
+    //     always {
+    //                 step([ $class: 'GitHubCommitStatusSetter'])
+    //     }
+    // }
 }
