@@ -14,15 +14,15 @@ pipeline {
                 sh 'mvn -B clean package'
                 sh 'docker build -t buzz-leapyear:latest .'
             }
+            // post {
+            //     always {
+            //         junit 'target/surefire-reports/*.xml'
+            //     }
+            // }
         }
         stage('Smoke Test') {
             steps {
-                sh 'docker run --rm -d -p 8080:8080 buzz-leapyear:latest'
-            }
-            post {
-                always {
-                    junit 'target/surefire-reports/*.xml'
-                }
+                sh 'docker run --rm -d buzz-leapyear:latest'
             }
         }
     }
