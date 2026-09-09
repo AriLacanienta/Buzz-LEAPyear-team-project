@@ -1,6 +1,12 @@
 services:
   app:
-    build: .
+    build: ./backend
+    ports:
+      - "6767:6767"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/trading_api
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=lets_get_that_money
     depends_on:
       - db
   db:
