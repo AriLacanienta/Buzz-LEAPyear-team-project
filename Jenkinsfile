@@ -14,9 +14,7 @@ pipeline {
         }
         stage('Build Image') {
             steps {
-                sh 'docker-compose up \
-                    --env POSTGRES_PASSWORD=${POSTGRES_PASSWORD} \
-                    -d'
+                sh 'docker-compose up -d'
                 sh 'docker-compose ps'
             }
             // post {
