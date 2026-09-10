@@ -1,5 +1,8 @@
 pipeline {
     agent any
+    environment {
+        POSTGRES_PASSWORD = credentials('POSTGRES_PASSWORD')
+    }
     tools {
         maven 'Maven3'
     }
@@ -11,7 +14,9 @@ pipeline {
         }
         stage('Build Image') {
             steps {
-                sh 'docker-compose up -d'
+                sh 'docker-compose up \
+                    --build-arg POSTGRES_PASSWORD=${POSTGRES_PASSWORD} \
+                    -d'
                 sh 'docker-compose ps'
             }
             // post {
