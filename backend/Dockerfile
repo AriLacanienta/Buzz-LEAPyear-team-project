@@ -7,7 +7,7 @@ RUN mvn -B clean package -DskipTests
 
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
-COPY --from=build /app/target/team-skeleton.jar app.jar
+COPY --from=build /app/target/*.jar app.jar
 RUN addgroup -S appgroup
 RUN adduser -S appuser -g appgroup
 USER appuser

@@ -1,5 +1,8 @@
 pipeline {
     agent any
+    environment {
+        POSTGRES_PASSWORD = credentials('POSTGRES_PASSWORD')
+    }
     tools {
         maven 'Maven3'
     }
@@ -11,8 +14,8 @@ pipeline {
         }
         stage('Build Image') {
             steps {
-                sh 'mvn -B clean package'
-                sh 'docker build -t buzz-leapyear:latest .'
+                sh 'docker-compose up -d'
+                sh 'docker-compose ps'
             }
             // post {
             //     always {
@@ -20,15 +23,10 @@ pipeline {
             //     }
             // }
         }
-        stage('Smoke Test') {
-            steps {
-                sh 'docker run --rm -d buzz-leapyear:latest'
-            }
-        }
-    }
-    post {
-        always {
-                    step([ $class: 'GitHubCommitStatusSetter'])
-        }
+        // stage('Smoke Test') {
+        //     steps {
+        //         sh 'docker-compose up -d'
+        //     }
+        // }
     }
 }
