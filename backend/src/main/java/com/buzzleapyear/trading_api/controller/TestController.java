@@ -8,9 +8,9 @@ import com.buzzleapyear.trading_api.service.TestService;
 @RestController
 @RequestMapping("api/v1") 
 public class TestController {
-
+  
   private final TestService testService;
-
+  
   public TestController(TestService testService) {
     this.testService = testService;
   }
