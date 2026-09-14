@@ -10,7 +10,7 @@ public class AuditLog {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "audit_id")
-    private Long auditId;
+    private Long id;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "report_id", nullable = false)
@@ -31,8 +31,8 @@ public class AuditLog {
     private LocalDateTime endDate;
 
     // Getters and Setters
-    public Long getAuditId() { return auditId; }
-    public void setAuditId(Long auditId) { this.auditId = auditId; }
+    public Long getAuditId() { return id; }
+    public void setAuditId(Long auditId) { this.id = auditId; }
     
     public Report getReport() { return report; }
     public void setReport(Report report) { this.report = report; }

@@ -10,7 +10,7 @@ public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "account_id")
-    private Long accountId;
+    private Long id;
     
     @Column(name = "account_name", nullable = false)
     private String accountName;
@@ -36,8 +36,8 @@ public class Account {
     private List<AuditLog> auditLogs;
 
     // Getters and Setters
-    public Long getAccountId() { return accountId; }
-    public void setAccountId(Long accountId) { this.accountId = accountId; }
+    public Long getAccountId() { return id; }
+    public void setAccountId(Long accountId) { this.id = accountId; }
     
     public String getAccountName() { return accountName; }
     public void setAccountName(String accountName) { this.accountName = accountName; }

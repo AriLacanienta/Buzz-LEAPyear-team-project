@@ -13,7 +13,7 @@ public class Report {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "report_id")
-    private Long reportId;
+    private Long id;
     
     @Column(name = "report_name", nullable = false, unique = true)
     private String reportName;
@@ -33,8 +33,8 @@ public class Report {
     private List<AuditLog> auditLogs;
 
     // Getters and Setters
-    public Long getReportId() { return reportId; }
-    public void setReportId(Long reportId) { this.reportId = reportId; }
+    public Long getReportId() { return id; }
+    public void setReportId(Long reportId) { this.id = reportId; }
     
     public String getReportName() { return reportName; }
     public void setReportName(String reportName) { this.reportName = reportName; }

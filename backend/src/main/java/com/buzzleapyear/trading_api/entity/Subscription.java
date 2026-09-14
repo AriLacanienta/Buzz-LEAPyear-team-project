@@ -12,7 +12,7 @@ public class Subscription {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "subscription_id")
-    private Long subscriptionId;
+    private Long id;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id")
@@ -26,8 +26,8 @@ public class Subscription {
     private LocalDateTime subscriptionStartDate;
 
     // Getters and Setters
-    public Long getSubscriptionId() { return subscriptionId; }
-    public void setSubscriptionId(Long subscriptionId) { this.subscriptionId = subscriptionId; }
+    public Long getSubscriptionId() { return id; }
+    public void setSubscriptionId(Long subscriptionId) { this.id = subscriptionId; }
     
     public Account getAccount() { return account; }
     public void setAccount(Account account) { this.account = account; }

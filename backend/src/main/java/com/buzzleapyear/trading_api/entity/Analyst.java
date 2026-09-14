@@ -9,15 +9,15 @@ public class Analyst {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "analyst_id")
-    private Long analystId;
+    private Long id;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     // Getters and Setters
-    public Long getAnalystId() { return analystId; }
-    public void setAnalystId(Long analystId) { this.analystId = analystId; }
+    public Long getAnalystId() { return id; }
+    public void setAnalystId(Long analystId) { this.id = analystId; }
     
     public User getUser() { return user; }
     public void setUser(User user) { this.user = user; }

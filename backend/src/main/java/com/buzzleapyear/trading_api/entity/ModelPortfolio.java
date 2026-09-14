@@ -12,7 +12,7 @@ public class ModelPortfolio {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "portfolio_id")
-    private Long portfolioId;
+    private Long id;
     
     @Column(name = "portfolio_name", nullable = false, unique = true)
     private String portfolioName;
@@ -24,8 +24,8 @@ public class ModelPortfolio {
     private List<PortfolioHolding> holdings;
 
     // Getters and Setters
-    public Long getPortfolioId() { return portfolioId; }
-    public void setPortfolioId(Long portfolioId) { this.portfolioId = portfolioId; }
+    public Long getPortfolioId() { return id; }
+    public void setPortfolioId(Long portfolioId) { this.id = portfolioId; }
     
     public String getPortfolioName() { return portfolioName; }
     public void setPortfolioName(String portfolioName) { this.portfolioName = portfolioName; }
