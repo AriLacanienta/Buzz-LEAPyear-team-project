@@ -16,7 +16,6 @@ pipeline {
         }
         stage('Build Image') {
             steps {
-                sh 'docker-compose down'
                 sh 'docker-compose up -d --build'
             }
             // post {
@@ -30,5 +29,11 @@ pipeline {
         //         sh 'docker-compose up -d'
         //     }
         // }
+    }
+    post {
+        always{
+            sh 'docker-compose down'
+            sh 'docker system prune -f'
+        }
     }
 }
