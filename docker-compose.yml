@@ -2,11 +2,11 @@ services:
   web:
     build: ./frontend
     ports:
-      - "8081:8080"
+      - "${HOST_WEB_PORT}:8080"
   app:
     build: ./backend
     ports:
-      - "6969:6767"
+      - "${HOST_APP_PORT}:6767"
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:${POSTGRES_PORT}/${POSTGRES_DB}
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}

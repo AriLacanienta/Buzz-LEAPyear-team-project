@@ -2,6 +2,8 @@ pipeline {
     agent any
     environment {
         POSTGRES_PASSWORD = credentials('POSTGRES_PASSWORD')
+        HOST_WEB_PORT = 6969
+        HOST_APP_PORT = 8082
     }
     tools {
         maven 'Maven3'
@@ -14,8 +16,8 @@ pipeline {
         }
         stage('Build Image') {
             steps {
-                sh 'docker-compose up -d'
-                sh 'docker-compose ps'
+                sh 'docker-compose down'
+                sh 'docker-compose up -d --build'
             }
             // post {
             //     always {
