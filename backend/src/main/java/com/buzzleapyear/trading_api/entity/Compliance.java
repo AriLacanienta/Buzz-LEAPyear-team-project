@@ -9,7 +9,7 @@ public class Compliance {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "compliance_id")
-    private Long complianceId;
+    private Long id;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -23,8 +23,8 @@ public class Compliance {
     private Report report;
 
     // Getters and Setters
-    public Long getComplianceId() { return complianceId; }
-    public void setComplianceId(Long complianceId) { this.complianceId = complianceId; }
+    public Long getComplianceId() { return id; }
+    public void setComplianceId(Long complianceId) { this.id = complianceId; }
     
     public User getUser() { return user; }
     public void setUser(User user) { this.user = user; }

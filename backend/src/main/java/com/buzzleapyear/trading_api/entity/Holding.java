@@ -12,7 +12,7 @@ public class Holding {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "holdings_id")
-    private Long holdingId;
+    private Long id;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id", nullable = false)
@@ -29,8 +29,8 @@ public class Holding {
     private BigDecimal totalCost;
 
     // Getters and Setters
-    public Long getHoldingId() { return holdingId; }
-    public void setHoldingId(Long holdingId) { this.holdingId = holdingId; }
+    public Long getHoldingId() { return id; }
+    public void setHoldingId(Long holdingId) { this.id = holdingId; }
     
     public Account getAccount() { return account; }
     public void setAccount(Account account) { this.account = account; }

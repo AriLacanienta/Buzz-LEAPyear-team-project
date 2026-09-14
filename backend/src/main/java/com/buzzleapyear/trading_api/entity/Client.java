@@ -11,7 +11,7 @@ public class Client {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "clients_id")
-    private Long clientId;
+    private Long id;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -38,8 +38,8 @@ public class Client {
     }
 
     // Getters and Setters
-    public Long getClientId() { return clientId; }
-    public void setClientId(Long clientId) { this.clientId = clientId; }
+    public Long getClientId() { return id; }
+    public void setClientId(Long clientId) { this.id = clientId; }
     
     public User getUser() { return user; }
     public void setUser(User user) { this.user = user; }

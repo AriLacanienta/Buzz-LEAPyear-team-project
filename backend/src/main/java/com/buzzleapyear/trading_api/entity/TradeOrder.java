@@ -12,7 +12,7 @@ public class TradeOrder {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "trade_order_id")
-    private Long tradeOrderId;
+    private Long id;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id", nullable = false)
@@ -36,8 +36,8 @@ public class TradeOrder {
     private List<TradeOrderStatus> statuses;
 
     // Getters and Setters
-    public Long getTradeOrderId() { return tradeOrderId; }
-    public void setTradeOrderId(Long tradeOrderId) { this.tradeOrderId = tradeOrderId; }
+    public Long getTradeOrderId() { return id; }
+    public void setTradeOrderId(Long tradeOrderId) { this.id = tradeOrderId; }
     
     public Account getAccount() { return account; }
     public void setAccount(Account account) { this.account = account; }

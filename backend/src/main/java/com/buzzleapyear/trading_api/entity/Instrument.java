@@ -12,7 +12,7 @@ public class Instrument {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "instrument_id")
-    private Long instrumentId;
+    private Long id;
     
     @Column(name = "instrument_name", nullable = false)
     private String instrumentName;
@@ -37,8 +37,8 @@ public class Instrument {
     private List<PortfolioHolding> portfolioHoldings;
 
     // Getters and Setters
-    public Long getInstrumentId() { return instrumentId; }
-    public void setInstrumentId(Long instrumentId) { this.instrumentId = instrumentId; }
+    public Long getInstrumentId() { return id; }
+    public void setInstrumentId(Long instrumentId) { this.id = instrumentId; }
     
     public String getInstrumentName() { return instrumentName; }
     public void setInstrumentName(String instrumentName) { this.instrumentName = instrumentName; }

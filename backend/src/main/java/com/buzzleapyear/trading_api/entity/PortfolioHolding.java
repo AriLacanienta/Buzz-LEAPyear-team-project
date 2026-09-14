@@ -12,7 +12,7 @@ public class PortfolioHolding {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "holdings_id")
-    private Long holdingId;
+    private Long id;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "portfolio_id", nullable = false)
@@ -26,8 +26,8 @@ public class PortfolioHolding {
     private BigDecimal holdingWeight;
 
     // Getters and Setters
-    public Long getHoldingId() { return holdingId; }
-    public void setHoldingId(Long holdingId) { this.holdingId = holdingId; }
+    public Long getHoldingId() { return id; }
+    public void setHoldingId(Long holdingId) { this.id = holdingId; }
     
     public ModelPortfolio getModelPortfolio() { return modelPortfolio; }
     public void setModelPortfolio(ModelPortfolio modelPortfolio) { this.modelPortfolio = modelPortfolio; }

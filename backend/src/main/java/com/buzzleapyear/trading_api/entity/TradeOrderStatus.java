@@ -10,7 +10,7 @@ public class TradeOrderStatus {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "status_id")
-    private Long statusId;
+    private Long id;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "trade_order_id", nullable = false)
@@ -30,8 +30,8 @@ public class TradeOrderStatus {
     private LocalDateTime timeUpdated;
 
     // Getters and Setters
-    public Long getStatusId() { return statusId; }
-    public void setStatusId(Long statusId) { this.statusId = statusId; }
+    public Long getStatusId() { return id; }
+    public void setStatusId(Long statusId) { this.id = statusId; }
     
     public TradeOrder getTradeOrder() { return tradeOrder; }
     public void setTradeOrder(TradeOrder tradeOrder) { this.tradeOrder = tradeOrder; }
