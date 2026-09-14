@@ -1,10 +1,14 @@
 services:
+  web:
+    build: ./frontend
+    ports:
+      - "8081:8080"
   app:
     build: ./backend
     ports:
-      - "6767:6767"
+      - "6969:6767"
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:${POSTGRES_PORT}/${POSTGRES_DB}
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
     depends_on:
