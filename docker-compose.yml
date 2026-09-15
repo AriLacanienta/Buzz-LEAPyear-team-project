@@ -2,7 +2,12 @@ services:
   web:
     build: ./frontend
     ports:
-      - "${HOST_WEB_PORT}:8080"
+      - "${HOST_WEB_PORT}:4200"
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/angular.json:/app/angular.json
+    environment:
+      - WATCHPACK_POLLING=true
   app:
     build: ./backend
     ports:
