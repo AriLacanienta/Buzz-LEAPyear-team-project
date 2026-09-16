@@ -23,9 +23,9 @@ public class TradeOrder {
     @JoinColumn(name = "instrument_id", nullable = false)
     private Instrument instrument;
     
-    @Column(name = "order_type", nullable = false)
+    @Column(name = "side", nullable = false)
     @Enumerated(EnumType.STRING)
-    private OrderType orderType;
+    private OrderSide side;
     
     @Column(name = "quantity", nullable = false)
     private BigInteger quantity;
