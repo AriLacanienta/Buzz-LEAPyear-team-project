@@ -20,4 +20,9 @@ public class TestController {
     return testService.testPrint();
   }
 
+  @GetMapping("/getClientTradeHistory/{client_id}")
+  public String getClientTradeHistory(){
+    return "not yet implemented";
+  }
+
 }

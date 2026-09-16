@@ -31,8 +31,8 @@ public class AuditLog {
     private LocalDateTime endDate;
 
     // Getters and Setters
-    public Long getAuditId() { return id; }
-    public void setAuditId(Long auditId) { this.id = auditId; }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
     
     public Report getReport() { return report; }
     public void setReport(Report report) { this.report = report; }

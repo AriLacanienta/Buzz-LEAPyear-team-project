@@ -24,8 +24,8 @@ public class ModelPortfolio {
     private List<PortfolioHolding> holdings;
 
     // Getters and Setters
-    public Long getPortfolioId() { return id; }
-    public void setPortfolioId(Long portfolioId) { this.id = portfolioId; }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
     
     public String getPortfolioName() { return portfolioName; }
     public void setPortfolioName(String portfolioName) { this.portfolioName = portfolioName; }

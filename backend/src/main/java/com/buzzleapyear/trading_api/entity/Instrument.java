@@ -37,8 +37,8 @@ public class Instrument {
     private List<PortfolioHolding> portfolioHoldings;
 
     // Getters and Setters
-    public Long getInstrumentId() { return id; }
-    public void setInstrumentId(Long instrumentId) { this.id = instrumentId; }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
     
     public String getInstrumentName() { return instrumentName; }
     public void setInstrumentName(String instrumentName) { this.instrumentName = instrumentName; }
@@ -62,6 +62,6 @@ public class Instrument {
     public void setPortfolioHoldings(List<PortfolioHolding> portfolioHoldings) { this.portfolioHoldings = portfolioHoldings; }
     
     public enum AssetType {
-        EQUITY, BOND, FUND, CASH
+        EQUITY, BOND, FUND, CASH, CRYPTO, ETF
     }
 }
