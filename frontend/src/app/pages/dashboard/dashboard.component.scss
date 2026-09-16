@@ -1,13 +1,12 @@
 .container {
   padding: 20px;
-  max-width: 1200px;
   margin: 0 auto;
 }
 
 header {
   text-align: center;
   margin-bottom: 40px;
-  border-bottom: 2px solid #007bff;
+  border-bottom: 3px solid #1E2D45;
   padding-bottom: 20px;
 
   h1 {
@@ -16,7 +15,7 @@ header {
   }
 
   p {
-    color: #666;
+    color: #9aa1ad;
     font-size: 18px;
     margin-bottom: 20px;
   }
@@ -27,37 +26,43 @@ header {
   gap: 20px;
   justify-content: center;
   padding-top: 15px;
-  border-top: 1px solid #ddd;
 
   .tab {
     padding: 10px 20px;
     text-decoration: none;
-    color: #666;
+    color: #9aa1ad;
     font-weight: 500;
     border-bottom: 3px solid transparent;
     transition: all 0.3s ease;
     cursor: pointer;
 
     &:hover {
-      color: #007bff;
+      color: #1E2D45;
     }
 
     &.active {
-      color: #007bff;
-      border-bottom-color: #007bff;
+      border-bottom-color: #1E2D45;
+      border: 1px solid #1E2D45;
+      border-radius: 2px;
+      background-color: #0F1520;
+      color: #ffffff;
     }
   }
 }
 
 main {
+  max-width: 1200px;
+  margin: 0 auto;
+
   section {
     margin-bottom: 30px;
 
     h2 {
-      color: #007bff;
-      border-left: 4px solid #007bff;
+      color: #3B82F6;
+      border-left: 4px solid #3B82F6;
       padding-left: 10px;
     }
+    
     p {
       color: #9aa1ad;
       font-size: 16px;
@@ -70,11 +75,11 @@ main {
 
       li {
         padding: 8px 0;
-        color: #555;
+        color: #9aa1ad;
 
         &:before {
           content: "✓ ";
-          color: #28a745;
+          color: #3B82F6;
           font-weight: bold;
           margin-right: 8px;
         }

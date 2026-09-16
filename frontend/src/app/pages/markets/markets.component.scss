@@ -1,13 +1,12 @@
 .container {
   padding: 20px;
-  max-width: 1200px;
   margin: 0 auto;
 }
 
 header {
   text-align: center;
   margin-bottom: 40px;
-  border-bottom: 2px solid #007bff;
+  border-bottom: 3px solid #1E2D45;
   padding-bottom: 20px;
 
   h1 {
@@ -27,7 +26,6 @@ header {
   gap: 20px;
   justify-content: center;
   padding-top: 15px;
-  border-top: 1px solid #ddd;
 
   .tab {
     padding: 10px 20px;
@@ -39,19 +37,26 @@ header {
     cursor: pointer;
 
     &:hover {
-      color: #007bff;
+      color: #1E2D45;
     }
 
     &.active {
-      color: #007bff;
-      border-bottom-color: #007bff;
+      border-bottom-color: #1E2D45;
+      border: 1px solid #1E2D45;
+      border-radius: 2px;
+      background-color: #0F1520;
+      color: #ffffff;
     }
   }
 }
 
 main {
+  max-width: 1200px;
+  margin: 0 auto;
+
   section {
     margin-bottom: 30px;
+   
 
     h2 {
       color: #007bff;
@@ -59,8 +64,14 @@ main {
       padding-left: 10px;
     }
 
-    p {
-      color: #555;
+    ul {
+      list-style-type: none;
+      padding: 0;
+
+      li {
+        padding: 8px 0;
+        color: #9aa1ad;
+      }
     }
   }
 }
