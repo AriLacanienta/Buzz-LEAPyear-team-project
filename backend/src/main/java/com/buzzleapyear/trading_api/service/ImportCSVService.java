@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 
 import org.springframework.stereotype.Service;
 import jakarta.persistence.EntityManager;
@@ -19,11 +20,12 @@ import jakarta.persistence.Persistence;
 import com.buzzleapyear.trading_api.entity.User;
 import com.buzzleapyear.trading_api.entity.Client;
 import com.buzzleapyear.trading_api.entity.Instrument;
+import com.buzzleapyear.trading_api.entity.Instrument.AssetType;
 import com.buzzleapyear.trading_api.entity.Account;
 import com.buzzleapyear.trading_api.entity.TradeOrder;
 
 @Service
-public class importCSVService {
+public class ImportCSVService {
     public void importFromTradesCSV(Path csvFilepath) {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("persistence-unit-name");
         EntityManager em = emf.createEntityManager();
@@ -96,15 +98,15 @@ public class importCSVService {
 
                     // Step 5: Create TradeOrder (depends on instrument_id and account_id)
                     TradeOrder tradeOrder = new TradeOrder();
-                    tradeOrder.setTradeId(values.trade_id);
                     tradeOrder.setAccount(account); // Set Account relationship
                     tradeOrder.setInstrument(instrument); // Set Instrument relationship
                     tradeOrder.setOrderDate(values.trade_date);
-                    tradeOrder.setQuantity(values.quantity);
-                    tradeOrder.setPrice(values.price);
-                    tradeOrder.setValue(values.value);
+                    tradeOrder.setQuantity(BigInteger.valueOf(values.quantity));
+                    tradeOrder.setPrice(BigDecimal.valueOf(values.price));
+                    tradeOrder.setValue(BigDecimal.valueOf(values.value));
                     tradeOrder.setSide(values.side);
                     em.persist(tradeOrder);
+                    em.flush();
                     
                     transaction.commit();
                 } catch (Exception e) {
@@ -130,27 +132,26 @@ public class importCSVService {
 
     public static class LineValues {
         public String trade_id;
-        public Date trade_date;
+        public LocalDateTime trade_date;
         public String client_id;
         public String client_name;
         public String advisor;
         public String instrument;
-        public String asset_class;
-        public OrderSide side;
+        public AssetType asset_class;
+        public TradeOrder.OrderSide side;
         public Integer quantity;
         public double price;
         public String currency;
         public double value;
 
-        public LineValues(String trade_id, Date trade_date, String client_id, String client_name, 
-            String advisor, String instrument, String asset_class, String side, double quantity,
+        public LineValues(String trade_id, LocalDateTime trade_date, String client_id, String client_name, 
+            String advisor, String instrument, AssetType asset_class, String side, int quantity,
              double price, String currency, double value) {
 
-            final String[] VALID_ASSET_CLASSES = {"Equity", "Bond", "Fund", "Cash", "Crypto", "ETF"}; 
             final String[] VALID_SIDES = {"BUY", "SELL"};
 
-            if (!Arrays.asList(VALID_ASSET_CLASSES).contains(asset_class))
-                throw new IllegalArgumentException("asset_class must be one of: " + Arrays.toString(VALID_ASSET_CLASSES)); 
+            if (asset_class == null)
+                throw new IllegalArgumentException("asset_class cannot be null");
             if (!Arrays.asList(VALID_SIDES).contains(side.toUpperCase()))
                 throw new IllegalArgumentException("Side must be one of: " + Arrays.toString(VALID_SIDES));
             if (quantity <= 0)
@@ -180,21 +181,25 @@ public class importCSVService {
         try {
             String[] values = csvLine.split(",");
             String trade_id = values[0].trim();
-            
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            Date trade_date = dateFormat.parse(values[1].trim());
-            
+            LocalDateTime trade_date = LocalDateTime.parse(values[1].trim());
             String client_id = values[2].trim();
             String client_name = values[3].trim();
             String advisor = values[4].trim();
             String instrument = values[5].trim();
-            String asset_class = values[6].trim();
+            String asset_class_str = values[6].trim();
             String side = values[7].trim().toUpperCase();
             int quantity = Integer.parseInt(values[8].trim());
             double price = Double.parseDouble(values[9].trim());
             String currency = values[10].trim();
             double value = Double.parseDouble(values[11].trim());
 
+            // Convert asset_class string to AssetType enum
+            AssetType asset_class;
+            try {
+                asset_class = AssetType.valueOf(asset_class_str.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Invalid asset_class: " + asset_class_str + ". Must be one of: " + Arrays.toString(AssetType.values()), e);
+            }
 
             return new LineValues(trade_id, trade_date, client_id, client_name, advisor, instrument, asset_class, side, quantity, price, currency, value);
         } catch (Exception e) {
