@@ -148,19 +148,6 @@ public class ImportCSVService {
             String advisor, String instrument, AssetType asset_class, String side, int quantity,
              double price, String currency, double value) {
 
-            final String[] VALID_SIDES = {"BUY", "SELL"};
-
-            if (asset_class == null)
-                throw new IllegalArgumentException("asset_class cannot be null");
-            if (!Arrays.asList(VALID_SIDES).contains(side.toUpperCase()))
-                throw new IllegalArgumentException("Side must be one of: " + Arrays.toString(VALID_SIDES));
-            if (quantity <= 0)
-                throw new IllegalArgumentException("quantity must be positive");
-            if (price <= 0)
-                throw new IllegalArgumentException("price must be positive");
-            if (value <=0)
-                throw new IllegalArgumentException("value must be positive");
-
             this.trade_id = trade_id;
             this.trade_date = trade_date;
             this.client_id = client_id;
@@ -200,6 +187,18 @@ public class ImportCSVService {
             } catch (IllegalArgumentException e) {
                 throw new IllegalArgumentException("Invalid asset_class: " + asset_class_str + ". Must be one of: " + Arrays.toString(AssetType.values()), e);
             }
+                        final String[] VALID_SIDES = {"BUY", "SELL"};
+
+            if (asset_class == null)
+                throw new IllegalArgumentException("asset_class cannot be null");
+            if (!Arrays.asList(VALID_SIDES).contains(side.toUpperCase()))
+                throw new IllegalArgumentException("Side must be one of: " + Arrays.toString(VALID_SIDES));
+            if (quantity <= 0)
+                throw new IllegalArgumentException("quantity must be positive");
+            if (price <= 0)
+                throw new IllegalArgumentException("price must be positive");
+            if (value <=0)
+                throw new IllegalArgumentException("value must be positive");
 
             return new LineValues(trade_id, trade_date, client_id, client_name, advisor, instrument, asset_class, side, quantity, price, currency, value);
         } catch (Exception e) {
