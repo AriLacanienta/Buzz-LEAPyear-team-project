@@ -33,8 +33,8 @@ public class Report {
     private List<AuditLog> auditLogs;
 
     // Getters and Setters
-    public Long getReportId() { return id; }
-    public void setReportId(Long reportId) { this.id = reportId; }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
     
     public String getReportName() { return reportName; }
     public void setReportName(String reportName) { this.reportName = reportName; }

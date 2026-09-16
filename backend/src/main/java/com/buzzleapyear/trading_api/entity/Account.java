@@ -36,8 +36,8 @@ public class Account {
     private List<AuditLog> auditLogs;
 
     // Getters and Setters
-    public Long getAccountId() { return id; }
-    public void setAccountId(Long accountId) { this.id = accountId; }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
     
     public String getAccountName() { return accountName; }
     public void setAccountName(String accountName) { this.accountName = accountName; }

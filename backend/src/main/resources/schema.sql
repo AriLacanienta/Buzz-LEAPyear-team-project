@@ -117,8 +117,10 @@ CREATE TABLE trade_orders(
     trade_order_id SERIAL PRIMARY KEY,
     account_id INT NOT NULL,
     instrument_id INT NOT NULL,
-    order_type VARCHAR(10) NOT NULL CHECK (order_type IN ('Buy', 'Sell')),
+    side VARCHAR(10) NOT NULL CHECK (side IN ('BUY', 'SELL')),
     quantity NUMERIC(20, 4) NOT NULL CHECK (quantity > 0),
+    price NUMERIC(20,2) NOT NULL CHECK (price > 0),
+    trade_value NUMERIC(20,2) NOT NULL CHECK (price > 0),
     order_date TIMESTAMP NOT NULL,
     CONSTRAINT fk_account_id FOREIGN KEY (account_id) REFERENCES accounts(account_id),
     CONSTRAINT fk_instrument_id FOREIGN KEY (instrument_id) REFERENCES instruments(instrument_id)

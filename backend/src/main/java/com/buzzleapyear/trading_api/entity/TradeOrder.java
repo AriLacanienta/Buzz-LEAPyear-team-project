@@ -2,6 +2,7 @@ package com.buzzleapyear.trading_api.entity;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -27,7 +28,13 @@ public class TradeOrder {
     private OrderType orderType;
     
     @Column(name = "quantity", nullable = false)
-    private BigDecimal quantity;
+    private BigInteger quantity;
+
+    @Column(name = "price", nullable = false)
+    private BigDecimal price;
+        
+    @Column(name = "trade_value", nullable = false)
+    private BigDecimal tradeValue;
     
     @Column(name = "order_date", nullable = false)
     private LocalDateTime orderDate;
@@ -36,8 +43,8 @@ public class TradeOrder {
     private List<TradeOrderStatus> statuses;
 
     // Getters and Setters
-    public Long getTradeOrderId() { return id; }
-    public void setTradeOrderId(Long tradeOrderId) { this.id = tradeOrderId; }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
     
     public Account getAccount() { return account; }
     public void setAccount(Account account) { this.account = account; }
@@ -45,11 +52,17 @@ public class TradeOrder {
     public Instrument getInstrument() { return instrument; }
     public void setInstrument(Instrument instrument) { this.instrument = instrument; }
     
-    public OrderType getOrderType() { return orderType; }
-    public void setOrderType(OrderType orderType) { this.orderType = orderType; }
+    public OrderSide getSide() { return side; }
+    public void setSide(OrderSide orderSide) { this.side = orderSide; }
     
-    public BigDecimal getQuantity() { return quantity; }
-    public void setQuantity(BigDecimal quantity) { this.quantity = quantity; }
+    public BigInteger getQuantity() { return quantity; }
+    public void setQuantity(BigInteger quantity) { this.quantity = quantity; }
+
+    public BigDecimal getPrice() { return price; }
+    public void setPrice(BigDecimal price) { this.price = price; }
+    
+    public BigDecimal getValue() { return tradeValue; }
+    public void setValue(BigDecimal value) { this.tradeValue = value; }
     
     public LocalDateTime getOrderDate() { return orderDate; }
     public void setOrderDate(LocalDateTime orderDate) { this.orderDate = orderDate; }
@@ -57,7 +70,7 @@ public class TradeOrder {
     public List<TradeOrderStatus> getStatuses() { return statuses; }
     public void setStatuses(List<TradeOrderStatus> statuses) { this.statuses = statuses; }
     
-    public enum OrderType {
+    public enum OrderSide {
         BUY, SELL
     }
 }
