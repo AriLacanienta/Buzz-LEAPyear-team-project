@@ -16,8 +16,8 @@ public class Analyst {
     private User user;
 
     // Getters and Setters
-    public Long getAnalystId() { return id; }
-    public void setAnalystId(Long analystId) { this.id = analystId; }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
     
     public User getUser() { return user; }
     public void setUser(User user) { this.user = user; }

@@ -29,8 +29,8 @@ public class Holding {
     private BigDecimal totalCost;
 
     // Getters and Setters
-    public Long getHoldingId() { return id; }
-    public void setHoldingId(Long holdingId) { this.id = holdingId; }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
     
     public Account getAccount() { return account; }
     public void setAccount(Account account) { this.account = account; }

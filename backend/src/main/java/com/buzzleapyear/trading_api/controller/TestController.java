@@ -3,6 +3,7 @@ package com.buzzleapyear.trading_api.controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
 import com.buzzleapyear.trading_api.service.TestService;
 
 @RestController
@@ -18,6 +19,11 @@ public class TestController {
   @GetMapping("/test")
   public String index() {
     return testService.testPrint();
+  }
+
+  @GetMapping("/getClientTradeHistory/{client_id}")
+  public String getClientTradeHistory(){
+    return "not yet implemented";
   }
 
 }
