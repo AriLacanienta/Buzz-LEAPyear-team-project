@@ -57,17 +57,12 @@ main {
 
   section {
     margin-bottom: 30px;
+   
 
     h2 {
-      color: #3B82F6;
-      border-left: 4px solid #3B82F6;
+      color: #007bff;
+      border-left: 4px solid #007bff;
       padding-left: 10px;
-    }
-    
-    p {
-      color: #9aa1ad;
-      font-size: 16px;
-      margin-top: 10px;
     }
 
     ul {
@@ -77,13 +72,6 @@ main {
       li {
         padding: 8px 0;
         color: #9aa1ad;
-
-        &:before {
-          content: "✓ ";
-          color: #3B82F6;
-          font-weight: bold;
-          margin-right: 8px;
-        }
       }
     }
   }
