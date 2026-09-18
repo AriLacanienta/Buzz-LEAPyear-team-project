@@ -1,33 +1,36 @@
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.nio.file.Files;
-import java.nio.file.Path;
+package com.buzzleapyear.trading_api.service;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
+
+import com.buzzleapyear.trading_api.entity.Account;
+import com.buzzleapyear.trading_api.entity.Client;
+import com.buzzleapyear.trading_api.entity.Instrument;
+import com.buzzleapyear.trading_api.entity.Instrument.AssetType;
+import com.buzzleapyear.trading_api.entity.TradeOrder;
+import com.buzzleapyear.trading_api.entity.User;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.Persistence;
 
-import com.buzzleapyear.trading_api.entity.User;
-import com.buzzleapyear.trading_api.entity.Client;
-import com.buzzleapyear.trading_api.entity.Instrument;
-import com.buzzleapyear.trading_api.entity.Instrument.AssetType;
-import com.buzzleapyear.trading_api.entity.Account;
-import com.buzzleapyear.trading_api.entity.TradeOrder;
-
 @Service
 public class ImportCSVService {
     public void importFromTradesCSV(Path csvFilepath) {
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("persistence-unit-name");
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("batch-csv-import");
         EntityManager em = emf.createEntityManager();
         EntityTransaction transaction = em.getTransaction();
         
@@ -167,8 +170,10 @@ public class ImportCSVService {
     protected LineValues parseLine(String csvLine) throws IllegalArgumentException {
         try {
             String[] values = csvLine.split(",");
+
             String trade_id = values[0].trim();
-            LocalDateTime trade_date = LocalDateTime.parse(values[1].trim());
+            LocalDate trade_date = LocalDate.parse(values[1].trim());
+            LocalDateTime trade_date_time = LocalDateTime.of(trade_date, LocalTime.MIN);
             String client_id = values[2].trim();
             String client_name = values[3].trim();
             String advisor = values[4].trim();
@@ -187,7 +192,7 @@ public class ImportCSVService {
             } catch (IllegalArgumentException e) {
                 throw new IllegalArgumentException("Invalid asset_class: " + asset_class_str + ". Must be one of: " + Arrays.toString(AssetType.values()), e);
             }
-                        final String[] VALID_SIDES = {"BUY", "SELL"};
+            final String[] VALID_SIDES = {"BUY", "SELL"};
 
             if (asset_class == null)
                 throw new IllegalArgumentException("asset_class cannot be null");
@@ -200,7 +205,7 @@ public class ImportCSVService {
             if (value <=0)
                 throw new IllegalArgumentException("value must be positive");
 
-            return new LineValues(trade_id, trade_date, client_id, client_name, advisor, instrument, asset_class, side, quantity, price, currency, value);
+            return new LineValues(trade_id, trade_date_time, client_id, client_name, advisor, instrument, asset_class, side, quantity, price, currency, value);
         } catch (Exception e) {
             throw new IllegalArgumentException("Failed to parse CSV line: \'" + csvLine + "\'" + e.getMessage(), e);
         }
