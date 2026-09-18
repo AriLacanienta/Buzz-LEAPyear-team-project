@@ -1,0 +1,42 @@
+.container {
+  margin: 0 auto;
+}
+
+main {
+  max-width: 1350px;
+  margin: 0 auto;
+
+  section {
+    margin-bottom: 40px;
+
+    h2 {
+      color: #3B82F6;
+      border-left: 4px solid #3B82F6;
+      padding-left: 10px;
+      margin-bottom: 20px;
+    }
+  }
+}
+
+.profile-section {
+  background-color: #1E2D45;
+  padding: 40px;
+  border-radius: 12px;
+  border: 1px solid #2a3f5f;
+  margin-bottom: 30px;
+
+  .profile-header {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+
+    .profile-photo {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #3B82F6;
+      flex-shrink: 0;
+    }
+  }
+}
