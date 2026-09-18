@@ -28,7 +28,7 @@ public class TradeOrder {
     private OrderSide side;
     
     @Column(name = "quantity", nullable = false)
-    private BigInteger quantity;
+    private BigDecimal quantity;
 
     @Column(name = "price", nullable = false)
     private BigDecimal price;
@@ -55,8 +55,8 @@ public class TradeOrder {
     public OrderSide getSide() { return side; }
     public void setSide(OrderSide orderSide) { this.side = orderSide; }
     
-    public BigInteger getQuantity() { return quantity; }
-    public void setQuantity(BigInteger quantity) { this.quantity = quantity; }
+    public BigDecimal getQuantity() { return quantity; }
+    public void setQuantity(BigDecimal quantity) { this.quantity = quantity; }
 
     public BigDecimal getPrice() { return price; }
     public void setPrice(BigDecimal price) { this.price = price; }

@@ -21,7 +21,7 @@ public class Account {
     
     @Column(name = "risk_profile", nullable = false)
     @Enumerated(EnumType.STRING)
-    private RiskProfile riskProfile;
+    private RiskProfile riskProfile = RiskProfile.MODERATE;
     
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Subscription> subscriptions;

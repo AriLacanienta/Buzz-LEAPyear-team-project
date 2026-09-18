@@ -2,10 +2,9 @@ package com.buzzleapyear.trading_api.service;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -23,22 +22,24 @@ import com.buzzleapyear.trading_api.entity.TradeOrder;
 import com.buzzleapyear.trading_api.entity.User;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.EntityTransaction;
-import jakarta.persistence.Persistence;
+import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
 
 @Service
 public class ImportCSVService {
-    public void importFromTradesCSV(Path csvFilepath) {
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("batch-csv-import");
-        EntityManager em = emf.createEntityManager();
-        EntityTransaction transaction = em.getTransaction();
-        
+
+    @PersistenceContext 
+    private EntityManager em;
+
+    @Transactional
+    public void importFromTradesCSV(InputStream csvInputStream) throws IOException {        
         // Cache to track already-created users and clients to avoid duplicates
         Map<String, User> userCache = new HashMap<>();
         Map<String, Client> clientCache = new HashMap<>();
+        Map<String, Instrument> instrumentCache = new HashMap<>();
+        Map<String, Account> accountCache = new HashMap<>();
 
-        try (BufferedReader br = Files.newBufferedReader(csvFilepath)) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(csvInputStream))) {
             String line;
             boolean isFirstLine = true;
             
@@ -48,13 +49,13 @@ public class ImportCSVService {
                     isFirstLine = false;
                     continue;
                 }
+                // Skip blank lines
+                if (line.isBlank())
+                    continue;
                 
+                LineValues values = parseLine(line);
                 try {
-                    LineValues values = parseLine(line);
-                    
-                    if (!transaction.isActive()) {
-                        transaction.begin();
-                    }
+                
 
                     // Step 1: Create or retrieve User (generates user_id)
                     User user = userCache.get(values.client_name);
@@ -85,51 +86,50 @@ public class ImportCSVService {
                     }
 
                     // Step 3: Create Instrument (independent)
-                    Instrument instrument = new Instrument();
-                    instrument.setInstrumentName(values.instrument);
-                    instrument.setAssetType(values.asset_class);
-                    instrument.setCurrencyCode(values.currency);
-                    em.persist(instrument);
-                    em.flush();
+                    Instrument instrument = instrumentCache.get(values.instrument);
+                    if (instrument == null) {
+                        instrument = new Instrument();
+                        instrument.setInstrumentName(values.instrument);
+                        instrument.setAssetType(values.asset_class);
+                        instrument.setCurrencyCode(values.currency);
+                        instrument.setInstrumentSymbol(values.instrument);
+                        em.persist(instrument);
+                        em.flush();
+                        instrumentCache.put(values.instrument, instrument);
+                    }
 
                     // Step 4: Create Account (depends on client_id)
-                    Account account = new Account();
-                    account.setAccountName(values.client_id + "_Account");
-                    account.setClient(client); // Set the Client relationship
-                    em.persist(account);
-                    em.flush();
+                    String accountKey = client.getId() + "_Account";
+                    Account account = accountCache.get(accountKey);
+                    if (account == null){
+                        account = new Account();
+                        account.setAccountName(values.client_id + "_Account");
+                        account.setClient(client); // Set the Client relationship
+                        em.persist(account);
+                        em.flush();
+                        accountCache.put(accountKey, account);
+                    }
 
                     // Step 5: Create TradeOrder (depends on instrument_id and account_id)
                     TradeOrder tradeOrder = new TradeOrder();
                     tradeOrder.setAccount(account); // Set Account relationship
                     tradeOrder.setInstrument(instrument); // Set Instrument relationship
                     tradeOrder.setOrderDate(values.trade_date);
-                    tradeOrder.setQuantity(BigInteger.valueOf(values.quantity));
+                    tradeOrder.setQuantity(BigDecimal.valueOf(values.quantity));
                     tradeOrder.setPrice(BigDecimal.valueOf(values.price));
                     tradeOrder.setValue(BigDecimal.valueOf(values.value));
                     tradeOrder.setSide(values.side);
                     em.persist(tradeOrder);
                     em.flush();
                     
-                    transaction.commit();
                 } catch (Exception e) {
-                    if (transaction.isActive()) {
-                        transaction.rollback();
-                    }
-                    System.err.println("Error importing row: " + e.getMessage());
+                    System.err.println("Error persisting row: " + e.getMessage());
                     e.printStackTrace();
                 }
             }
         } catch (IOException e) {
             System.err.println("Error reading CSV file: " + e.getMessage());
             e.printStackTrace();
-        } finally {
-            if (em != null && em.isOpen()) {
-                em.close();
-            }
-            if (emf != null && emf.isOpen()) {
-                emf.close();
-            }
         }
     }
 
@@ -142,13 +142,13 @@ public class ImportCSVService {
         public String instrument;
         public AssetType asset_class;
         public TradeOrder.OrderSide side;
-        public Integer quantity;
+        public double quantity;
         public double price;
         public String currency;
         public double value;
 
         public LineValues(String trade_id, LocalDateTime trade_date, String client_id, String client_name, 
-            String advisor, String instrument, AssetType asset_class, String side, int quantity,
+            String advisor, String instrument, AssetType asset_class, String side, double quantity,
              double price, String currency, double value) {
 
             this.trade_id = trade_id;
@@ -180,7 +180,7 @@ public class ImportCSVService {
             String instrument = values[5].trim();
             String asset_class_str = values[6].trim();
             String side = values[7].trim().toUpperCase();
-            int quantity = Integer.parseInt(values[8].trim());
+            Double quantity = Double.parseDouble(values[8].trim());
             double price = Double.parseDouble(values[9].trim());
             String currency = values[10].trim();
             double value = Double.parseDouble(values[11].trim());
@@ -194,8 +194,6 @@ public class ImportCSVService {
             }
             final String[] VALID_SIDES = {"BUY", "SELL"};
 
-            if (asset_class == null)
-                throw new IllegalArgumentException("asset_class cannot be null");
             if (!Arrays.asList(VALID_SIDES).contains(side.toUpperCase()))
                 throw new IllegalArgumentException("Side must be one of: " + Arrays.toString(VALID_SIDES));
             if (quantity <= 0)
@@ -207,7 +205,7 @@ public class ImportCSVService {
 
             return new LineValues(trade_id, trade_date_time, client_id, client_name, advisor, instrument, asset_class, side, quantity, price, currency, value);
         } catch (Exception e) {
-            throw new IllegalArgumentException("Failed to parse CSV line: \'" + csvLine + "\'" + e.getMessage(), e);
+            throw new IllegalArgumentException("Failed to parse CSV line: \'" + csvLine + "\' " + e.getMessage(), e);
         }
     }
 }
