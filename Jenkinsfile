@@ -23,16 +23,12 @@ pipeline {
             steps{
                 sh 'cd backend && mvn -B test'
             }
-            // post {
-            //     always {
-            //         junit 'target/surefire-reports/*.xml'
-            //         }
-            // }
+            post {
+                always {
+                    junit 'backend/target/surefire-reports/*.xml'
+                }
+            }
         }
-        // stage('Build Image') {
-        //     steps {
-        //         sh 'docker-compose up -d --build'
-        //     }
         stage('Smoke Test') {
             steps {
                 sh 'docker-compose up -d --build'
