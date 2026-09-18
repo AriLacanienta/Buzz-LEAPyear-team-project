@@ -29,7 +29,8 @@ class CsvImportServiceTests {
             LineValues result = testService.parseLine(TEST_LINE);
 
             Assertions.assertAll("parsed values",
-                () -> Assertions.assertEquals("Alice Chen", result.client_name)
+                () -> Assertions.assertEquals("Alice Chen", result.client_name),
+                () -> Assertions.assertEquals("J. Okafor", result.advisor)
             );
         }
         

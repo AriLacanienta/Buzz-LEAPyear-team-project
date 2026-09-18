@@ -4,7 +4,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.buzzleapyear.trading_api.service.ImportCSVService;
 import com.buzzleapyear.trading_api.service.TestService;
 
 @RestController
@@ -25,13 +24,6 @@ public class TestController {
   @GetMapping("/getClientTradeHistory/{client_id}")
   public String getClientTradeHistory(){
     return "not yet implemented";
-  }
-
-  @GetMapping("/loadFromCSV");
-  public String loadFromCSV(){
-    ImportCSVService importservice = new ImportCSVService();
-    importservice.importFromTradesCSV("backend/src/main/resources/trades.csv");
-    return "ran";
   }
 
 }
