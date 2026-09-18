@@ -29,12 +29,10 @@ pipeline {
             //         }
             // }
         }
-        stage('Build Image') {
-            steps {
-                sh 'docker-compose up -d --build'
-            }
- }
-        }
+        // stage('Build Image') {
+        //     steps {
+        //         sh 'docker-compose up -d --build'
+        //     }
         stage('Smoke Test') {
             steps {
                 sh 'docker-compose up -d --build'
