@@ -158,7 +158,7 @@ public class ImportCSVService {
             this.advisor = advisor;
             this.instrument = instrument;
             this.asset_class = asset_class;
-            this.side = side == "BUY" ? TradeOrder.OrderSide.BUY : TradeOrder.OrderSide.SELL;
+            this.side = side.equals("BUY") ? TradeOrder.OrderSide.BUY : TradeOrder.OrderSide.SELL;
             this.quantity = quantity;
             this.price = price;
             this.currency = currency;
