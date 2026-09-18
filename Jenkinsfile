@@ -16,12 +16,12 @@ pipeline {
         }
         stage('Build app') {
             steps{
-                'cd backend && mvn -B clean package'
+                sh 'cd backend && mvn -B clean package'
             }
         }
         stage('Test app') {
             steps{
-                'cd backend && mvn -B test'
+                sh 'cd backend && mvn -B test'
             }
             // post {
             //     always {
