@@ -3,39 +3,38 @@
 }
 
 main {
-  max-width: 1350px;
+  max-width: 75%;
   margin: 0 auto;
 
   section {
-    margin-bottom: 40px;
+    margin-bottom: 2.5rem;
 
     h2 {
       color: #3B82F6;
-      border-left: 4px solid #3B82F6;
-      padding-left: 10px;
-      margin-bottom: 20px;
+      border-left: 0.25rem solid #3B82F6;
+      padding-left: 0.625rem;
+      margin-bottom: 1.25rem;
     }
   }
 }
 
 .profile-section {
   background-color: #1E2D45;
-  padding: 40px;
-  border-radius: 12px;
-  border: 1px solid #2a3f5f;
-  margin-bottom: 30px;
+  padding: 2.5rem;
+  border-radius: 0.75rem;
+  border: 0.0625rem solid #2a3f5f;
+  margin-bottom: 1.875rem;
 
   .profile-header {
     display: flex;
     align-items: center;
-    gap: 30px;
+    gap: 1.875rem;
 
     .profile-photo {
-      width: 120px;
-      height: 120px;
+      width: 7.5rem;
+      height: 7.5rem;
       border-radius: 50%;
       object-fit: cover;
-      border: 3px solid #3B82F6;
       flex-shrink: 0;
     }
   }

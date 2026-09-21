@@ -7,18 +7,18 @@
 .container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 1.25rem;
 }
 
 header {
   text-align: center;
-  padding: 40px 0;
-  border-bottom: 2px solid #007bff;
-  margin-bottom: 40px;
+  padding: 2.5rem 0;
+  border-bottom: 0.125rem solid #007bff;
+  margin-bottom: 2.5rem;
 
   h1 {
     color: #333;
-    margin-bottom: 10px;
+    margin-bottom: 0.625rem;
     font-size: 2.5rem;
   }
 
@@ -30,12 +30,12 @@ header {
 
 main {
   section {
-    margin-bottom: 40px;
+    margin-bottom: 2.5rem;
 
     h2 {
       color: #007bff;
       font-size: 1.8rem;
-      margin-bottom: 15px;
+      margin-bottom: 0.9375rem;
     }
 
     p {
@@ -50,7 +50,7 @@ main {
       color: #555;
 
       li {
-        margin: 10px 0;
+        margin: 0.625rem 0;
         font-size: 1rem;
       }
     }
