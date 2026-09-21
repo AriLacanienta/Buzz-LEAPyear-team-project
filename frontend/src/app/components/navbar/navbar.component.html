@@ -2,7 +2,7 @@
   <nav class="tabs">
     <a routerLink="/account" routerLinkActive="active" class="account-tab">
       <img src="assets/images/joanna.jpg" alt="Account"/>
-      
+      <span>{{ accountName$ | async }}</span>
     </a>
     <a routerLink="/portfolio" routerLinkActive="active" class="tab">Portfolio</a>
     <a routerLink="/markets" routerLinkActive="active" class="tab">Markets</a>

@@ -1,7 +1,7 @@
 header {
   text-align: center;
-  margin-bottom: 1.5625rem;
-  border-bottom: 0.1875rem solid #1E2D45;
+  margin-bottom: 1.5rem;
+  border-bottom: 0.2rem solid #1E2D45;
   padding-bottom: 0.1rem;
 
   h1 {
@@ -11,7 +11,7 @@ header {
 
   p {
     color: #9aa1ad;
-    font-size: 1.125rem;
+    font-size: 1.25rem;
     margin-bottom: 1.25rem;
   }
 }
@@ -21,19 +21,19 @@ header {
   gap: 0.5rem;
   max-width: 75%;
   margin: 0 auto;
-  padding-top: 0.625rem;
+  padding-top: 0.6rem;
   align-items: center;
 
   .account-tab {
     display: flex;
     align-items: center;
-    gap: 0.625rem;
-    padding: 0.625rem 1.25rem;
+    gap: 0.6rem;
+    padding: 0.3rem 0.625rem;
     text-decoration: none;
     color: #9aa1ad;
     font-weight: 500;
     border-bottom: 0.0625rem solid transparent;
-    border-radius: 0.5rem;
+    border-radius: 0.3rem;
     cursor: pointer;
 
     img {
@@ -47,7 +47,7 @@ header {
   }
 
   .tab {
-    padding: 0.3125rem 0.9375rem;
+    padding: 0.3rem 1rem;
     text-decoration: none;
     color: #9aa1ad;
     font-weight: 500;
@@ -57,6 +57,14 @@ header {
 
     &:hover {
       color: #1E2D45;
+    }
+
+    &.active {
+      border-bottom-color: #1E2D45;
+      border: 1px solid #1E2D45;
+      border-radius: 0.5rem;
+      background-color: #0F1520;
+      color: #ffffff;
     }
   }
 }
