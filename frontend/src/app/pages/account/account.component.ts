@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { SharedService } from '../../services/shared.service';
+import { AccountService } from '../../services/account.service';
 
 @Component({
   selector: 'app-account',
@@ -16,9 +16,9 @@ export class AccountComponent implements OnInit {
     accountBalance: '$125,432.50'
   };
 
-  constructor(private sharedService: SharedService) { }
+  constructor(private accountService: AccountService) { }
 
   ngOnInit() {
-    this.sharedService.setAccountName(this.accountInfo.name);
+    this.accountService.setAccountName(this.accountInfo.name);
   }
 }

@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { SharedService } from '../../services/shared.service';
+import { AccountService } from '../../services/account.service';
 import { map } from 'rxjs/operators';
 
 @Component({
@@ -8,9 +8,9 @@ import { map } from 'rxjs/operators';
   styleUrls: ['./navbar.component.scss']
 })
 export class NavbarComponent {
-  accountName$ = this.sharedService.accountName$.pipe(
+  accountName$ = this.accountService.accountName$.pipe(
     map(name => name.split(' ')[0])
   );
 
-  constructor(private sharedService: SharedService) { }
+  constructor(private accountService: AccountService) { }
 }

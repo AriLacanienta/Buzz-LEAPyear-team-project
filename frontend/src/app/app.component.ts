@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { SharedService } from './services/shared.service';
+import { AccountService } from './services/account.service';
 
 @Component({
   selector: 'app-root',
@@ -7,11 +7,11 @@ import { SharedService } from './services/shared.service';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
-  constructor(private sharedService: SharedService) {
+  constructor(private accountService: AccountService) {
     console.log('AppComponent initialized');
   }
 
   ngOnInit() {
-    this.sharedService.setAccountName('Joanna Smith');
+    this.accountService.setAccountName('Joanna Smith');
   }
 }

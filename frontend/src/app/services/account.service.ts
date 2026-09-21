@@ -4,7 +4,7 @@ import { BehaviorSubject } from 'rxjs';
 @Injectable({
   providedIn: 'root'
 })
-export class SharedService {
+export class AccountService {
   private accountNameSubject = new BehaviorSubject<string>('');
   accountName$ = this.accountNameSubject.asObservable();
 
