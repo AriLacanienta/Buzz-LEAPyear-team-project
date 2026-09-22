@@ -17,14 +17,8 @@ public class TradeOrderStatus {
     private TradeOrder tradeOrder;
     
     @Column(name = "status", nullable = false)
-    private String status;
-    
-    @Column(name = "status_date", nullable = false)
-    private LocalDateTime statusDate;
-    
-    @Column(name = "status_name", nullable = false)
     @Enumerated(EnumType.STRING)
-    private StatusName statusName;
+    private OrderStatus status;
     
     @Column(name = "time_updated", nullable = false)
     private LocalDateTime timeUpdated;
@@ -36,19 +30,13 @@ public class TradeOrderStatus {
     public TradeOrder getTradeOrder() { return tradeOrder; }
     public void setTradeOrder(TradeOrder tradeOrder) { this.tradeOrder = tradeOrder; }
     
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
-    
-    public LocalDateTime getStatusDate() { return statusDate; }
-    public void setStatusDate(LocalDateTime statusDate) { this.statusDate = statusDate; }
-    
-    public StatusName getStatusName() { return statusName; }
-    public void setStatusName(StatusName statusName) { this.statusName = statusName; }
+    public OrderStatus getStatus() { return status; }
+    public void setStatus(OrderStatus statusName) { this.status = statusName; }
     
     public LocalDateTime getTimeUpdated() { return timeUpdated; }
     public void setTimeUpdated(LocalDateTime timeUpdated) { this.timeUpdated = timeUpdated; }
     
-    public enum StatusName {
-        PENDING, SUCCESS, FAILED
+    public enum OrderStatus {
+        SUBMITTED, VALIDATED, FILLED, REJECTED
     }
 }
