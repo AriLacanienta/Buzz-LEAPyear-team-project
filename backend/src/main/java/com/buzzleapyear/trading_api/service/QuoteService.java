@@ -159,11 +159,9 @@ public class QuoteService {
 
         for (Instrument instrument : instruments) {
             try {
-                BigDecimal currentPrice = latestQuotes.get(instrument.getInstrumentId()).currentPrice;
-
                 responses.add(new QuoteResponseDto(
                     instrument.getInstrumentSymbol(),
-                    currentPrice,
+                    latestQuotes.get(instrument.getInstrumentId()).currentPrice,
                     latestQuotes.get(instrument.getInstrumentId()).highPrice,
                     latestQuotes.get(instrument.getInstrumentId()).lowPrice,
                     latestQuotes.get(instrument.getInstrumentId()).openPrice,
@@ -197,7 +195,7 @@ public class QuoteService {
         }
 
         return Optional.of(new QuoteResponseDto(
-            symbol, 
+            symbol,
             state.currentPrice, 
             state.highPrice, 
             state.lowPrice, 
