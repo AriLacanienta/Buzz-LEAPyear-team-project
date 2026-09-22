@@ -3,18 +3,23 @@
 
   <main>
     <section class="markets-content">
-      <h2>Markets</h2>
-      <p>Explore market data and trends here.</p>
-      <div class="market-list">
-        <ul>
-          <li>Total portfolio value</li>
-          <li>Buying power</li>
-          <li>Allocation</li>
-          <li>Portfolio holdings</li>
-          <li>Recent orders</li>
-          <li>Open positions</li>
-          <li>Watchlist</li>
-        </ul>
+      <h2>{{ title }}</h2>
+      
+      <div *ngIf="instruments.length > 0" class="instruments-list">
+        <div *ngFor="let instrument of instruments" class="instrument-item">
+          <p><strong>Symbol:</strong> {{ instrument.instrumentSymbol }}</p>
+          <p><strong>Name:</strong> {{ instrument.instrumentName }}</p>
+          <p><strong>Price:</strong> ${{ instrument.currentPrice }}</p>
+          <p><strong>Change:</strong> {{ instrument.change }}</p>
+          <p><strong>Change %:</strong> {{ instrument.changePercent }}%</p>
+          <p><strong>Volume:</strong> {{ instrument.volume }}</p>
+          <p><strong>Market Cap:</strong> {{ instrument.marketCap }}</p>
+          <hr>
+        </div>
+      </div>
+
+      <div *ngIf="instruments.length === 0" class="no-data-message">
+        No instruments available
       </div>
     </section>
   </main>
