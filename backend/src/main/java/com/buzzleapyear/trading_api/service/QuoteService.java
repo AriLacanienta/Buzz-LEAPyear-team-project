@@ -41,10 +41,13 @@ import java.util.ArrayList;
 public class QuoteService {
     private final double MIN_VOLATILITY;
     private final double MAX_VOLATILITY;
+    private final double MIN_DRIFT;
+    private final double MAX_DRIFT;
 
     private static class InstrumentQuoteState {
         BigDecimal currentPrice;
         double volatility;
+        double drift;
         BigDecimal highPrice;
         BigDecimal lowPrice;
         BigDecimal openPrice;
@@ -60,11 +63,18 @@ public class QuoteService {
     private final QuoteRepository quoteRepository;
     private final Map<Long, InstrumentQuoteState> latestQuotes = new ConcurrentHashMap<>();
 
-    public QuoteService(InstrumentService instrumentService, QuoteRepository quoteRepository, @Value("${QUOTE_MIN_VOLATILITY:0.0}") double minVolatility, @Value("${QUOTE_MAX_VOLATILITY:0.0}") double maxVolatility) {
+    public QuoteService(InstrumentService instrumentService, QuoteRepository quoteRepository, 
+        @Value("${QUOTE_MIN_VOLATILITY:0.0}") double minVolatility, 
+        @Value("${QUOTE_MAX_VOLATILITY:0.0}") double maxVolatility,
+        @Value("${QUOTE_MIN_DRIFT:0.0}") double minDrift,
+        @Value("${QUOTE_MAX_DRIFT:0.0}") double maxDrift
+    ) {
         this.instrumentService = instrumentService;
         this.quoteRepository = quoteRepository;
         this.MIN_VOLATILITY = minVolatility;
         this.MAX_VOLATILITY = maxVolatility;
+        this.MIN_DRIFT = minDrift;
+        this.MAX_DRIFT = maxDrift;
     }
     
     /*
@@ -84,6 +94,7 @@ public class QuoteService {
             if (quote != null) {
                 state.currentPrice = quote.getPrice();
                 state.volatility = randomNum(MIN_VOLATILITY, MAX_VOLATILITY).doubleValue();
+                state.drift = randomNum(MIN_DRIFT, MAX_DRIFT).doubleValue();
                 state.highPrice = quote.getHighPriceOfDay();
                 state.lowPrice = quote.getLowPriceOfDay();
                 state.openPrice = quote.getOpenPriceOfDay();
@@ -125,13 +136,15 @@ public class QuoteService {
             if (prevPrice == null) continue;
 
             double volatility = prevEntry.getValue().volatility; // How big a move would be
+            double drift = prevEntry.getValue().drift; // Chance of rise vs decline
 
-            BigDecimal newPrice = generateNextPrice(prevPrice, volatility);
+            BigDecimal newPrice = generateNextPrice(prevPrice, volatility, drift);
             InstrumentQuoteState prevState = prevEntry.getValue();
             InstrumentQuoteState newState = new InstrumentQuoteState();
 
             newState.currentPrice = newPrice;
             newState.volatility = volatility;
+            newState.drift = drift;
             newState.highPrice = newPrice.max(prevState.highPrice);
             newState.lowPrice = newPrice.min(prevState.lowPrice);
             newState.openPrice = prevState.openPrice;
@@ -211,9 +224,9 @@ public class QuoteService {
         ));
     }
 
-    private BigDecimal generateNextPrice(BigDecimal prevPrice, double volatility) {
+    private BigDecimal generateNextPrice(BigDecimal prevPrice, double volatility, double drift) {
         double shock = ThreadLocalRandom.current().nextGaussian(); // Random value ranging *mostly* from -3 to 3, but generally closer to 0
-        double changePercent = volatility * shock; // Scale the random value
+        double changePercent = drift + volatility * shock; // Scale the random value
 
         BigDecimal change = prevPrice.multiply(BigDecimal.valueOf(changePercent));
         BigDecimal newPrice = prevPrice.add(change).setScale(2, RoundingMode.HALF_UP);
