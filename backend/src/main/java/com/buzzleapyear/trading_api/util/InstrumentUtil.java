@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.math.BigDecimal;
 
 public class InstrumentUtil {
+
     public static List<ListInstrumentsResponseDto> getMockInstruments() {
         return Arrays.asList(
             new ListInstrumentsResponseDto(

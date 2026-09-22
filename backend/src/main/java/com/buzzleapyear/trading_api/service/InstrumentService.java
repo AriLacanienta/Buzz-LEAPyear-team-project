@@ -19,6 +19,10 @@ public class InstrumentService {
         this.instrumentRepository = instrumentRepository;
     }
 
+    public List<Instrument> getAllInstruments() {
+        return instrumentRepository.findAll();
+    }
+
     public Optional<Instrument> getInstrumentBySymbol(String symbol) {
         return instrumentRepository.findByInstrumentSymbol(symbol);
     }
