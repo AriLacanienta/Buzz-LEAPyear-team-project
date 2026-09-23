@@ -119,18 +119,18 @@ public class QuoteService {
         }
 
         for (Map.Entry<Long, InstrumentQuoteState> prevEntry : latestQuotes.entrySet()) {
-            BigDecimal prevPrice = prevEntry.getValue().currentPrice;
+            InstrumentQuoteState prevState = prevEntry.getValue();
+            BigDecimal prevPrice = prevState.currentPrice;
             Long instrumentId = prevEntry.getKey();
 
             if (prevPrice == null) continue;
 
-            double volatility = prevEntry.getValue().volatility; // How big a move would be
-            double drift = prevEntry.getValue().drift; // Chance of rise vs decline
+            double volatility = prevState.volatility; // How big a move would be
+            double drift = prevState.drift; // Chance of rise vs decline
 
             BigDecimal newPrice = generateNextPrice(prevPrice, volatility, drift);
-            InstrumentQuoteState prevState = prevEntry.getValue();
+            
             InstrumentQuoteState newState = new InstrumentQuoteState();
-
             newState.currentPrice = newPrice;
             newState.volatility = volatility;
             newState.drift = drift;
@@ -149,7 +149,7 @@ public class QuoteService {
             latestQuotes.put(instrumentId, newState);
             System.out.println(
                 "QUOTE:" + instrumentId + " - PRICE: $" + newPrice + " - HIGH: $" + newState.highPrice + " - LOW: $" 
-                + newState.lowPrice + " - CHANGE: $" + newState.change + " - CHANGE%: " + newState.changePercent + "% - VOLUME: " + newState.volume
+                + newState.lowPrice + " - CHANGE: $" + newState.change + " - CHANGE%: " + newState.changePercent.setScale(2) + "% - VOLUME: " + newState.volume
             );
         }
         System.out.println("----------------------------------------------");
