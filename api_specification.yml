@@ -1,0 +1,155 @@
+paths:
+  /test:
+    get:
+
+  /tradeorders:
+    post:
+    get:
+      schema:
+        $ref: '#/components/schemas/trade_order_status'
+
+  /deposit:
+    post:
+      schema:
+        amount:
+  /withdraw:
+    post:
+      schema:
+        amount:
+
+
+components:
+  schemas:
+    trade_order_status:
+      type: object
+      required: [tradeOrderId]
+      properties:
+        tradeOrderId: {type: int}
+        orderId: { type: int }
+        accoountId: { type: int }
+        status: { type: string, enum: [SUBMITTED, VALIDATED, FILLED, REJECTED] }
+        reasonText: { type: string }
+
+    trade_order:
+      type: object
+      required: [side, instrumentId, quantity, price, accountId]
+      properties:
+        side:
+        instrumentId:
+        quantity:
+        price:
+        accountId:
+        ticker:
+
+    submitOrderCostBased:
+      properties:
+        cost:
+        side:
+        accountId:
+        instrumentId:
+    submitOrderQuantityBased:
+      properties:
+        quantity:
+        side:
+        accountId:
+        instrumentId:
+
+    instrument:
+      instrumentName:
+      instrumentSymbol:
+      assettype:
+      currencyCode:
+
+    quote:
+      properties:
+        symbol:
+        name:
+        price:
+        highPrice:
+        lowPrice:
+        previousClosePrice:
+        change:
+        changePercent:
+        volume:
+        marketCap:
+        timestamp:
+
+    quoteSummary:
+      properties:
+        instrumentSymbol:
+        instrumentName:
+        price:
+        changePercent:
+
+    allHoldings:
+      properties:
+        instrumentSymbol:
+        instrumentName:
+        quantity:
+        avgBuyPrice:
+        quotePrice:
+        currentValue:
+        change:
+        changePercent:
+        oldestBuy: { type: Date }
+
+    holdingSummary:
+      properties:
+        instrumentSymbol:
+        instrumentName:
+        instrumentPrice:
+        change:
+        changePercent:
+        holdingValue:
+        holdingQuantity:
+
+    orderHistory:
+      properties:
+        orderId:
+        side:
+        instrumentId:
+        instrumentName:
+        quantity:
+        price:
+        value:
+        date:
+        status:
+
+    portfolioSummary:
+      properties:
+        totalValue:
+        cashBalance:
+        reservedCash:
+
+    deposit:
+      properties:
+        accountId:
+        amount:
+
+    withdraw:
+      properties:
+        accountId:
+        amount:
+
+    clientInfo:
+      properties:
+        accounts: { type: list(accountId) }
+        userId:
+        email:
+        username:
+        password:
+        firstname:
+        lastname:
+
+    
+
+
+
+    ...:
+    type: object
+    required: [accountId]
+    properties:
+      ticker:
+      side:
+      quantity:
+      price:
