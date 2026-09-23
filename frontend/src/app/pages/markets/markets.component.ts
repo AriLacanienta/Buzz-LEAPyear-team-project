@@ -1,7 +1,6 @@
-import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { NavbarComponent } from '@app/components/navbar/navbar.component';
 import { InstrumentService } from '@app/services/instrument.service';
+import { MatTableModule } from '@angular/material/table';
 
 @Component({
   selector: 'app-markets',
@@ -9,8 +8,8 @@ import { InstrumentService } from '@app/services/instrument.service';
   styleUrls: ['./markets.component.scss']
 })
 export class MarketsComponent implements OnInit {
-  title = 'BuzzLEAPYear Trading Platform';
   instruments: any[] = [];
+  displayedColumns: string[] = ['instrumentSymbol', 'instrumentName', 'currentPrice', 'change', 'changePercent', 'volume', 'marketCap'];
 
   constructor(private instrumentService: InstrumentService) {
     console.log('MarketsComponent initialized');
@@ -27,5 +26,20 @@ export class MarketsComponent implements OnInit {
         console.error('Error loading instruments:', error);
       }
     });
+  }
+
+  formatChangePercent(value: number): string {
+    const isPositive = value >= 0;
+    const prefix = isPositive ? '+' : '';
+    return `${prefix}${value}`;
+  }
+
+  getChangePercentClass(value: number): string {
+    const isPositive = value >= 0;
+    return isPositive ? 'positive-change' : 'negative-change';
+  }
+
+  getSymbolFirstLetter(symbol: string): string {
+    return symbol.charAt(0).toUpperCase();
   }
 }

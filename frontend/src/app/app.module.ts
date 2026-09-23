@@ -10,6 +10,7 @@ import { TradeComponent } from './pages/trade/trade.component';
 import { MarketsComponent } from './pages/markets/markets.component';
 import { AccountComponent } from './pages/account/account.component';
 import { NavbarComponent } from './components/navbar/navbar.component';
+import { MatTableModule } from '@angular/material/table';
 
 const routes: Routes = [
   { path: '', component: DashboardComponent },
@@ -32,7 +33,8 @@ const routes: Routes = [
     BrowserModule,
     BrowserAnimationsModule,
     RouterModule.forRoot(routes),
-    HttpClientModule
+    HttpClientModule,
+    MatTableModule
   ],
   providers: [],
   bootstrap: [AppComponent]
