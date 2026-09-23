@@ -17,6 +17,26 @@ paths:
       schema:
         amount:
 
+  /register:
+    post:
+      schema:
+        properties:
+          email:
+          password_hash:
+          firstname:
+          lastname:
+          email:
+          role:
+
+  /login:
+    post:
+      schema:
+        properties:
+          email:
+          username:
+          password_hash:
+
+
 
 components:
   schemas:
@@ -140,6 +160,8 @@ components:
         password:
         firstname:
         lastname:
+
+
 
     
 
