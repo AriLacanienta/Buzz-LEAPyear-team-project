@@ -57,6 +57,8 @@ CREATE TABLE accounts(
     account_name TEXT NOT NULL,
     client_id INT NOT NULL,
     risk_profile TEXT NOT NULL CHECK(risk_profile IN ('Conservative', 'Moderate', 'Aggressive')),
+    cash_available NUMERIC(20, 2) NOT NULL DEFAULT 0,
+    cash_reserved NUMERIC(20, 2) NOT NULL DEFAULT 0,
     CONSTRAINT fk_client_id FOREIGN KEY (client_id) REFERENCES clients(clients_id)
 );
 CREATE TABLE operations(
@@ -132,6 +134,7 @@ CREATE TABLE trade_order_status(
     status_date TIMESTAMP NOT NULL,
     status_name VARCHAR(50) NOT NULL CHECK (status_name IN ('Pending', 'Success', 'Failed')),
     time_updated TIMESTAMP NOT NULL,
+    reason_text VARCHAR(500),
     CONSTRAINT fk_trade_order_id FOREIGN KEY (trade_order_id) REFERENCES trade_orders(trade_order_id)
 );
 CREATE TABLE holdings(
@@ -166,13 +169,10 @@ IMPORT .csv 'C:/Users/Administrator/instruments.csv' INTO TABLE instruments;
 IMPORT .csv 'C:/Users/Administrator/model_portfolio.csv' INTO TABLE model_portfolio;
 --IMPORT .csv 'C:/Users/Administrator/pricing.csv' INTO TABLE pricing;
 
-/*
-changed to no pricing table
 CREATE TABLE pricing(
     pricing_id SERIAL PRIMARY KEY,
     instrument_id INT NOT NULL,
-    price NUMERIC(20, 4) NOT NULL CHECK (price >= 0),
+    price NUMERIC(20, 2) NOT NULL CHECK (price >= 0),
     price_date TIMESTAMP NOT NULL,
     CONSTRAINT fk_instrument_id FOREIGN KEY (instrument_id) REFERENCES instruments(instrument_id)
 );
-*/

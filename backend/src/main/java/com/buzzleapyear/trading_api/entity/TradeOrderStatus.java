@@ -22,6 +22,9 @@ public class TradeOrderStatus {
     
     @Column(name = "time_updated", nullable = false)
     private LocalDateTime timeUpdated;
+    
+    @Column(name = "reason_text", length = 500)
+    private String reasonText;
 
     // Getters and Setters
     public Long getId() { return id; }
@@ -35,6 +38,9 @@ public class TradeOrderStatus {
     
     public LocalDateTime getTimeUpdated() { return timeUpdated; }
     public void setTimeUpdated(LocalDateTime timeUpdated) { this.timeUpdated = timeUpdated; }
+    
+    public String getReasonText() { return reasonText; }
+    public void setReasonText(String reasonText) { this.reasonText = reasonText; }
     
     public enum OrderStatus {
         SUBMITTED, VALIDATED, FILLED, REJECTED
