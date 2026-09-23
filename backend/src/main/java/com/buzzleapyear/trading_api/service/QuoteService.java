@@ -21,20 +21,9 @@ import java.util.List;
 import java.util.ArrayList;
 
 /*
-    INSERT INTO instruments (instrument_name, instrument_symbol, asset_type, currency_code) VALUES ('Apple Inc.', 'AAPL', 'EQUITY', 'USD');
-    INSERT INTO instruments (instrument_name, instrument_symbol, asset_type, currency_code) VALUES ('Microsoft Corporation', 'MSFT', 'EQUITY', 'USD');
-    INSERT INTO instruments (instrument_name, instrument_symbol, asset_type, currency_code) VALUES ('Alphabet Inc.', 'GOOGL', 'EQUITY', 'USD');
-    INSERT INTO instruments (instrument_name, instrument_symbol, asset_type, currency_code) VALUES ('Tesla Inc.', 'TSLA', 'EQUITY', 'USD');
-
-    INSERT INTO quotes (instrument_id, price, high_price_of_day, low_price_of_day, open_price_of_day, previous_close_price_of_day, change_amount, change_percent, volume, market_cap, timestamp) VALUES (1, 175.50, 176.25, 174.80, 175.00, 174.25, 1.25, 0.72, 52500000.00, 2750000000000.00, NOW());
-    INSERT INTO quotes (instrument_id, price, high_price_of_day, low_price_of_day, open_price_of_day, previous_close_price_of_day, change_amount, change_percent, volume, market_cap, timestamp) VALUES (2, 425.50, 428.00, 424.25, 426.00, 424.50, 1.00, 0.24, 45000000.00, 2850000000000.00, NOW());
-    INSERT INTO quotes (instrument_id, price, high_price_of_day, low_price_of_day, open_price_of_day, previous_close_price_of_day, change_amount, change_percent, volume, market_cap, timestamp) VALUES (3, 182.50, 185.00, 181.75, 183.00, 181.25, 1.25, 0.69, 38000000.00, 1200000000000.00, NOW());
-    INSERT INTO quotes (instrument_id, price, high_price_of_day, low_price_of_day, open_price_of_day, previous_close_price_of_day, change_amount, change_percent, volume, market_cap, timestamp) VALUES (4, 245.75, 248.50, 242.00, 244.00, 241.50, 4.25, 1.76, 52000000.00, 780000000000.00, NOW());
-
     Future work:
     Periodically save quotes data to the database in intervals (e.g., every 5 minutes)
     Implement market rules - trading hours
-
 */
 
 @Service
