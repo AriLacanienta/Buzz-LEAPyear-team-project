@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.math.BigDecimal;
 import com.buzzleapyear.trading_api.repository.InstrumentRepository;
 import com.buzzleapyear.trading_api.entity.Instrument;
+import com.buzzleapyear.trading_api.entity.Instrument.AssetType;
 
 @Service
 public class InstrumentService {
@@ -21,6 +22,10 @@ public class InstrumentService {
 
     public List<Instrument> getAllInstruments() {
         return instrumentRepository.findAll();
+    }
+
+    public List<Instrument> getAllInstrumentsByAssetTypeAsc(AssetType assetType) {
+        return instrumentRepository.findByAssetTypeOrderByInstrumentSymbolAsc(assetType);
     }
 
     public Optional<Instrument> getInstrumentBySymbol(String symbol) {

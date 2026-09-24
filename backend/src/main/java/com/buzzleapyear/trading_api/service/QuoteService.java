@@ -19,11 +19,15 @@ import org.springframework.beans.factory.annotation.Value;
 import java.util.Comparator;
 import java.util.List;
 import java.util.ArrayList;
+import com.buzzleapyear.trading_api.entity.Instrument.AssetType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageImpl;
+import com.buzzleapyear.trading_api.dto.ListMarketEquitySummaryResponseDto;
 
 /*
-    Future work:
+    Possible future work:
     Periodically save quotes data to the database in intervals (e.g., every 5 minutes)
-    Implement market rules - trading hours
 */
 
 @Service
@@ -34,9 +38,9 @@ public class QuoteService {
     private final double MAX_DRIFT;
 
     private static class InstrumentQuoteState {
-        BigDecimal currentPrice;
         double volatility;
         double drift;
+        BigDecimal currentPrice;
         BigDecimal highPrice;
         BigDecimal lowPrice;
         BigDecimal openPrice;
@@ -141,18 +145,13 @@ public class QuoteService {
             newState.change = newPrice.subtract(prevState.previousClosePrice);
             newState.changePercent = newPrice.subtract(prevState.previousClosePrice)
             .divide(prevState.previousClosePrice, 4, RoundingMode.HALF_UP)
-            .multiply(BigDecimal.valueOf(100));
+            .multiply(BigDecimal.valueOf(100)).setScale(2);
             newState.volume = prevState.volume + ThreadLocalRandom.current().nextLong(1000);
             newState.marketCap = prevState.marketCap;
             newState.timestamp = java.time.LocalDateTime.now();
 
             latestQuotes.put(instrumentId, newState);
-            System.out.println(
-                "QUOTE:" + instrumentId + " - PRICE: $" + newPrice + " - HIGH: $" + newState.highPrice + " - LOW: $" 
-                + newState.lowPrice + " - CHANGE: $" + newState.change + " - CHANGE%: " + newState.changePercent.setScale(2) + "% - VOLUME: " + newState.volume
-            );
         }
-        System.out.println("----------------------------------------------");
     }
 
     public List<QuoteResponseDto> getAllLatestQuotes() {
@@ -211,6 +210,34 @@ public class QuoteService {
             state.marketCap,
             state.timestamp
         ));
+    }
+
+    public Page<ListMarketEquitySummaryResponseDto> getLatestMarketEquityQuotes(AssetType assetType, Pageable pageable) {
+        List<ListMarketEquitySummaryResponseDto> responses = new ArrayList<>();
+
+        for (Instrument instrument : instrumentService.getAllInstrumentsByAssetTypeAsc(assetType)) {
+            long instrumentId = instrument.getInstrumentId();
+            InstrumentQuoteState latestQuote = latestQuotes.get(instrumentId);
+
+                if (latestQuote != null) {
+                    responses.add(new ListMarketEquitySummaryResponseDto(
+                        instrument.getInstrumentName(),
+                        instrument.getInstrumentSymbol(),
+                        latestQuote.currentPrice,
+                        latestQuote.change,
+                        latestQuote.changePercent,
+                        latestQuote.volume,
+                        latestQuote.marketCap
+                    ));
+                }
+        }
+
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), responses.size());
+
+        List<ListMarketEquitySummaryResponseDto> pagedResponses = start >= responses.size() ? List.of() : responses.subList(start, end);
+
+        return new PageImpl<>(pagedResponses, pageable, responses.size());
     }
 
     private BigDecimal generateNextPrice(BigDecimal prevPrice, double volatility, double drift) {
