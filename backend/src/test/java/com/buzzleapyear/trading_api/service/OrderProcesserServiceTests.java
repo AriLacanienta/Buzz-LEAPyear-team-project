@@ -8,6 +8,8 @@ import static org.mockito.Mockito.verify;
 import org.junit.jupiter.api.Test;
 
 import com.buzzleapyear.trading_api.entity.TradeOrderStatus;
+// for manual testing:
+//curl --json '{"side":"BUY","price":"9999.99","accountId":"1","instrumentId":"1","quantity":"999"}' http://localhost:6767/api/v1/tradeorders
 
 public class OrderProcesserServiceTests {
     

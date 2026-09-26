@@ -49,6 +49,17 @@ public class OrderExecutor {
             order.getId(), order.getQuantity(), order.getPrice());
         
         // Get or create holding for this instrument
+        Holding holding = getOrCreateHolding(account, instrument);
+
+        // Update holding quantity and total cost
+        updateHoldingQuantity(holding, order, instrument);
+
+
+        // Deduct from cash reserved (was already deducted from available on VALIDATED)
+        updateCashReserved(account, order);
+    }
+
+    private Holding getOrCreateHolding(Account account, Instrument instrument) {
         Optional<Holding> existingHolding = holdingRepository.findByAccountIdAndInstrumentId(
             account.getId(), instrument.getId());
         
@@ -60,8 +71,10 @@ public class OrderExecutor {
             newHolding.setTotalCost(BigDecimal.ZERO);
             return newHolding;
         });
+        return holding;
+    }
 
-        // Update holding quantity and total cost
+    private void updateHoldingQuantity(Holding holding, TradeOrder order, Instrument instrument) {
         BigDecimal orderCost = order.getPrice().multiply(order.getQuantity());
         holding.setQuantity(holding.getQuantity().add(order.getQuantity()));
         holding.setTotalCost(holding.getTotalCost().add(orderCost));
@@ -70,8 +83,10 @@ public class OrderExecutor {
         holdingRepository.save(holding);
         logger.info("Holding updated: {} - quantity now: {}, total cost: {}", 
             instrument.getInstrumentSymbol(), holding.getQuantity(), holding.getTotalCost());
+    }
 
-        // Deduct from cash reserved (was already deducted from available on VALIDATED)
+        private void updateCashReserved(Account account, TradeOrder order) {
+        BigDecimal orderCost = order.getPrice().multiply(order.getQuantity());
         account.setCashReserved(account.getCashReserved().subtract(orderCost));
         accountRepository.save(account);
         logger.info("Account cash updated - reserved reduced by: ${}. New reserved: ${}", 

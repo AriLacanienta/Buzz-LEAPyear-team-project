@@ -1,6 +1,8 @@
 package com.buzzleapyear.trading_api.service;
 
 import java.math.BigDecimal;
+import java.text.NumberFormat;
+import java.util.Locale;
 
 import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
@@ -21,6 +23,11 @@ import com.buzzleapyear.trading_api.entity.TradeOrder;
 public class OrderValidator {
     
     private static final Logger logger = LoggerFactory.getLogger(OrderValidator.class);
+
+    private final double CONSERVATIVE_LIMIT = 10_000;
+    private final double MODERATE_LIMIT = 10_000;
+    // AGGRESSIVE_LIMIT is unlimited
+
 
     public OrderValidator(){}
 
@@ -98,9 +105,9 @@ public class OrderValidator {
         
         switch (account.getRiskProfile()) {
             case CONSERVATIVE:
-                return holdingCost.compareTo(BigDecimal.valueOf(10_000)) <= 0;
+                return holdingCost.compareTo(BigDecimal.valueOf(CONSERVATIVE_LIMIT)) <= 0;
             case MODERATE:
-                return holdingCost.compareTo(BigDecimal.valueOf(50_000)) <= 0;
+                return holdingCost.compareTo(BigDecimal.valueOf(MODERATE_LIMIT)) <= 0;
             case AGGRESSIVE:
                 return true;  // No limit
             default:
@@ -126,9 +133,11 @@ public class OrderValidator {
         
         // Check risk profile
         if (!validateRiskProfile(account, order)) {
+            // TODO: Get ready for international markets
+            NumberFormat formatter = NumberFormat.getCurrencyInstance(Locale.US);
             String limit = switch (account.getRiskProfile()) {
-                case CONSERVATIVE -> "$10,000";
-                case MODERATE -> "$50,000";
+                case CONSERVATIVE -> formatter.format(CONSERVATIVE_LIMIT);
+                case MODERATE -> formatter.format(MODERATE_LIMIT);
                 case AGGRESSIVE -> "unlimited";
             };
             BigDecimal holdingCost = order.getPrice().multiply(order.getQuantity());
