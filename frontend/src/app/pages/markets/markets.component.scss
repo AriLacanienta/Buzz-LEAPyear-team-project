@@ -11,7 +11,7 @@
     
     th {
       color: #62748E;
-      font-weight: 800;
+      font-weight: 700;
       border-bottom: 0.0625rem solid #1E2D45;
     }
     
@@ -37,6 +37,27 @@
 
     .negative-change {
       color: #EF4444;
+      font-weight: 600;
+    }
+
+    .neutral-change {
+      color: #9aa1ad;
+      font-weight: 600;
+    }
+
+    .change-value {
+      display: flex;
+      align-items: center;
+      gap: .25rem;
+      font-size: 0.85rem;
+      opacity: 0.8;
+    }
+
+    .change-percent {
+      display: flex;
+      align-items: center;
+      gap: .25rem;
+      font-size: .8rem;
       font-weight: 600;
     }
 

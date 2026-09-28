@@ -1,12 +1,29 @@
 <header>
-  <nav class="tabs">
-    <a routerLink="/account" routerLinkActive="active" class="account-tab">
-      <img src="assets/images/joanna.jpg" alt="Account"/>
-      <span>{{ accountName$ | async }}</span>
-    </a>
-    <a routerLink="/portfolio" routerLinkActive="active" class="tab">Portfolio</a>
-    <a routerLink="/markets" routerLinkActive="active" class="tab">Markets</a>
-    <a routerLink="/trade" routerLinkActive="active" class="tab">Trade</a>
-    <a routerLink="/account" routerLinkActive="active" class="tab">Account</a>
-  </nav>
+  <div class="header-content">
+    <nav class="tabs">
+      <a routerLink="/account" routerLinkActive="active" class="account-tab">
+        <img src="assets/images/joanna.jpg" alt="Account"/>
+        <span>{{ accountName$ | async }}</span>
+      </a>
+      <a routerLink="/portfolio" routerLinkActive="active" class="tab">Portfolio</a>
+      <a routerLink="/markets" routerLinkActive="active" class="tab">Markets</a>
+      <a routerLink="/trade" routerLinkActive="active" class="tab">Trade</a>
+      <a routerLink="/account" routerLinkActive="active" class="tab">Account</a>
+    </nav>
+
+    <div class="navbar-right">
+      <div class="market-info">
+        |
+        <div class="market-text">
+          <span class="status-dot" [class.open]="(marketStatusDisplay$ | async)?.class === 'open'" [class.closed]="(marketStatusDisplay$ | async)?.class === 'closed'"></span>
+          <span [class]="'market-status ' + (marketStatusDisplay$ | async)?.class">
+            {{ (marketStatusDisplay$ | async)?.text }}
+          </span>
+        </div>
+        |
+        <span class="navbar-date">{{ formattedDate$ | async }}</span>
+      </div>
+    </div>
+  </div>
+ 
 </header>

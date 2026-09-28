@@ -9,13 +9,12 @@ import { MatTableModule } from '@angular/material/table';
 })
 export class MarketsComponent implements OnInit {
   instruments: any[] = [];
-  displayedColumns: string[] = ['instrumentSymbol', 'instrumentName', 'currentPrice', 'change', 'changePercent', 'volume', 'marketCap'];
+  displayedColumns: string[] = ['instrumentSymbol', 'instrumentName', 'currentPrice', 'changePercent', 'volume', 'marketCap'];
 
   constructor(private instrumentService: InstrumentService) {
     console.log('MarketsComponent initialized');
   }
 
-  // fetch data after component initialization
   ngOnInit(): void {
     this.instrumentService.getInstruments().subscribe({
       next: (response: any) => {
@@ -35,11 +34,42 @@ export class MarketsComponent implements OnInit {
   }
 
   getChangePercentClass(value: number): string {
-    const isPositive = value >= 0;
-    return isPositive ? 'positive-change' : 'negative-change';
+    if (value > 0) {
+      return 'positive-change';
+    } else if (value < 0) {
+      return 'negative-change';
+    } else {
+      return 'neutral-change';
+    }
   }
 
   getSymbolFirstLetter(symbol: string): string {
     return symbol.charAt(0).toUpperCase();
+  }
+
+  getChangeArrow(value: number): string {
+    if (value > 0) {
+      return '▲';
+    } else if (value < 0) {
+      return '▼';
+    } else {
+      return '';
+    }
+  }
+
+  formatPrice(price: number): string {
+    return price.toFixed(2);
+  }
+
+  formatValue(volume: number): string {
+    if (volume >= 1_000_000_000) {
+      return (volume / 1_000_000_000) + 'B';
+    } else if (volume >= 1_000_000) {
+      return (volume / 1_000_000) + 'M';
+    } else if (volume >= 1_000) {
+      return (volume / 1_000) + 'K';
+    } else {
+      return volume.toString();
+    }
   }
 }

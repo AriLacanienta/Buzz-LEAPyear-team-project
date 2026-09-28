@@ -1,8 +1,10 @@
 header {
-  text-align: center;
-  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 2rem;
   border-bottom: 0.2rem solid #1E2D45;
-  padding-bottom: 0.1rem;
+  margin-bottom: 1.5rem;
 
   h1 {
     margin: 0;
@@ -16,12 +18,17 @@ header {
   }
 }
 
+.header-content {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 75%;
+  margin: 0 auto;
+}
+
 .tabs {
   display: flex;
   gap: 0.5rem;
-  max-width: 75%;
-  margin: 0 auto;
-  padding-top: 0.6rem;
   align-items: center;
 
   .account-tab {
@@ -67,4 +74,54 @@ header {
       color: #ffffff;
     }
   }
+}
+
+.navbar-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.market-info {
+  display: flex;
+  gap: .5rem;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+.market-text {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.status-dot {
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  display: inline-block;
+
+  &.open {
+    background-color: #10B981;
+    animation: blink 2s infinite;
+  }
+
+  &.closed {
+    background-color: #EF4444;
+  }
+}
+
+@keyframes blink {
+  0%, 50% {
+    opacity: 1;
+  }
+  51%, 100% {
+    opacity: 0.3;
+  }
+}
+
+.navbar-date {
+  color: #9aa1ad;
+  font-weight: 500;
 }

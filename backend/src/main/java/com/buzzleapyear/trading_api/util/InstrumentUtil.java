@@ -31,7 +31,7 @@ public class InstrumentUtil {
                 "GOOGL",
                 new BigDecimal("2800.00"),
                 new BigDecimal("15.00"),
-                new BigDecimal("0.54"),
+                new BigDecimal("-0.54"),
                 new BigDecimal("1500000"),
                 new BigDecimal("1800000000")
             ),
@@ -49,7 +49,7 @@ public class InstrumentUtil {
                 "AMZN",
                 new BigDecimal("3500.00"),
                 new BigDecimal("20.00"),
-                new BigDecimal("0.57"),
+                new BigDecimal("-0.57"),
                 new BigDecimal("2500000"),
                 new BigDecimal("1700000000")
             ),
@@ -76,7 +76,7 @@ public class InstrumentUtil {
                 "SONY",
                 new BigDecimal("100.00"),
                 new BigDecimal("2.00"),
-                new BigDecimal("2.04"),
+                new BigDecimal("-2.04"),
                 new BigDecimal("1000000"),
                 new BigDecimal("500000000")
             ),
@@ -85,7 +85,7 @@ public class InstrumentUtil {
                 "INTC",
                 new BigDecimal("55.00"),
                 new BigDecimal("1.50"),
-                new BigDecimal("2.73"),
+                new BigDecimal("-2.73"),
                 new BigDecimal("800000"),
                 new BigDecimal("44000000")
             ),

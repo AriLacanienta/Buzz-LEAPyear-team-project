@@ -21,27 +21,32 @@
 
           <ng-container matColumnDef="currentPrice">
             <th mat-header-cell *matHeaderCellDef> PRICE </th>
-            <td mat-cell *matCellDef="let instrument"> ${{ instrument.currentPrice }} </td>
-          </ng-container>
-
-          <ng-container matColumnDef="change">
-            <th mat-header-cell *matHeaderCellDef> CHANGE </th>
-            <td mat-cell *matCellDef="let instrument"> {{ instrument.change }} </td>
+            <td mat-cell *matCellDef="let instrument"> ${{ formatPrice(instrument.currentPrice) }} </td>
           </ng-container>
 
           <ng-container matColumnDef="changePercent">
-            <th mat-header-cell *matHeaderCellDef> CHANGE % </th>
-            <td mat-cell *matCellDef="let instrument" [ngClass]="getChangePercentClass(instrument.changePercent)"> {{ formatChangePercent(instrument.changePercent) }}% </td>
+            <th mat-header-cell *matHeaderCellDef> CHANGE </th>
+            <td mat-cell *matCellDef="let instrument" [ngClass]="getChangePercentClass(instrument.changePercent)">
+              <div class="change-container">
+                <div class="change-value">
+                  {{ formatPrice(instrument.change) }}
+                </div>
+                <div class="change-percent">
+                  {{ formatChangePercent(instrument.changePercent) }}%
+                  <span class="arrow">{{ getChangeArrow(instrument.changePercent) }}</span>
+                </div>
+              </div>
+            </td>
           </ng-container>
 
           <ng-container matColumnDef="volume">
             <th mat-header-cell *matHeaderCellDef> VOLUME </th>
-            <td mat-cell *matCellDef="let instrument"> {{ instrument.volume }} </td>
+            <td mat-cell *matCellDef="let instrument"> {{ formatValue(instrument.volume) }} </td>
           </ng-container>
 
           <ng-container matColumnDef="marketCap">
             <th mat-header-cell *matHeaderCellDef> MARKET CAP </th>
-            <td mat-cell *matCellDef="let instrument"> {{ instrument.marketCap }} </td>
+            <td mat-cell *matCellDef="let instrument"> {{ formatValue(instrument.marketCap) }} </td>
           </ng-container>
 
           <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
