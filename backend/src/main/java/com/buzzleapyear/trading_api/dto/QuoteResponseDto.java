@@ -12,7 +12,7 @@ public record QuoteResponseDto(
     BigDecimal change,
     BigDecimal changePercent,
     long volume,
-    BigDecimal marketCap,
+    long marketCap,
     LocalDateTime timestamp
 ) {
 }

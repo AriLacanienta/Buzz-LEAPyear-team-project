@@ -48,7 +48,7 @@ public class QuoteService {
         BigDecimal change;
         BigDecimal changePercent;
         long volume;
-        BigDecimal marketCap;
+        long marketCap;
         LocalDateTime timestamp;
     }
 
@@ -81,7 +81,7 @@ public class QuoteService {
             InstrumentQuoteState state = new InstrumentQuoteState();
 
             Quote quote = quoteRepository
-            .findTopByInstrumentIdOrderByTimestampDesc(instrument.getInstrumentId())
+            .findTopByInstrumentIdOrderByTimestampDesc(instrument.getId())
             .orElse(null);
 
             if (quote != null) {
@@ -98,8 +98,8 @@ public class QuoteService {
                 state.marketCap = quote.getMarketCap();
                 state.timestamp = quote.getTimestamp();
 
-                latestQuotes.put(instrument.getInstrumentId(), state);
-                System.out.println("QUOTE for instrument " + instrument.getInstrumentId() + ": " + quote.getPrice());
+                latestQuotes.put(instrument.getId(), state);
+                System.out.println("QUOTE for instrument " + instrument.getId() + ": " + quote.getPrice());
             }
         }
         } catch (Exception e) {
@@ -160,23 +160,28 @@ public class QuoteService {
 
         for (Instrument instrument : instruments) {
             try {
-                long instrumentId = instrument.getInstrumentId();
+                long instrumentId = instrument.getId();
+                InstrumentQuoteState quoteState = latestQuotes.get(instrumentId);
+                
+                if (quoteState == null) {
+                    continue;
+                }
 
                 responses.add(new QuoteResponseDto(
                     instrument.getInstrumentSymbol(),
-                    latestQuotes.get(instrumentId).currentPrice,
-                    latestQuotes.get(instrumentId).highPrice,
-                    latestQuotes.get(instrumentId).lowPrice,
-                    latestQuotes.get(instrumentId).openPrice,
-                    latestQuotes.get(instrumentId).previousClosePrice,
-                    latestQuotes.get(instrumentId).change,
-                    latestQuotes.get(instrumentId).changePercent,
-                    latestQuotes.get(instrumentId).volume,
-                    latestQuotes.get(instrumentId).marketCap,
-                    latestQuotes.get(instrumentId).timestamp
+                    quoteState.currentPrice,
+                    quoteState.highPrice,
+                    quoteState.lowPrice,
+                    quoteState.openPrice,
+                    quoteState.previousClosePrice,
+                    quoteState.change,
+                    quoteState.changePercent,
+                    quoteState.volume,
+                    quoteState.marketCap,
+                    quoteState.timestamp
                 ));
             } catch (Exception e) {
-                System.err.println("Error fetching quote for instrument " + instrument.getInstrumentId() + ": " + e.getMessage());
+                System.err.println("Error fetching quote for instrument " + instrument.getId() + ": " + e.getMessage());
             }
         }
         responses.sort(Comparator.comparing(QuoteResponseDto::symbol));
@@ -190,7 +195,7 @@ public class QuoteService {
             return Optional.empty();
         }
 
-        Long instrumentId = instrument.get().getInstrumentId();
+        Long instrumentId = instrument.get().getId();
         InstrumentQuoteState state = latestQuotes.get(instrumentId);
 
         if (state == null || state.currentPrice == null) {
@@ -216,7 +221,7 @@ public class QuoteService {
         List<ListMarketEquitySummaryResponseDto> responses = new ArrayList<>();
 
         for (Instrument instrument : instrumentService.getAllInstrumentsByAssetTypeAsc(assetType)) {
-            long instrumentId = instrument.getInstrumentId();
+            long instrumentId = instrument.getId();
             InstrumentQuoteState latestQuote = latestQuotes.get(instrumentId);
 
                 if (latestQuote != null) {

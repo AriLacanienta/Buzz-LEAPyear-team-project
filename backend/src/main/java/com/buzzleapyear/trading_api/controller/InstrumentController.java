@@ -1,12 +1,10 @@
 package com.buzzleapyear.trading_api.controller;
-import com.buzzleapyear.trading_api.util.InstrumentUtil;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import com.buzzleapyear.trading_api.service.InstrumentService;
 import com.buzzleapyear.trading_api.dto.InstrumentDetailsResponseDto;
-import com.buzzleapyear.trading_api.dto.ListInstrumentsResponseDto;
 import com.buzzleapyear.trading_api.entity.Instrument;
 import org.springframework.http.ResponseEntity;
 import com.buzzleapyear.trading_api.mapper.InstrumentMapper;
@@ -27,20 +25,6 @@ public class InstrumentController {
     public InstrumentController(InstrumentService instrumentService, InstrumentMapper instrumentMapper) {
         this.instrumentService = instrumentService;
         this.instrumentMapper = instrumentMapper;
-    }
-
-    @GetMapping()
-    public ResponseEntity<Page<ListInstrumentsResponseDto>> getAllInstruments(Pageable pageable) {
-        List<ListInstrumentsResponseDto> mockData = InstrumentUtil.getMockInstruments();
-
-        // Create a Page using the mock data
-        Page<ListInstrumentsResponseDto> page = new PageImpl<>(
-            mockData,
-            pageable,
-            mockData.size()
-        );
-
-        return ResponseEntity.ok(page);
     }
 
     @GetMapping("/{symbol}/details")

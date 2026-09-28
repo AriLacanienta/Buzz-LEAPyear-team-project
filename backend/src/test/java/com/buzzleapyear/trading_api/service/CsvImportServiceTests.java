@@ -11,6 +11,7 @@ import com.buzzleapyear.trading_api.entity.Instrument.AssetType;
 import com.buzzleapyear.trading_api.entity.TradeOrder;
 import com.buzzleapyear.trading_api.entity.TradeOrder.OrderSide;
 import com.buzzleapyear.trading_api.entity.User;
+import com.buzzleapyear.trading_api.repository.InstrumentRepository;
 import com.buzzleapyear.trading_api.service.ImportCSVService.LineValues;
 
 import org.junit.jupiter.api.Assertions;
@@ -33,10 +34,14 @@ import static org.mockito.Mockito.*;
 class CsvImportServiceTests {
 
 	private ImportCSVService testService;
+	
+	@Mock
+	private InstrumentRepository mockInstrumentRepository;
 
     @BeforeEach
     void setUp(){
-        testService = new ImportCSVService();
+    	MockitoAnnotations.openMocks(this);
+        testService = new ImportCSVService(mockInstrumentRepository);
     }
 
     @Nested
@@ -97,11 +102,13 @@ class CsvImportServiceTests {
         private ImportCSVService service;
         @Mock
         private EntityManager mockEntityManager;
+        @Mock
+        private InstrumentRepository mockInstrumentRepository;
 
         @BeforeEach
         void setUp() {
             MockitoAnnotations.openMocks(this);
-            service = new ImportCSVService();
+            service = new ImportCSVService(mockInstrumentRepository);
             // Use reflection to set the mocked EntityManager
             try {
                 var field = ImportCSVService.class.getDeclaredField("em");

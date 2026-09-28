@@ -60,7 +60,7 @@ public class Quote {
     private long volume;
 
     @Column(name = "market_cap", nullable = false)
-    private BigDecimal marketCap;
+    private long marketCap;
 
     @Column(name = "timestamp", nullable = false)
     private LocalDateTime timestamp;

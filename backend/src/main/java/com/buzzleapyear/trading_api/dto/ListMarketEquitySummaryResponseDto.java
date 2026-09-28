@@ -8,5 +8,5 @@ public record ListMarketEquitySummaryResponseDto(
     BigDecimal change,
     BigDecimal changePercent,
     long volume,
-    BigDecimal marketCap
+    long marketCap
 ) {}

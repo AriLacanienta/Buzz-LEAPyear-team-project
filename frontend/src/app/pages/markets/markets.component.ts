@@ -16,7 +16,7 @@ export class MarketsComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.instrumentService.getInstruments('EQUITY').subscribe({
+    this.instrumentService.getInstruments('EQUITY', 0, 100).subscribe({
       next: (response: any) => {
         console.log('Full response:', response);
         console.log('Response content:', response.content);
