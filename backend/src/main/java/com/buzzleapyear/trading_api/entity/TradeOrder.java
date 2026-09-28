@@ -70,6 +70,7 @@ public class TradeOrder {
     public List<TradeOrderStatus> getStatuses() { return statuses; }
     public void setStatuses(List<TradeOrderStatus> statuses) { this.statuses = statuses; }
     public void addStatus(TradeOrderStatus newStatus) { this.statuses.add(newStatus); }
+
     
     public enum OrderSide {
         BUY, SELL

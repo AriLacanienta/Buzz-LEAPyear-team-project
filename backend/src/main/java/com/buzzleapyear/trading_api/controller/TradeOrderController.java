@@ -1,5 +1,19 @@
 package com.buzzleapyear.trading_api.controller;
 
+import java.net.URI;
+import java.time.LocalDateTime;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.buzzleapyear.trading_api.dto.OrderStatusDTO;
 import com.buzzleapyear.trading_api.dto.TradeOrderDTO;
 import com.buzzleapyear.trading_api.dto.TradeOrderResponseDTO;
@@ -10,15 +24,10 @@ import com.buzzleapyear.trading_api.entity.TradeOrderStatus;
 import com.buzzleapyear.trading_api.repository.AccountRepository;
 import com.buzzleapyear.trading_api.repository.InstrumentRepository;
 import com.buzzleapyear.trading_api.repository.TradeOrderRepository;
+import com.buzzleapyear.trading_api.repository.TradeOrderStatusRepository;
 import com.buzzleapyear.trading_api.service.ProcessOrderService;
-import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.time.LocalDateTime;
+import jakarta.validation.Valid;
 
 /**
  * TradeOrderController
@@ -34,16 +43,19 @@ public class TradeOrderController {
     
     private final ProcessOrderService processOrderService;
     private final TradeOrderRepository tradeOrderRepository;
+    private final TradeOrderStatusRepository tradeOrderStatusRepository;
     private final AccountRepository accountRepository;
     private final InstrumentRepository instrumentRepository;
 
     public TradeOrderController(
             ProcessOrderService processOrderService,
             TradeOrderRepository tradeOrderRepository,
+            TradeOrderStatusRepository tradeOrderStatusRepository,
             AccountRepository accountRepository,
             InstrumentRepository instrumentRepository) {
         this.processOrderService = processOrderService;
         this.tradeOrderRepository = tradeOrderRepository;
+        this.tradeOrderStatusRepository = tradeOrderStatusRepository;
         this.accountRepository = accountRepository;
         this.instrumentRepository = instrumentRepository;
     }
@@ -94,18 +106,18 @@ public class TradeOrderController {
             tradeOrderRepository.save(order);
             logger.info("SUBMITTED status logged for order ID: {}", order.getId());
             
-            // Submit for async processing
+            // Submit for processing
             processOrderService.submitOrder(order);
-            
-            // Return 202 Accepted with order ID
+
+            logger.info("Return 201 Created for order ID: {}", order.getId());
             TradeOrderResponseDTO response = new TradeOrderResponseDTO(
                 order.getId(),
-                TradeOrderStatus.OrderStatus.SUBMITTED,
-                "Order submitted for processing"
+                tradeOrderStatusRepository.getLatestStatusById(order.getId()).getStatus(),
+                "Order Processed"
             );
-            
-            logger.info("Returning 202 Accepted for order ID: {}", order.getId());
-            return ResponseEntity.accepted().body(response);
+            return ResponseEntity.created(
+                new URI(String.format("/tradeorder/%s", order.getId())))
+                .body(response);
             
         } catch (IllegalArgumentException e) {
             logger.error("Validation error: {}", e.getMessage());
@@ -137,7 +149,7 @@ public class TradeOrderController {
             }
             
             // Get latest status
-            TradeOrderStatus latestStatus = processOrderService.getOrderStatus(orderId);
+            TradeOrderStatus latestStatus = tradeOrderStatusRepository.getLatestStatusById(orderId);
             
             if (latestStatus == null) {
                 logger.warn("No status found for order: {}", orderId);
