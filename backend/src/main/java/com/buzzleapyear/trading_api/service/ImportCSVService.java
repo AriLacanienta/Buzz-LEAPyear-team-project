@@ -16,11 +16,14 @@ import org.springframework.stereotype.Service;
 
 import com.buzzleapyear.trading_api.entity.Account;
 import com.buzzleapyear.trading_api.entity.Client;
+import com.buzzleapyear.trading_api.entity.Holding;
 import com.buzzleapyear.trading_api.entity.Instrument;
 import com.buzzleapyear.trading_api.entity.Instrument.AssetType;
 import com.buzzleapyear.trading_api.entity.Quote;
 import com.buzzleapyear.trading_api.entity.TradeOrder;
+import com.buzzleapyear.trading_api.entity.TradeOrder.OrderSide;
 import com.buzzleapyear.trading_api.entity.User;
+import com.buzzleapyear.trading_api.repository.HoldingRepository;
 import com.buzzleapyear.trading_api.repository.InstrumentRepository;
 
 import jakarta.persistence.EntityManager;
@@ -34,9 +37,13 @@ public class ImportCSVService {
     private EntityManager em;
     
     private final InstrumentRepository instrumentRepository;
+    private final HoldingRepository holdingRepository;
     
-    public ImportCSVService(InstrumentRepository instrumentRepository) {
+    public ImportCSVService(
+            InstrumentRepository instrumentRepository,
+            HoldingRepository holdingRepository) {
         this.instrumentRepository = instrumentRepository;
+        this.holdingRepository = holdingRepository;
     }
 
     @Transactional
@@ -135,6 +142,30 @@ public class ImportCSVService {
                     tradeOrder.setSide(values.side);
                     em.persist(tradeOrder);
                     em.flush();
+
+                    // Step 6: update Holdings
+                    Holding holding = holdingRepository.findByAccountIdAndInstrumentId(account.getId(), instrument.getId()).orElse(null);
+                    if (holding == null){
+                        holding = new Holding();
+                        holding.setAccount(account);
+                        holding.setInstrument(instrument);
+                        holding.setQuantity(BigDecimal.valueOf(values.side == OrderSide.SELL ? values.quantity + 1.0 : 0.0 ));
+                        holding.setTotalCost(BigDecimal.valueOf(values.value));
+                        em.persist(holding);
+                        em.flush();
+                    }
+                    if (values.side == OrderSide.BUY){
+                        holding.setQuantity(holding.getQuantity().add(BigDecimal.valueOf(values.quantity)));
+                    } 
+                    // SELL
+                    else {
+                        holding.setQuantity(holding.getQuantity().subtract(BigDecimal.valueOf(values.quantity)));
+                        if (holding.getQuantity().compareTo(BigDecimal.valueOf(0.0)) <= 0) {
+                            account.getHoldings().remove(holding);
+                            em.remove(holding);
+                        }
+                    }
+                    em.persist(holding);
                     
                 } catch (Exception e) {
                     System.err.println("Error persisting row: " + e.getMessage());
