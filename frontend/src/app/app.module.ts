@@ -17,10 +17,11 @@ import { AuthInterceptor } from './interceptors/auth.interceptor';
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
-  { path: '', component: DashboardComponent },
+  { path: 'dashboard', component: DashboardComponent },
   { path: 'portfolio', component: DashboardComponent },
   { path: 'trade', component: TradeComponent },
-  { path: 'markets', component: MarketsComponent }
+  { path: 'markets', component: MarketsComponent },
+  { path: '', redirectTo: '/login', pathMatch: 'full' }
 ];
 
 @NgModule({
