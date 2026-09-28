@@ -65,8 +65,8 @@ public class User {
     }
 
     // Getters and Setters
-    public Long getUserId() { return id; }
-    public void setUserId(Long userId) { this.id = userId; }
+    public Long getId() { return id; }
+    public void setId(Long userId) { this.id = userId; }
     
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }

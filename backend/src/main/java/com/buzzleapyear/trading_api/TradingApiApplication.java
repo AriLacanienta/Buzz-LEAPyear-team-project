@@ -7,11 +7,15 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @EnableScheduling
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+
+
+@SpringBootApplication
+@EnableTransactionManagement 
 public class TradingApiApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(TradingApiApplication.class, args);
-
 	}
 
 }

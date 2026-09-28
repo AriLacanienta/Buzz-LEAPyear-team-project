@@ -21,8 +21,8 @@ public class Operation {
     private User user;
 
     // Getters and Setters
-    public Long getOperationId() { return id; }
-    public void setOperationId(Long operationId) { this.id = operationId; }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
     
     public String getOperationName() { return operationName; }
     public void setOperationName(String operationName) { this.operationName = operationName; }

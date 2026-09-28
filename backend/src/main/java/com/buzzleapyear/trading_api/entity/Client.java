@@ -38,8 +38,8 @@ public class Client {
     }
 
     // Getters and Setters
-    public Long getClientId() { return id; }
-    public void setClientId(Long clientId) { this.id = clientId; }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
     
     public User getUser() { return user; }
     public void setUser(User user) { this.user = user; }

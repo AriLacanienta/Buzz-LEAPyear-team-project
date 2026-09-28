@@ -14,21 +14,26 @@ pipeline {
                 checkout scm
             }
         }
-        stage('Build Image') {
+        stage('Build app') {
+            steps{
+                sh 'cd backend && mvn -B clean package'
+            }
+        }
+        stage('Test app') {
+            steps{
+                sh 'cd backend && mvn -B test'
+            }
+            post {
+                always {
+                    junit 'backend/target/surefire-reports/*.xml'
+                }
+            }
+        }
+        stage('Smoke Test') {
             steps {
                 sh 'docker-compose up -d --build'
             }
-            // post {
-            //     always {
-            //         junit 'target/surefire-reports/*.xml'
-            //     }
-            // }
         }
-        // stage('Smoke Test') {
-        //     steps {
-        //         sh 'docker-compose up -d'
-        //     }
-        // }
     }
     post {
         always{

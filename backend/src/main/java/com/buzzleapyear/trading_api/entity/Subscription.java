@@ -26,8 +26,8 @@ public class Subscription {
     private LocalDateTime subscriptionStartDate;
 
     // Getters and Setters
-    public Long getSubscriptionId() { return id; }
-    public void setSubscriptionId(Long subscriptionId) { this.id = subscriptionId; }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
     
     public Account getAccount() { return account; }
     public void setAccount(Account account) { this.account = account; }

@@ -30,8 +30,8 @@ public class TradeOrderStatus {
     private LocalDateTime timeUpdated;
 
     // Getters and Setters
-    public Long getStatusId() { return id; }
-    public void setStatusId(Long statusId) { this.id = statusId; }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
     
     public TradeOrder getTradeOrder() { return tradeOrder; }
     public void setTradeOrder(TradeOrder tradeOrder) { this.tradeOrder = tradeOrder; }
