@@ -6,7 +6,7 @@ import { Component } from '@angular/core';
   styleUrls: ['./dashboard.component.scss']
 })
 export class DashboardComponent {
-  title = 'Buzz Trade';
+  title = 'Buzz Trader';
 
   constructor() {
     console.log('DashboardComponent initialized');

@@ -1,0 +1,41 @@
+.container {
+  margin: 0 auto;
+}
+
+main {
+  max-width: 75%;
+  margin: 0 auto;
+
+  section {
+    margin-bottom: 2.5rem;
+
+    h2 {
+      color: #3B82F6;
+      border-left: 0.25rem solid #3B82F6;
+      padding-left: 0.6rem;
+      margin-bottom: 1.25rem;
+    }
+  }
+}
+
+.profile-section {
+  background-color: #1E2D45;
+  padding: 2.5rem;
+  border-radius: 0.75rem;
+  border: 0.0625rem solid #2a3f5f;
+  margin-bottom: 1.875rem;
+
+  .profile-header {
+    display: flex;
+    align-items: center;
+    gap: 1.875rem;
+
+    .profile-photo {
+      width: 7.5rem;
+      height: 7.5rem;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+  }
+}

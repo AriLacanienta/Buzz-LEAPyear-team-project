@@ -1,26 +1,61 @@
 <div class="container">
-  <header>
-    <nav class="tabs">
-      <a routerLink="/portfolio" routerLinkActive="active" class="tab">Portfolio</a>
-      <a routerLink="/markets" routerLinkActive="active" class="tab">Markets</a>
-      <a routerLink="/trade" routerLinkActive="active" class="tab">Trade</a>
-    </nav>
-  </header>
+  <app-navbar></app-navbar>
 
   <main>
     <section class="markets-content">
-      <h2>Markets</h2>
-      <p>Explore market data and trends here.</p>
-      <div class="market-list">
-        <ul>
-          <li>Total portfolio value</li>
-          <li>Buying power</li>
-          <li>Allocation</li>
-          <li>Portfolio holdings</li>
-          <li>Recent orders</li>
-          <li>Open positions</li>
-          <li>Watchlist</li>
-        </ul>
+      
+      <div *ngIf="instruments.length > 0" class="instruments-table">
+        <table mat-table [dataSource]="instruments">
+
+          <ng-container matColumnDef="instrumentSymbol">
+            <th mat-header-cell *matHeaderCellDef> SYMBOL </th>
+            <td mat-cell *matCellDef="let instrument">
+              <span class="symbol-avatar">{{ getSymbolFirstLetter(instrument.instrumentSymbol) }}</span>{{ instrument.instrumentSymbol }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="instrumentName">
+            <th mat-header-cell *matHeaderCellDef> NAME </th>
+            <td mat-cell *matCellDef="let instrument"> {{ instrument.instrumentName }} </td>
+          </ng-container>
+
+          <ng-container matColumnDef="currentPrice">
+            <th mat-header-cell *matHeaderCellDef> PRICE </th>
+            <td mat-cell *matCellDef="let instrument"> ${{ formatPrice(instrument.currentPrice) }} </td>
+          </ng-container>
+
+          <ng-container matColumnDef="changePercent">
+            <th mat-header-cell *matHeaderCellDef> CHANGE </th>
+            <td mat-cell *matCellDef="let instrument" [ngClass]="getChangePercentClass(instrument.changePercent)">
+              <div class="change-container">
+                <div class="change-value">
+                  {{ formatPrice(instrument.change) }}
+                </div>
+                <div class="change-percent">
+                  {{ formatChangePercent(instrument.changePercent) }}%
+                  <span class="arrow">{{ getChangeArrow(instrument.changePercent) }}</span>
+                </div>
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="volume">
+            <th mat-header-cell *matHeaderCellDef> VOLUME </th>
+            <td mat-cell *matCellDef="let instrument"> {{ formatValue(instrument.volume) }} </td>
+          </ng-container>
+
+          <ng-container matColumnDef="marketCap">
+            <th mat-header-cell *matHeaderCellDef> MARKET CAP </th>
+            <td mat-cell *matCellDef="let instrument"> {{ formatValue(instrument.marketCap) }} </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+      </div>
+
+      <div *ngIf="instruments.length === 0" class="no-data-message">
+        No instruments available
       </div>
     </section>
   </main>

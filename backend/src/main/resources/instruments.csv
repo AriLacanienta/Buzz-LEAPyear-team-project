@@ -1,0 +1,30 @@
+instrument_name,instrument_symbol,asset_type,currency_code
+Apple Inc.,AAPL,EQUITY,USD
+Microsoft Corporation,MSFT,EQUITY,USD
+Alphabet Inc.,GOOGL,EQUITY,USD
+Tesla Inc.,TSLA,EQUITY,USD
+Amazon.com Inc.,AMZN,EQUITY,USD
+NVIDIA Corporation,NVDA,EQUITY,USD
+Meta Platforms Inc.,META,EQUITY,USD
+Berkshire Hathaway Inc.,BRK.B,EQUITY,USD
+JPMorgan Chase & Co.,JPM,EQUITY,USD
+Johnson & Johnson,JNJ,EQUITY,USD
+Visa Inc.,V,EQUITY,USD
+Walmart Inc.,WMT,EQUITY,USD
+Procter & Gamble Company,PG,EQUITY,USD
+UnitedHealth Group Inc.,UNH,EQUITY,USD
+Verizon Communications Inc.,VZ,EQUITY,USD
+The Coca-Cola Company,KO,EQUITY,USD
+Pfizer Inc.,PFE,EQUITY,USD
+Adobe Inc.,ADBE,EQUITY,USD
+Costco Wholesale Corporation,COST,EQUITY,USD
+Intel Corporation,INTC,EQUITY,USD
+Oracle Corporation,ORCL,EQUITY,USD
+Cisco Systems Inc.,CSCO,EQUITY,USD
+International Business Machines,IBM,EQUITY,USD
+Broadcom Inc.,AVGO,EQUITY,USD
+Advanced Micro Devices Inc.,AMD,EQUITY,USD
+Qualcomm Incorporated,QCOM,EQUITY,USD
+Applied Materials Inc.,AMAT,EQUITY,USD
+ASML Holding N.V.,ASML,EQUITY,USD
+Salesforce Inc.,CRM,EQUITY,USD

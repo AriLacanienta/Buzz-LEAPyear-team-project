@@ -14,11 +14,15 @@ import { LoginComponent } from './pages/login/login.component';
 import { RegisterComponent } from './pages/register/register.component';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
 import { authGuard } from './auth.guard';
+import { AccountComponent } from './pages/account/account.component';
+import { NavbarComponent } from './components/navbar/navbar.component';
+import { MatTableModule } from '@angular/material/table';
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
   { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard] },
+  { path: 'account', component: AccountComponent },
   { path: 'portfolio', component: DashboardComponent, canActivate: [authGuard] },
   { path: 'trade', component: TradeComponent, canActivate: [authGuard] },
   { path: 'markets', component: MarketsComponent, canActivate: [authGuard]},
@@ -32,7 +36,9 @@ const routes: Routes = [
     TradeComponent,
     MarketsComponent,
     LoginComponent,
-    RegisterComponent
+    RegisterComponent,
+    AccountComponent,
+    NavbarComponent
   ],
   imports: [
     BrowserModule,
@@ -40,7 +46,9 @@ const routes: Routes = [
     ReactiveFormsModule,
     CommonModule,
     HttpClientModule,
-    RouterModule.forRoot(routes)
+    RouterModule.forRoot(routes),
+    HttpClientModule,
+    MatTableModule
   ],
   providers: [
     // Register HTTP interceptor to add JWT token to all requests
