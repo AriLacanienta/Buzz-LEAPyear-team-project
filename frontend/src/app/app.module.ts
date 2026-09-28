@@ -13,14 +13,15 @@ import { MarketsComponent } from './pages/markets/markets.component';
 import { LoginComponent } from './pages/login/login.component';
 import { RegisterComponent } from './pages/register/register.component';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
+import { authGuard } from './auth.guard';
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
-  { path: 'dashboard', component: DashboardComponent },
-  { path: 'portfolio', component: DashboardComponent },
-  { path: 'trade', component: TradeComponent },
-  { path: 'markets', component: MarketsComponent },
+  { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard] },
+  { path: 'portfolio', component: DashboardComponent, canActivate: [authGuard] },
+  { path: 'trade', component: TradeComponent, canActivate: [authGuard] },
+  { path: 'markets', component: MarketsComponent, canActivate: [authGuard]},
   { path: '', redirectTo: '/login', pathMatch: 'full' }
 ];
 
