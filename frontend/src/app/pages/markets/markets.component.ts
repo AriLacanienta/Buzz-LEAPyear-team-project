@@ -16,13 +16,18 @@ export class MarketsComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.instrumentService.getInstruments().subscribe({
+    this.instrumentService.getInstruments('EQUITY').subscribe({
       next: (response: any) => {
-        this.instruments = response.content;
+        console.log('Full response:', response);
+        console.log('Response content:', response.content);
+        this.instruments = response.content || [];
         console.log('Instruments loaded:', this.instruments);
+        console.log('Instruments length:', this.instruments.length);
       },
       error: (error) => {
         console.error('Error loading instruments:', error);
+        console.error('Error message:', error.message);
+        console.error('Error status:', error.status);
       }
     });
   }

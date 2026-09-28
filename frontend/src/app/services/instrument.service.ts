@@ -7,11 +7,11 @@ import { environment } from '../../environments/environment';
   providedIn: 'root'
 })
 export class InstrumentService {
-  private apiUrl = `${environment.apiUrl}/instruments`;
+  private apiUrl = `${environment.apiUrl}/api/v1/quote/market`;
 
   constructor(private http: HttpClient) {}
 
-  getInstruments(page: number = 0, size: number = 10): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}?page=${page}&size=${size}`);
+  getInstruments(assetType: string = 'EQUITY', page: number = 0, size: number = 10): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}?assetType=${assetType}&page=${page}&size=${size}`);
   }
 }
