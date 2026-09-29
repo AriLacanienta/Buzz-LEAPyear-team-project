@@ -1,0 +1,10 @@
+<button class="container">
+    <div>
+        <span>{{ item.symbol }}</span>
+        <span>{{ item.name }}</span>
+    </div>
+    <div>
+        <span>${{ item.price.toFixed(2) }}</span>
+        <span [class.negative]="item.change < 0">{{ item.change > 0 ? '+' : '' }}{{ item.change.toFixed(2) }}%</span>
+    </div>
+</button>

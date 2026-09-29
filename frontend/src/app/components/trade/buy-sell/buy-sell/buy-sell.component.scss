@@ -1,0 +1,241 @@
+$spacing: 1rem;
+$spacing-sm: 0.25rem;
+$radius-xl: 0.75rem;
+$radius-lg: 0.5rem;
+$radius-md: 0.375rem;
+$bg-dark: #0f1520;
+$bg-darker: #080c14;
+$border-dark: #1e2d45;
+$text-light: #e8eaf0;
+$color-white: #ffffff;
+$color-emerald: #10b981;
+$color-red: #ef4444;
+$color-blue-400: #60a5fa;
+$color-blue-500: #3080ff;
+$color-slate-500: #64748b;
+$color-slate-300: #cbd5e1;
+$font-weight-semibold: 600;
+$text-xs: 0.75rem;
+$text-xs-line-height: 1rem;
+$text-sm: 0.875rem;
+$text-sm-line-height: 1.25rem;
+$transition-timing: ease-in-out;
+$transition-duration: 200ms;
+$shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+
+.buy-sell-container {
+  padding: calc($spacing-sm * 5);
+  background-color: $bg-dark;
+  border: 1px solid $border-dark;
+  border-radius: $radius-xl;
+  color: $text-light;
+
+  > :not(:last-child) {
+    margin-bottom: calc($spacing * 1);
+  }
+
+  h2.header {
+    font-family: Inter, sans-serif;
+    color: $color-white;
+    font-weight: $font-weight-semibold;
+    font-size: $text-sm;
+    line-height: $text-sm-line-height;
+  }
+}
+
+.toggle {
+  display: flex;
+  background-color: #080c14;
+  border: 1px solid #1e2d45;
+  border-radius: 0.5rem;
+  padding: 0.125rem;
+  margin-bottom: 1rem;
+}
+
+.buy-btn,
+.sell-btn {
+  transition-property: all;
+  transition-timing-function: $transition-timing;
+  transition-duration: $transition-duration;
+  box-shadow: $shadow;
+  text-transform: capitalize;
+  color: $color-white;
+  font-weight: $font-weight-semibold;
+  font-size: $text-xs;
+  line-height: $text-xs-line-height;
+  padding-block: calc($spacing-sm * 2);
+  padding-inline: calc($spacing-sm * 2);
+  background-color: #080c14;
+  border-radius: $radius-md;
+  flex: 1;
+  border: none;
+  font-family: Inter, sans-serif;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &:active {
+    opacity: 0.7;
+  }
+}
+
+.buy-btn.selected {
+  background-color: $color-emerald;
+
+  &:hover {
+    opacity: 0.9;
+  }
+}
+
+.sell-btn.selected {
+  background-color: $color-red;
+
+  &:hover {
+    opacity: 0.9;
+  }
+}
+
+.tag {
+  display: flex;
+  gap: calc($spacing-sm * 2);
+
+  button {
+    padding-inline: calc($spacing-sm * 2.5);
+    padding-block: calc($spacing-sm * 1);
+    border-radius: $radius-xl;
+    font-size: 10px;
+    font-weight: 500;
+    transition-property: all;
+    transition-timing-function: $transition-timing;
+    transition-duration: $transition-duration;
+    text-transform: capitalize;
+    color: $color-slate-500;
+    border: 1px solid transparent;
+    font-family: Inter, sans-serif;
+    cursor: pointer;
+    background-color: transparent;
+
+    &:hover {
+      color: $color-slate-300;
+    }
+
+    &:active {
+      opacity: 0.7;
+    }
+  }
+
+  button.selected {
+    background-color: #3080ff33;
+    color: $color-blue-400;
+    border-color: #3080ff4d;
+
+    &:hover {
+      opacity: 0.8;
+    }
+  }
+}
+
+.quantity-container {
+  margin-bottom: calc($spacing-sm * 4);
+
+  label {
+    display: block;
+    margin-bottom: calc($spacing-sm * 1.5);
+    font-size: 10px;
+    font-weight: $font-weight-semibold;
+    color: $color-slate-500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+}
+
+.quantity-input {
+  width: 100%;
+  background-color: #141c2e;
+  border: 1px solid $border-dark;
+  border-radius: $radius-lg;
+  padding-inline: calc($spacing-sm * 3);
+  padding-block: calc($spacing-sm * 2.5);
+  font-size: $text-sm;
+  font-family: monospace;
+  color: $color-white;
+  transition-property: border-color;
+  transition-timing-function: $transition-timing;
+  transition-duration: $transition-duration;
+
+  /* Remove up/down arrows from number input */
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  &[type='number'] {
+    -moz-appearance: textfield;
+  }
+
+  &::placeholder {
+    color: #64748b;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: #3080ff99;
+  }
+}
+
+.buying-power {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: $text-xs;
+  margin-bottom: calc($spacing-sm * 4);
+}
+
+.buying-power-label {
+  color: $color-slate-500;
+}
+
+.buying-power-value {
+  font-family: monospace;
+  font-weight: 500;
+  color: $color-emerald;
+}
+
+.sell {
+  background-color: $color-red !important;
+
+  &:hover {
+    background-color: #dc2626 !important;
+  }
+}
+
+.place-order-btn {
+  width: 100%;
+  padding-block: 0.75rem;
+  border-radius: $radius-xl;
+  font-size: $text-sm;
+  font-weight: $font-weight-semibold;
+  transition-property: all;
+  transition-timing-function: $transition-timing;
+  transition-duration: $transition-duration;
+  background-color: $color-emerald;
+  color: $color-white;
+  border: none;
+  font-family: Inter, sans-serif;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #059669;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+
+

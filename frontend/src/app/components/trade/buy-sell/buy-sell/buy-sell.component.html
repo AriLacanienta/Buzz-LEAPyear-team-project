@@ -1,0 +1,30 @@
+<div class="buy-sell-container">
+    <h2 class="header">Place an Order</h2>
+
+    <div class="toggle">
+        <button class="buy-btn" [class.selected]="isBuy" (click)="toggleOrderType('buy')">Buy</button>
+        <button class="sell-btn" [class.selected]="!isBuy" (click)="toggleOrderType('sell')">Sell</button>
+    </div>
+
+    <div class="tag">
+        <button [class.selected]="selectedTag === 'All'" (click)="selectTag('All')">All</button>
+        <button [class.selected]="selectedTag === 'Stock'" (click)="selectTag('Stock')">Stock</button>
+        <button [class.selected]="selectedTag === 'Crypto'" (click)="selectTag('Crypto')">Crypto</button>
+    </div>
+
+    <app-search (itemSelected)="onSearchItemSelected($event)"></app-search>
+
+    <div class="quantity-container">
+        <label for="quantity">QUANTITY / SHARES</label>
+        <input type="number" id="quantity" name="quantity" class="quantity-input" min="0" step="1" placeholder="0" (input)="onQuantityInput($event)" />
+    </div>
+
+    <div class="buying-power">
+        <span class="buying-power-label">{{ isBuy ? 'Available buying power' : 'Cash after sale' }}</span>
+        <span class="buying-power-value">$42,180.00</span>
+    </div>
+
+    <button class="place-order-btn" [class.sell]="!isBuy">{{ isBuy ? 'Review & Submit Buy' : 'Review & Submit Sell' }}</button>
+
+    <div></div>
+</div>

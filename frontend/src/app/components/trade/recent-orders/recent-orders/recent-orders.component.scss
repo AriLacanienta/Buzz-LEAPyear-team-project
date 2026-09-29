@@ -1,0 +1,33 @@
+.recent-orders-container {
+  background-color: #0f1520;
+  border-color: #1e2d45;
+  border-style: solid;
+  border-width: 1px;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.header {
+  padding-block: 16px;
+  padding-inline: 20px;
+  border-color: #1e2d45;
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+}
+
+.header h3 {
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.no-orders {
+  display: block;
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: center;
+  padding-block: 40px;
+  padding-inline: 20px;
+}

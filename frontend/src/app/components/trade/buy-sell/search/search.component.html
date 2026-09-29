@@ -1,0 +1,17 @@
+<div class="search-container">
+    <div class="search-input">
+        <span class="material-icons">search</span>
+        <input type="text" 
+               class="search-input-field" 
+               placeholder="Search stocks, forex, crypto..."
+               [value]="searchInput"
+               (input)="onSearchInput($event)"
+               (focus)="onSearchBoxFocus()"
+               (blur)="onSearchBoxBlur()">
+    </div>
+    <app-search-list
+        *ngIf="isSearchBoxFocused && searchResults.length > 0"
+        [results]="searchResults"
+        (itemSelected)="onResultSelected($event)">
+    </app-search-list>
+</div>

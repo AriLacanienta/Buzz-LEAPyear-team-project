@@ -24,7 +24,6 @@ const routes: Routes = [
   declarations: [
     AppComponent,
     DashboardComponent,
-    TradeComponent,
     MarketsComponent,
     AccountComponent,
     NavbarComponent
