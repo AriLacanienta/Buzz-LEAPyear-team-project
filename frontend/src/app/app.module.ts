@@ -11,6 +11,7 @@ import { MarketsComponent } from './pages/markets/markets.component';
 import { AccountComponent } from './pages/account/account.component';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { MatTableModule } from '@angular/material/table';
+import { PortfolioHoldingCardComponent } from './components/portfolio-holding-card/portfolio-holding-card.component';
 
 const routes: Routes = [
   { path: '', component: DashboardComponent },
@@ -34,7 +35,8 @@ const routes: Routes = [
     BrowserAnimationsModule,
     RouterModule.forRoot(routes),
     HttpClientModule,
-    MatTableModule
+    MatTableModule,
+    PortfolioHoldingCardComponent
   ],
   providers: [],
   bootstrap: [AppComponent]
