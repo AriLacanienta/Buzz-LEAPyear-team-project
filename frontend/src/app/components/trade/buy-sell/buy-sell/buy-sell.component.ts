@@ -31,7 +31,7 @@ export class BuySellComponent {
     input.value = input.value.replace(/^0+(?=\d)/, '');
   }
 
-  onSearchItemSelected(item: SearchResult): void {
+  onSearchItemSelected(item: SearchResult | null): void {
     this.selectedResult = item;
     console.log('Selected item from search:', item);
     // Handle selected item (populate quantity, set symbol, etc.)

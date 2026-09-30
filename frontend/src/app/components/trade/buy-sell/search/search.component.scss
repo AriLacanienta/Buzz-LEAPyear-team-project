@@ -25,6 +25,32 @@ $color-slate-600: #475569;
     color: #64748b;
     pointer-events: none;
   }
+
+  .search-icon {
+    left: 0.5rem;
+  }
+
+  .search-clear-btn {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .close-icon {
+    right: 0;
+    left: auto;
+    position: relative;
+    transform: none;
+    top: auto;
+  }
 }
 
 .search-input-field {

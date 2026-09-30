@@ -16,7 +16,7 @@ export class SearchComponent implements OnInit {
   isSearchBoxFocused: boolean = false;
   private allResults: SearchResult[] = [];
   
-  @Output() itemSelected = new EventEmitter<SearchResult>();
+  @Output() itemSelected = new EventEmitter<SearchResult | null>();
 
   ngOnInit(): void {
     // TODO: Inject InstrumentService and load initial data
@@ -110,6 +110,13 @@ export class SearchComponent implements OnInit {
     if (this.isSearchBoxFocused) {
       this.filterResults();
     }
+  }
+
+  onSearchClear(): void {
+    this.itemSelected.emit(null);
+    this.searchInput = '';
+    this.searchResults = [];
+    this.isSearchBoxFocused = false;
   }
 
   private filterResults(): void {

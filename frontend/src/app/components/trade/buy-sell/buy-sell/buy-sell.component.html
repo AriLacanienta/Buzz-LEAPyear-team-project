@@ -16,7 +16,8 @@
 
     <app-search-result-detail [selectedResult]="selectedResult"></app-search-result-detail>
 
-    <div class="quantity-container">        <label for="quantity">QUANTITY / SHARES</label>
+    <div class="quantity-container">
+        <label for="quantity">QUANTITY / SHARES</label>
         <input type="number" id="quantity" name="quantity" class="quantity-input" min="0" step="1" placeholder="0" (input)="onQuantityInput($event)" />
     </div>
 

@@ -8,6 +8,9 @@
                (input)="onSearchInput($event)"
                (focus)="onSearchBoxFocus()"
                (blur)="onSearchBoxBlur()">
+        <button (mousedown)="onSearchClear()" class="search-clear-btn">
+            <span class="material-icons close-icon">close</span>
+        </button>
     </div>
     <app-search-list
         *ngIf="isSearchBoxFocused && searchResults.length > 0"
