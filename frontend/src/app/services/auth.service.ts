@@ -25,7 +25,7 @@ export class AuthService {
   /**
    * Login user with email and password
    * 
-   * Makes POST request to /api/auth/login
+   * Makes POST request to /api/v1/auth/login
    * Returns Observable with response containing JWT token
    * 
    * @param email - User's email address
@@ -47,7 +47,7 @@ export class AuthService {
   /**
    * Register new user
    * 
-   * Makes POST request to /api/auth/register
+   * Makes POST request to /api/v1/auth/register
    * Returns Observable with response containing JWT token
    * User is automatically logged in after registration
    * 
