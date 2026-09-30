@@ -74,6 +74,29 @@ header {
       color: #ffffff;
     }
   }
+
+  .logout-btn {
+    padding: 0.3rem 1rem;
+    background-color: transparent;
+    color: #9aa1ad;
+    border: 1px solid #1E2D45;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    margin-right: 0.5rem;
+
+    &:hover {
+      background-color: #0F1520;
+      color: #ffffff;
+    }
+
+    &:active {
+      border-color: #ffffff;
+      background-color: #1E2D45;
+    }
+  }
 }
 
 .navbar-right {

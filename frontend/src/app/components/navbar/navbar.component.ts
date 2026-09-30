@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { AccountService } from '../../services/account.service';
 import { MarketStatusService } from '../../services/market-status.service';
+import { AuthService } from '../../services/auth.service';
+import { Router } from '@angular/router';
 import { map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 
@@ -24,5 +26,15 @@ export class NavbarComponent {
     }))
   );
 
-  constructor(private accountService: AccountService, private marketStatusService: MarketStatusService) { }
+  constructor(
+    private accountService: AccountService,
+    private marketStatusService: MarketStatusService,
+    private authService: AuthService,
+    private router: Router
+  ) { }
+
+  logout(): void {
+    this.authService.logout();
+    this.router.navigate(['/login']);
+  }
 }
