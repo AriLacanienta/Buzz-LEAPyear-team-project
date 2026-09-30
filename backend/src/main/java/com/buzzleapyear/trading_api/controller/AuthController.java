@@ -23,9 +23,8 @@ import java.util.Optional;
  * GET /api/auth/validate - Validate JWT token
  */
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/api/v1/auth")
 //how long the browser should cache the preflight response (seconds)
-@CrossOrigin(origins = "*", maxAge = 3600)
 public class AuthController {
 
     @Autowired

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '@environments/environment';
 
 /**
  * AuthService - Handles all authentication logic
@@ -17,14 +18,14 @@ import { Observable } from 'rxjs';
 export class AuthService {
 
   // Backend API endpoint for authentication
-  private apiUrl = 'http://localhost:6767/api/auth';
+  private apiUrl = `${environment.apiUrl}/auth`;
 
   constructor(private http: HttpClient) { }
 
   /**
    * Login user with email and password
    * 
-   * Makes POST request to /api/auth/login
+   * Makes POST request to /api/v1/auth/login
    * Returns Observable with response containing JWT token
    * 
    * @param email - User's email address
@@ -46,7 +47,7 @@ export class AuthService {
   /**
    * Register new user
    * 
-   * Makes POST request to /api/auth/register
+   * Makes POST request to /api/v1/auth/register
    * Returns Observable with response containing JWT token
    * User is automatically logged in after registration
    * 
