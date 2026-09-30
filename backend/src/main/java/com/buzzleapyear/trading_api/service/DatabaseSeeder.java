@@ -31,8 +31,8 @@ public class DatabaseSeeder implements CommandLineRunner {
             
             logger.info("✓ Database seeding completed successfully!");
         } catch (Exception e) {
-            logger.error("✗ Database seeding failed (application will still start)", e);
-            // Don't rethrow - let the application continue running so we can diagnose the issue
+            logger.error("✗ Database seeding failed", e);
+            throw e;
         }
     }
 }
