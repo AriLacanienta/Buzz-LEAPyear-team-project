@@ -2,6 +2,6 @@
   <app-search-list-item
     *ngFor="let item of results"
     [item]="item"
-    (click)="selectItem(item)">
+    (mousedown)="selectItem(item)">
   </app-search-list-item>
 </div>

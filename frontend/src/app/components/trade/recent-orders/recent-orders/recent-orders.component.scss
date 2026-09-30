@@ -1,4 +1,11 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
 .recent-orders-container {
+  flex: 1;
   background-color: #0f1520;
   border-color: #1e2d45;
   border-style: solid;

@@ -1,0 +1,20 @@
+<div *ngIf="!selectedResult" class="result-detail">Search and select an instrument above</div>
+
+<div *ngIf="selectedResult" class="result-container">
+  <div class="result-header">
+    <div class="result-left">
+      <div class="result-symbol">{{ selectedResult.symbol }}</div>
+      <div class="result-name">{{ selectedResult.name }}</div>
+    </div>
+    <div class="result-right">
+      <div class="result-price">${{ selectedResult.price.toFixed(2) }}</div>
+      <div class="result-change" [class.positive]="selectedResult.change >= 0" [class.negative]="selectedResult.change < 0">
+        {{ selectedResult.change >= 0 ? '+' : '' }}{{ selectedResult.change.toFixed(2) }}% today
+      </div>
+    </div>
+  </div>
+  <div class="result-tags">
+    <span class="tag tradable">Tradable</span>
+    <span class="tag stocks">stocks</span>
+  </div>
+</div>

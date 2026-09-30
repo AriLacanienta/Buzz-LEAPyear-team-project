@@ -1,17 +1,19 @@
 import { Component } from '@angular/core';
 import { SearchComponent } from '../search/search.component';
+import { SearchResultDetailComponent } from '../search-result-detail/search-result-detail.component';
 import { SearchResult } from '../search-list/search-list.component';
 
 @Component({
   selector: 'app-buy-sell',
   standalone: true,
-  imports: [SearchComponent],
+  imports: [SearchComponent, SearchResultDetailComponent],
   templateUrl: './buy-sell.component.html',
   styleUrl: './buy-sell.component.scss'
 })
 export class BuySellComponent {
   isBuy: boolean = true;
   selectedTag: string = 'All';
+  selectedResult: SearchResult | null = null;
 
   toggleOrderType(type: 'buy' | 'sell'): void {
     this.isBuy = type === 'buy';
@@ -30,6 +32,7 @@ export class BuySellComponent {
   }
 
   onSearchItemSelected(item: SearchResult): void {
+    this.selectedResult = item;
     console.log('Selected item from search:', item);
     // Handle selected item (populate quantity, set symbol, etc.)
   }
