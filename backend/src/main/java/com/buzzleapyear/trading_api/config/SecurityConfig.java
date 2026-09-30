@@ -52,7 +52,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authorize -> authorize
-                // .requestMatchers(HttpMethod.OPTIONS, "/api/v1/auth/**").permitAll()
+                .requestMatchers(HttpMethod.OPTIONS, "/api/v1/auth/**").permitAll()
                 // // TODO: require ADMIN role on /test endpoint 
                 // .requestMatchers("/api/v1/test").permitAll()
                 .requestMatchers("/actuator/**").permitAll()
