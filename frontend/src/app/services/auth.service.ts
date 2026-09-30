@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '@environments/environment';
 
 /**
  * AuthService - Handles all authentication logic
@@ -17,7 +18,7 @@ import { Observable } from 'rxjs';
 export class AuthService {
 
   // Backend API endpoint for authentication
-  private apiUrl = 'http://localhost:6767/api/auth';
+  private apiUrl = `${environment.apiUrl}/auth`;
 
   constructor(private http: HttpClient) { }
 

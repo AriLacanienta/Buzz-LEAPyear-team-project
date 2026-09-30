@@ -22,7 +22,7 @@ const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
   { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard] },
-  { path: 'account', component: AccountComponent },
+  { path: 'account', component: AccountComponent, canActivate: [authGuard] },
   { path: 'portfolio', component: DashboardComponent, canActivate: [authGuard] },
   { path: 'trade', component: TradeComponent, canActivate: [authGuard] },
   { path: 'markets', component: MarketsComponent, canActivate: [authGuard]},
@@ -47,7 +47,6 @@ const routes: Routes = [
     CommonModule,
     HttpClientModule,
     RouterModule.forRoot(routes),
-    HttpClientModule,
     MatTableModule
   ],
   providers: [

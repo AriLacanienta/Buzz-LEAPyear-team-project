@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.buzzleapyear.trading_api.service.TestService;
 
 @RestController
-@RequestMapping("api/v1") 
+@RequestMapping("/api/v1") 
 public class TestController {
 
   private final TestService testService;
@@ -19,11 +19,6 @@ public class TestController {
   @GetMapping("/test")
   public String index() {
     return testService.testPrint();
-  }
-
-  @GetMapping("/getClientTradeHistory/{client_id}")
-  public String getClientTradeHistory(){
-    return "not yet implemented";
   }
 
 }

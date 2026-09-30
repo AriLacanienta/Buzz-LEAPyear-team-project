@@ -14,7 +14,7 @@ import java.util.List;
 import com.buzzleapyear.trading_api.entity.Instrument.AssetType;
 
 @RestController
-@RequestMapping("api/v1/quote") 
+@RequestMapping("/api/v1/quote") 
 public class QuoteController {
     private final QuoteService quoteService;
 
