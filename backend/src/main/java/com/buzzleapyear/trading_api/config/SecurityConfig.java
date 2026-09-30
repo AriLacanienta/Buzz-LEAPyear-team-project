@@ -52,7 +52,13 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers(HttpMethod.OPTIONS, "/api/v1/auth/**").permitAll()
+                // PUBLIC 
+                // - Allow all preflight requests (CORS)
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/v1/auth/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/auth/validate").permitAll()
+                
+                // RESTRICTED (RBAC)
                 // // TODO: require ADMIN role on /test endpoint 
                 // .requestMatchers("/api/v1/test").permitAll()
                 .requestMatchers("/actuator/**").permitAll()
