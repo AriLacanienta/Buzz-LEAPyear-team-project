@@ -11,17 +11,24 @@ public class DatabaseSeeder implements CommandLineRunner {
     
     private static final Logger logger = LoggerFactory.getLogger(DatabaseSeeder.class);
     private final ImportCSVService importCSVService;
+    private final QuoteService quoteService;
 
-    public DatabaseSeeder(ImportCSVService importCSVService) {
+    public DatabaseSeeder(ImportCSVService importCSVService, QuoteService quoteService) {
         this.importCSVService = importCSVService;
+        this.quoteService = quoteService;
     }
 
     @Override
     public void run(String... args) throws Exception {
         logger.info("Starting database seeding with trades.csv...");
         try {
-            ClassPathResource resource = new ClassPathResource("trades.csv");
-            importCSVService.importFromTradesCSV(resource.getInputStream());
+            importCSVService.importFromInstrumentsCSV(new ClassPathResource("instruments.csv").getInputStream());
+            importCSVService.importFromTradesCSV(new ClassPathResource("trades.csv").getInputStream());
+            importCSVService.importFromQuotesCSV(new ClassPathResource("quotes.csv").getInputStream());
+            
+            // Reinitialize quotes after CSV import completes
+            quoteService.reinitializeQuotes();
+            
             logger.info("✓ Database seeding completed successfully!");
         } catch (Exception e) {
             logger.error("✗ Database seeding failed", e);

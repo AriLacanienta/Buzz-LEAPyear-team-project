@@ -1,29 +1,25 @@
 <div class="container">
-  <header>
-    <nav class="tabs">
-      <a routerLink="/portfolio" routerLinkActive="active" class="tab">Portfolio</a>
-      <a routerLink="/markets" routerLinkActive="active" class="tab">Markets</a>
-      <a routerLink="/trade" routerLinkActive="active" class="tab">Trade</a>
-    </nav>
-  </header>
+  <app-navbar></app-navbar>
 
   <main>
-    <section class="intro">
-      <h2>Getting Started</h2>
-      <p>This is our dashboard portfolio page. We will start building features here.</p>
-    </section>
+    <section class="portfolio-section">
+      <h2>Top Holdings</h2>
+      
+      <div *ngIf="isLoading" class="loading-state">
+        <p>Loading your holdings...</p>
+      </div>
 
-    <section class="features">
-      <h2>Features</h2>
-      <ul>
-        <li>Total portfolio value</li>
-        <li>Buying power</li>
-        <li>Allocation</li>
-        <li>Portfolio holdings</li>
-        <li>Recent orders</li>
-        <li>Open positions</li>
-        <li>Watchlist</li>
-      </ul>
+      <div *ngIf="!isLoading && holdings.length === 0" class="empty-state">
+        <p>No holdings found. Start trading to build your portfolio!</p>
+      </div>
+
+      <div *ngIf="!isLoading && holdings.length > 0" class="holdings-column">
+        <app-portfolio-holding-card 
+          *ngFor="let holding of holdings; let i = index"
+          [holding]="holding"
+          [index]="i">
+        </app-portfolio-holding-card>
+      </div>
     </section>
   </main>
 </div>

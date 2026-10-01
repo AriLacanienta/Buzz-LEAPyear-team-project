@@ -1,78 +1,211 @@
 .container {
-  padding-top: 20px;
   margin: 0 auto;
 }
 
-header {
-  text-align: center;
-  margin-bottom: 40px;
-  border-bottom: 3px solid #1E2D45;
-  padding-bottom: 20px;
-
-  h1 {
-    margin: 0;
-    color: #333;
-  }
-
-  p {
-    color: #666;
-    font-size: 18px;
-    margin-bottom: 20px;
-  }
-}
-
-.tabs {
+.filter-section {
   display: flex;
-  gap: 15px;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding-top: 15px;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  padding: 1rem 0;
+  border-bottom: 0.0625rem solid rgba(255, 255, 255, 0.1);
+  align-items: center;
+}
 
-  .tab {
-    padding: 10px 20px;
-    text-decoration: none;
-    color: #666;
+.asset-tab {
+  padding: 0.5rem 1.25rem;
+  gap: 0.5rem;
+  background-color: #0F1520;
+  border: 0.025rem solid #1E2D45;
+  color: #90A1B9;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+
+  &:hover {
+    color: #ffffff;
+  }
+
+  &.active {
+    background-color: #2B7FFF;
+    border-color: #0066cc;
+    color: #ffffff;
+    border-bottom-color: #1E2D45;
+    font-weight: 700;
+  }
+}
+
+.market-tab {
+  padding: 0.5rem 1.25rem;
+  gap: 0.5rem;
+  background-color: #141C2E;
+  border: 0.0625rem;
+  color: #62748E;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+
+  &:hover {
+    color: #ffffff;
+  }
+
+  &.active {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: #0066cc;
+    color: #ffffff;
+    border-bottom-color: #1E2D45;
+    font-weight: 700;
+  }
+}
+
+.currency-code {
+  font-size: 0.7rem;
+  color: #0066cc;
+  font-weight: 400;
+  margin-left: 0.25rem;
+}
+
+.asset-type-filter {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+
+  label {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.875rem;
     font-weight: 500;
-    border-bottom: 1px solid transparent;
-    border-radius: 8px;
+  }
+
+  .asset-tabs {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  select {
+    padding: 0.75rem 1rem;
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #ffffff;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
     cursor: pointer;
+    transition: all 0.3s ease;
 
     &:hover {
-      color: #1E2D45;
+      color: #ffffff;
     }
 
-    &.active {
-      border-bottom-color: #1E2D45;
-      border: 1px solid #1E2D45;
-      border-radius: 8px;
-      background-color: #0F1520;
+    &:focus {
+      outline: none;
+      border-color: #0066cc;
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    option {
+      background-color: #1a1a2e;
       color: #ffffff;
     }
   }
 }
 
-main {
-  max-width: 1350px;
-  margin: 0 auto;
+.instruments-table {
+  border: 0.125rem solid #1E2D45;
+  margin-top: 1rem;
+  border-radius: 1rem;
+  overflow: hidden;
+  background-color: #141C2E;
 
-  section {
-    margin-bottom: 30px;
-   
+  .market-tabs-header {
+    padding: 1rem;
+    background-color: #141C2E;
+    border-bottom: 0.0625rem solid #1E2D45;
+  }
 
-    h2 {
-      color: #007bff;
-      border-left: 4px solid #007bff;
-      padding-left: 10px;
+  table {
+    background-color: #141C2E;
+    border: none;
+    width: 100%;
+    
+    th {
+      color: #62748E;
+      font-weight: 700;
+      border-bottom: 0.0625rem solid #1E2D45;
+    }
+    
+    td {
+      color: #90A1B9;
+      border-bottom: 0.0625rem solid #1E2D45;
     }
 
-    ul {
-      list-style-type: none;
-      padding: 0;
+    .cdk-column-instrumentSymbol {
+      color: #FFFFFF;
+      font-weight: 700;
+      font-family: 'DM Mono', monospace;
+    }
 
-      li {
-        padding: 8px 0;
-        color: #9aa1ad;
-      }
+    .cdk-column-currentPrice {
+        color: #FFFFFF;
+        font-weight: 600;
+    }
+
+    .positive-change {
+      color: #10B981;
+      font-weight: 600;
+    }
+
+    .negative-change {
+      color: #EF4444;
+      font-weight: 600;
+    }
+
+    .neutral-change {
+      color: #9aa1ad;
+      font-weight: 600;
+    }
+
+    .change-value {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.85rem;
+      opacity: 0.8;
+    }
+
+    .change-percent {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .symbol-avatar {
+      display: inline-block;
+      width: 1.5rem;
+      height: 1.5rem;
+      line-height: 1.5rem;
+      border-radius: 50%;
+      background-color: rgba(43, 127, 255, 0.15);
+      border-color: #1E2D45;
+      color: #51A2FF;
+      text-align: center;
+      font-weight: 600;
+      margin-right: 0.5rem;
     }
   }
+}
+
+main {
+  max-width: 75%;
+  margin: 0 auto;
+}
+
+.no-data-message {
+  padding: 2rem;
+  background-color: #141C2E;
+  border: 0.125rem solid #1E2D45;
+  color: #62748E;
+  text-align: center;
 }
