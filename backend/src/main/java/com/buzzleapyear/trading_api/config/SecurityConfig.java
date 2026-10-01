@@ -32,43 +32,29 @@ public class SecurityConfig {
     }
 
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:8081"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("content-type", "Authorization"));
-        configuration.setExposedHeaders(Arrays.asList("Authorization"));
-        configuration.setAllowCredentials(false);
-        configuration.setMaxAge(3600L);
-        
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
-
-    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
+        http.cors(cors -> cors.disable())
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authorize -> authorize
                 // PUBLIC 
-                // - Allow all preflight requests (CORS)
-                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/v1/auth/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/auth/validate").permitAll()
                 
                 // RESTRICTED (RBAC)
-                // // TODO: require ADMIN role on /test endpoint 
-                // .requestMatchers("/api/v1/test").permitAll()
-                .requestMatchers("/actuator/**").permitAll()
-                // .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
-                // .requestMatchers("/api/v1/analyst/**").hasAnyRole("ADMIN", "ANALYST")
-                // .requestMatchers("/api/v1/compliance/**").hasAnyRole("ADMIN", "COMPLIANCE")
-                // .requestMatchers("/api/v1/instruments/**", "/api/v1/quote/**").authenticated()
-                // .requestMatchers("/api/v1/client/**").authenticated()
+                .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/v1/test").hasRole("ADMIN")
+                .requestMatchers("/api/v1/analyst/**").hasAnyRole("ADMIN", "ANALYST")
+                .requestMatchers("/api/v1/compliance/**").hasAnyRole("ADMIN", "COMPLIANCE")
+                .requestMatchers("/api/v1/instruments/**", "/api/v1/quote/**").authenticated()
+                .requestMatchers("/api/v1/client/**").hasAnyRole("ADMIN","CLIENT","ANALYST")
+                
+                // HEALTHCHECK (internal only - docker-compose, kubernetes, etc.)
+                .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
+                .requestMatchers("/actuator/**").denyAll()
+                
+                // ALL paths
                 .anyRequest().authenticated()
-                // .anyRequest().permitAll()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         

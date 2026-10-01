@@ -13,6 +13,11 @@ services:
       - "${HOST_APP_PORT}:6767"
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:6767/actuator/health"]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+      start_interval: 5s
     depends_on:
       - db
   db:
@@ -25,6 +30,13 @@ services:
       - postgres_data:/var/lib/postgresql/data
     ports:
      - "${POSTGRES_PORT}:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-d", "${POSTGRES_DB}", "-U"," ${POSTGRES_USER}"]
+      interval: 2m
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+      start_interval: 3s
 
 volumes:
   postgres_data:
