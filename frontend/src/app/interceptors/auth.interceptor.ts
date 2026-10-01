@@ -1,18 +1,23 @@
 import { Injectable } from '@angular/core';
 import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { AuthService } from '../services/auth.service';
+import { Router } from '@angular/router';
 
 /*
 this file automatically adds JWT token to all HTTP requests
 This interceptor runs on EVERY HTTP request made by the app
 It extracts the JWT token from localStorage and adds it to the Authorization header
- So instead of manually adding token to each request, it's done automatically
+So instead of manually adding token to each request, it's done automatically
+ 
+ Added functionality to handle 401 Unauthorized responses by
+ clearing the stored token and redirecting to login page
  */
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
 
-  constructor(private authService: AuthService) { }
+  constructor(private authService: AuthService, private router: Router) { }
 
   /**
    * Intercept method called for every HTTP request
@@ -40,6 +45,19 @@ export class AuthInterceptor implements HttpInterceptor {
 
     //Passes the request to the next interceptor in the chain
     //allows the request to continue to the server
-    return next.handle(req);
+    return next.handle(req).pipe(
+      catchError(error => {
+        //handles 401 unauthorized responses
+        if (error.status === 401) {
+          // Token is invalid/expired, log user out
+          console.warn('Token has expired or is invalid, logging you out');
+          this.authService.logout();
+          this.router.navigate(['/login']);
+    
+
+        }
+        return throwError(() => error);
+      })
+    );
   }
 }
