@@ -12,11 +12,14 @@ import com.buzzleapyear.trading_api.dto.QuoteResponseDto;
 import com.buzzleapyear.trading_api.dto.ListMarketEquitySummaryResponseDto;
 import java.util.List;
 import com.buzzleapyear.trading_api.entity.Instrument.AssetType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("api/v1/quote") 
 public class QuoteController {
     private final QuoteService quoteService;
+    private static final Logger logger = LoggerFactory.getLogger(QuoteController.class);
 
     public QuoteController(QuoteService quoteService) {
         this.quoteService = quoteService;
@@ -34,12 +37,27 @@ public class QuoteController {
             .orElse(ResponseEntity.notFound().build());
     }
 
-    // GET /api/v1/quote/market?assetType={assetType}&page={page}&size={size}
+    // GET /api/v1/quote/market?assetType={assetType}&market={market}&page={page}&size={size}
     @GetMapping("/market")
     public ResponseEntity<Page<ListMarketEquitySummaryResponseDto>> getLatestMarketEquityQuotes(
         @RequestParam AssetType assetType,
+        @RequestParam(required = false) String market,
         Pageable pageable
     ) {
-        return ResponseEntity.ok(quoteService.getLatestMarketEquityQuotes(assetType, pageable));
+        logger.info("Received request - assetType: {}, market: {}, page: {}, size: {}", assetType, market, pageable.getPageNumber(), pageable.getPageSize());
+        
+        String currencyCode = null;
+        if (market != null && !market.isEmpty()) {
+            currencyCode = switch (market.toUpperCase()) {
+                case "US" -> "USD";
+                case "UK" -> "GBP";
+                case "INDIA", "INDIAN" -> "INR";
+                default -> null;
+            };
+        }
+        
+        logger.info("Converted market: {} to currencyCode: {}", market, currencyCode);
+        
+        return ResponseEntity.ok(quoteService.getLatestMarketEquityQuotes(assetType, currencyCode, pageable));
     }
 }

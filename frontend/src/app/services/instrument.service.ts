@@ -11,7 +11,11 @@ export class InstrumentService {
 
   constructor(private http: HttpClient) {}
 
-  getInstruments(assetType: string = 'EQUITY', page: number = 0, size: number = 10): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}?assetType=${assetType}&page=${page}&size=${size}`);
+  getInstruments(assetType: string = 'EQUITY', market: string | null = null, page: number = 0, size: number = 10): Observable<any> {
+    let url = `${this.apiUrl}?assetType=${assetType}&page=${page}&size=${size}`;
+    if (market) {
+      url += `&market=${market}`;
+    }
+    return this.http.get<any>(url);
   }
 }

@@ -12,6 +12,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import com.buzzleapyear.trading_api.entity.Instrument;
 import com.buzzleapyear.trading_api.service.InstrumentService;
 import com.buzzleapyear.trading_api.repository.QuoteRepository;
+import com.buzzleapyear.trading_api.repository.InstrumentRepository;
 import com.buzzleapyear.trading_api.entity.Quote;
 import com.buzzleapyear.trading_api.dto.QuoteResponseDto;
 import java.util.Optional;
@@ -24,6 +25,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageImpl;
 import com.buzzleapyear.trading_api.dto.ListMarketEquitySummaryResponseDto;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /*
     Possible future work:
@@ -36,6 +39,7 @@ public class QuoteService {
     private final double MAX_VOLATILITY;
     private final double MIN_DRIFT;
     private final double MAX_DRIFT;
+    private static final Logger logger = LoggerFactory.getLogger(QuoteService.class);
 
     private static class InstrumentQuoteState {
         double volatility;
@@ -54,9 +58,11 @@ public class QuoteService {
 
     private final InstrumentService instrumentService;
     private final QuoteRepository quoteRepository;
+    private final InstrumentRepository instrumentRepository;
     private final Map<Long, InstrumentQuoteState> latestQuotes = new ConcurrentHashMap<>();
 
-    public QuoteService(InstrumentService instrumentService, QuoteRepository quoteRepository, 
+    public QuoteService(InstrumentService instrumentService, QuoteRepository quoteRepository,
+        InstrumentRepository instrumentRepository,
         @Value("${QUOTE_MIN_VOLATILITY:0.0}") double minVolatility, 
         @Value("${QUOTE_MAX_VOLATILITY:0.0}") double maxVolatility,
         @Value("${QUOTE_MIN_DRIFT:0.0}") double minDrift,
@@ -64,6 +70,7 @@ public class QuoteService {
     ) {
         this.instrumentService = instrumentService;
         this.quoteRepository = quoteRepository;
+        this.instrumentRepository = instrumentRepository;
         this.MIN_VOLATILITY = minVolatility;
         this.MAX_VOLATILITY = maxVolatility;
         this.MIN_DRIFT = minDrift;
@@ -217,10 +224,16 @@ public class QuoteService {
         ));
     }
 
-    public Page<ListMarketEquitySummaryResponseDto> getLatestMarketEquityQuotes(AssetType assetType, Pageable pageable) {
+    public Page<ListMarketEquitySummaryResponseDto> getLatestMarketEquityQuotes(AssetType assetType, String currencyCode, Pageable pageable) {
         List<ListMarketEquitySummaryResponseDto> responses = new ArrayList<>();
 
-        for (Instrument instrument : instrumentService.getAllInstrumentsByAssetTypeAsc(assetType)) {
+        List<Instrument> instruments = (currencyCode != null && !currencyCode.isEmpty())
+        ? instrumentRepository.findByAssetTypeAndCurrencyCodeOrderByInstrumentSymbolAsc(assetType, currencyCode)
+        : instrumentService.getAllInstrumentsByAssetTypeAsc(assetType);
+
+        logger.info("Retrieved {} instruments for assetType: {}, currencyCode: {}", instruments.size(), assetType, currencyCode);
+
+        for (Instrument instrument : instruments) {
             long instrumentId = instrument.getId();
             InstrumentQuoteState latestQuote = latestQuotes.get(instrumentId);
 
@@ -236,6 +249,8 @@ public class QuoteService {
                     ));
                 }
         }
+
+        logger.info("Returning {} responses after filtering by quote state", responses.size());
 
         int start = (int) pageable.getOffset();
         int end = Math.min(start + pageable.getPageSize(), responses.size());
