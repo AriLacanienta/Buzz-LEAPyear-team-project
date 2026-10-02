@@ -1,13 +1,7 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SearchListItemComponent } from '../search-list-item/search-list-item.component';
-
-export interface SearchResult {
-  symbol: string;
-  name: string;
-  price: number;
-  change: number;
-}
+import { InstrumentSearchResponse } from '@app/models/instrument-search-response.model';
 
 @Component({
   selector: 'app-search-list',
@@ -17,10 +11,10 @@ export interface SearchResult {
   styleUrl: './search-list.component.scss'
 })
 export class SearchListComponent {
-  @Input() results: SearchResult[] = [];
-  @Output() itemSelected = new EventEmitter<SearchResult>();
+  @Input() results: InstrumentSearchResponse[] = [];
+  @Output() itemSelected = new EventEmitter<InstrumentSearchResponse>();
 
-  selectItem(item: SearchResult): void {
+  selectItem(item: InstrumentSearchResponse): void {
     this.itemSelected.emit(item);
   }
 }

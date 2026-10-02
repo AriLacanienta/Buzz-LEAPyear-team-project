@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.buzzleapyear.trading_api.service.QuoteService;
 import com.buzzleapyear.trading_api.dto.QuoteResponseDto;
 import com.buzzleapyear.trading_api.dto.ListMarketEquitySummaryResponseDto;
+import com.buzzleapyear.trading_api.dto.InstrumentSearchResponseDto;
 import java.util.List;
 import com.buzzleapyear.trading_api.entity.Instrument.AssetType;
 
@@ -32,6 +33,15 @@ public class QuoteController {
         return quoteService.getLatestQuoteBySymbol(symbol)
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build());
+    }
+
+    // GET /api/v1/quote/search?q={query}&page={page}&size={size}
+    @GetMapping("/search")
+    public ResponseEntity<Page<InstrumentSearchResponseDto>> getInstrumentSearchResults(
+        @RequestParam("q") String query,
+        Pageable pageable
+    ) {
+        return ResponseEntity.ok(quoteService.getInstrumentSearchResults(query, pageable));
     }
 
     // GET /api/v1/quote/market?assetType={assetType}&page={page}&size={size}

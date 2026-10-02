@@ -16,40 +16,38 @@ $color-slate-600: #475569;
 .search-input {
   position: relative;
 
-  .material-icons {
+  .search-icon {
     position: absolute;
     left: 0.5rem;
     top: 50%;
     transform: translateY(-50%);
-    font-size: 1.25rem;
     color: #64748b;
     pointer-events: none;
   }
 
-  .search-icon {
-    left: 0.5rem;
-  }
-
   .search-clear-btn {
     position: absolute;
-    right: 0;
+    right: 0.5rem;
     top: 0;
     height: 100%;
     background: none;
     border: none;
     cursor: pointer;
-    padding: 0 0.5rem;
+    padding: 0;
     display: flex;
     align-items: center;
     justify-content: center;
+    color: #64748b;
+    transition: color $transition-duration $transition-timing;
+
+    &:hover {
+      color: #cbd5e1;
+    }
   }
 
-  .close-icon {
-    right: 0;
-    left: auto;
-    position: relative;
-    transform: none;
-    top: auto;
+  svg {
+    width: 12px;
+    height: 12px;
   }
 }
 
@@ -69,11 +67,11 @@ $color-slate-600: #475569;
   font-family: Inter, sans-serif;
 
   &::placeholder {
-    color: #64748b;
+    color: #475569;
   }
 
   &:focus {
     outline: none;
-    border-color: #3080ff99;
+    border-color: rgba(59, 130, 246, 0.6);
   }
 }

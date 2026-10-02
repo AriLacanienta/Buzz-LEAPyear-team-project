@@ -1,12 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-export interface SearchResult {
-  symbol: string;
-  name: string;
-  price: number;
-  change: number;
-}
+import { InstrumentSearchResponse } from '@app/models/instrument-search-response.model';
 
 @Component({
   selector: 'app-search-list-item',
@@ -16,5 +10,5 @@ export interface SearchResult {
   styleUrl: './search-list-item.component.scss'
 })
 export class SearchListItemComponent {
-  @Input() item!: SearchResult;
+  @Input() item!: InstrumentSearchResponse;
 }

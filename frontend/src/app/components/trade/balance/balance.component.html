@@ -1,10 +1,10 @@
 <div class="balance-container">
   <div>
     <h2>CASH BALANCE</h2>
-    <p>{{ cashBalance | currency: currencyType: 'symbol': '1.2-2' }}</p>
+    <p>{{ balance?.cashAvailable | currency: balance?.currencyType: 'symbol': '1.2-2' }}</p>
   </div>
   <div>
     <h2>PORTFOLIO VALUE</h2>
-    <p>{{ portfolioValue | currency: currencyType: 'symbol': '1.2-2' }}</p>
+    <p>{{ balance?.portfolioValue | currency: balance?.currencyType: 'symbol': '1.2-2' }}</p>
   </div>
 </div>

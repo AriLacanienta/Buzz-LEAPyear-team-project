@@ -12,6 +12,7 @@ import { CurrentHoldingsComponent } from '@app/components/trade/current-holdings
   styleUrls: ['./trade.component.scss']
 })
 export class TradeComponent {
+  
   constructor() {
     console.log('TradeComponent initialized');
   }

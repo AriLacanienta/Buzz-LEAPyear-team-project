@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { SearchResult } from '../search-list/search-list.component';
+import { InstrumentSearchResponse } from '@app/models/instrument-search-response.model';
 
 @Component({
   selector: 'app-search-result-detail',
@@ -10,5 +10,5 @@ import { SearchResult } from '../search-list/search-list.component';
   styleUrl: './search-result-detail.component.scss'
 })
 export class SearchResultDetailComponent {
-  @Input() selectedResult: SearchResult | null = null;
+  @Input() selectedResult: InstrumentSearchResponse | null = null;
 }
