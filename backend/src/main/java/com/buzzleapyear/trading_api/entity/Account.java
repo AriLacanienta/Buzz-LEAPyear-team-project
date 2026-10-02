@@ -1,6 +1,7 @@
 package com.buzzleapyear.trading_api.entity;
 
 import jakarta.persistence.*;
+import java.math.BigDecimal;
 import java.util.List;
 
 @Entity
@@ -22,6 +23,12 @@ public class Account {
     @Column(name = "risk_profile", nullable = false)
     @Enumerated(EnumType.STRING)
     private RiskProfile riskProfile = RiskProfile.MODERATE;
+    
+    @Column(name = "cash_available", nullable = false)
+    private BigDecimal cashAvailable = BigDecimal.ZERO;
+    
+    @Column(name = "cash_reserved", nullable = false)
+    private BigDecimal cashReserved = BigDecimal.ZERO;
     
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Subscription> subscriptions;
@@ -47,6 +54,12 @@ public class Account {
     
     public RiskProfile getRiskProfile() { return riskProfile; }
     public void setRiskProfile(RiskProfile riskProfile) { this.riskProfile = riskProfile; }
+    
+    public BigDecimal getCashAvailable() { return cashAvailable; }
+    public void setCashAvailable(BigDecimal cashAvailable) { this.cashAvailable = cashAvailable; }
+    
+    public BigDecimal getCashReserved() { return cashReserved; }
+    public void setCashReserved(BigDecimal cashReserved) { this.cashReserved = cashReserved; }
     
     public List<Subscription> getSubscriptions() { return subscriptions; }
     public void setSubscriptions(List<Subscription> subscriptions) { this.subscriptions = subscriptions; }
