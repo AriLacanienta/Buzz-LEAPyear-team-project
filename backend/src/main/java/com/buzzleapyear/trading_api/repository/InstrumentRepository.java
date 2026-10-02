@@ -12,4 +12,6 @@ public interface InstrumentRepository extends JpaRepository<Instrument, Long> {
     Optional<Instrument> findByInstrumentSymbol(String symbol);
 
     List<Instrument> findByAssetTypeOrderByInstrumentSymbolAsc(AssetType assetType);
+
+    List<Instrument> findByAssetTypeAndCurrencyCodeOrderByInstrumentSymbolAsc(AssetType assetType, String currencyCode);
 }

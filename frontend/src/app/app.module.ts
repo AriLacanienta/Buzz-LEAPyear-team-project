@@ -17,6 +17,7 @@ import { authGuard } from './auth.guard';
 import { AccountComponent } from './pages/account/account.component';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { MatTableModule } from '@angular/material/table';
+import { PortfolioHoldingCardComponent } from './components/portfolio-holding-card/portfolio-holding-card.component';
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -47,7 +48,8 @@ const routes: Routes = [
     CommonModule,
     HttpClientModule,
     RouterModule.forRoot(routes),
-    MatTableModule
+    MatTableModule,
+    PortfolioHoldingCardComponent
   ],
   providers: [
     // Register HTTP interceptor to add JWT token to all requests

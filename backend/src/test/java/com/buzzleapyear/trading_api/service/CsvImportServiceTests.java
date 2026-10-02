@@ -1,7 +1,25 @@
 package com.buzzleapyear.trading_api.service;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.buzzleapyear.trading_api.entity.Account;
@@ -12,23 +30,10 @@ import com.buzzleapyear.trading_api.entity.TradeOrder;
 import com.buzzleapyear.trading_api.entity.TradeOrder.OrderSide;
 import com.buzzleapyear.trading_api.entity.User;
 import com.buzzleapyear.trading_api.repository.InstrumentRepository;
+import com.buzzleapyear.trading_api.repository.HoldingRepository;
 import com.buzzleapyear.trading_api.service.ImportCSVService.LineValues;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
 import jakarta.persistence.EntityManager;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-
-import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 class CsvImportServiceTests {
@@ -38,10 +43,13 @@ class CsvImportServiceTests {
 	@Mock
 	private InstrumentRepository mockInstrumentRepository;
 
+    @Mock
+	private HoldingRepository mockHoldingRepository;
+
     @BeforeEach
     void setUp(){
     	MockitoAnnotations.openMocks(this);
-        testService = new ImportCSVService(mockInstrumentRepository);
+        testService = new ImportCSVService(mockInstrumentRepository, mockHoldingRepository);
     }
 
     @Nested
@@ -108,7 +116,7 @@ class CsvImportServiceTests {
         @BeforeEach
         void setUp() {
             MockitoAnnotations.openMocks(this);
-            service = new ImportCSVService(mockInstrumentRepository);
+            service = new ImportCSVService(mockInstrumentRepository, mockHoldingRepository);
             // Use reflection to set the mocked EntityManager
             try {
                 var field = ImportCSVService.class.getDeclaredField("em");
