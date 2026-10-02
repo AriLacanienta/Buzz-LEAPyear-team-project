@@ -1,0 +1,37 @@
+<mat-card class="holding-card" *ngIf="index < 6">
+  <mat-card-content>
+    <div class="card-header">
+      <div class="symbol-info">
+        <div class="symbol">{{ holding.instrumentSymbol }}</div>
+        <div class="name">{{ holding.instrumentName }}</div>
+      </div>
+      <span class="symbol-icon" [ngStyle]="getSymbolStyle(holding.instrumentSymbol)">
+        {{ getSymbolFirstLetter(holding.instrumentSymbol) }}
+      </span>
+    </div>
+
+    <!-- Total Value -->
+    <div class="total-value">
+      ${{ formatTotalValue(holding.totalValue) }}
+    </div>
+
+    <!-- Quantity and Price Info -->
+    <div class="quantity-info">
+      <span class="quantity">{{ holding.quantity.toFixed(0) }} shares</span>
+      <span class="current-price">${{ formatPrice(holding.currentPrice) }}</span>
+    </div>
+
+    <!-- Change Info -->
+    <div class="change-section" [ngClass]="getChangePercentClass(holding.changePercent)">
+      <div class="change-amount-group">
+        <span class="sign">{{ holding.change >= 0 ? '+' : '' }}</span>
+        <span class="change-amount">${{ formatPrice(Math.abs(holding.change)) }}</span>
+      </div>
+      <div class="change-percent-group">
+        <span class="sign">{{ holding.change >= 0 ? '+' : '' }}</span>
+        <span class="change-percent">{{ formatTotalValue(holding.changePercent) }}%</span>
+        <span class="arrow">{{ getChangeArrow(holding.changePercent) }}</span>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>
