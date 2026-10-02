@@ -8,7 +8,6 @@ import java.util.List;
 @Table(name = "users", uniqueConstraints = {
     @UniqueConstraint(columnNames = "username"),
     @UniqueConstraint(columnNames = "email"),
-    @UniqueConstraint(columnNames = {"user_first_name", "user_last_name"})
 })
 public class User {
     

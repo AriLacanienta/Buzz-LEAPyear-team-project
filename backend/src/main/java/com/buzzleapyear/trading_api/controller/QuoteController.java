@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @RestController
-@RequestMapping("api/v1/quote") 
+@RequestMapping("/api/v1/quote") 
 public class QuoteController {
     private final QuoteService quoteService;
     private static final Logger logger = LoggerFactory.getLogger(QuoteController.class);
