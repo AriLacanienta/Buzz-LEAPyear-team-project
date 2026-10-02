@@ -21,18 +21,18 @@
         <input type="number" id="quantity" name="quantity" class="quantity-input" min="0" step="1" placeholder="0" (input)="onQuantityInput($event)" />
     </div>
 
-    <div class="price-summary">
+    <div *ngIf="selectedResult" class="price-summary">
         <div class="price-summary-row">
             <span class="price-label">Indicative price</span>
-            <span class="price-value">$418.32</span>
+            <span class="price-value">${{ selectedResult.currentPrice.toFixed(2) }}</span>
         </div>
         <div class="price-summary-row">
             <span class="price-label">Quantity</span>
-            <span class="price-value">5</span>
+            <span class="price-value">{{ quantity }}</span>
         </div>
         <div class="price-summary-row total">
             <span class="price-label">Estimated total</span>
-            <span class="price-value">$2,091.60</span>
+            <span class="price-value">$9999.99</span>
         </div>
     </div>
 
