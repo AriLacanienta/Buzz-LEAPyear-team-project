@@ -4,7 +4,7 @@
         <span>{{ item.instrumentName }}</span>
     </div>
     <div>
-        <span>${{ item.currentPrice ? item.currentPrice.toFixed(2) : 'N/A' }}</span>
-        <span [class.negative]="(item.percentChange ?? 0) < 0">{{ (item.percentChange ?? 0) > 0 ? '+' : '' }}{{ (item.percentChange ?? 0).toFixed(2) }}%</span>
+        <span>${{ item.currentPrice.toFixed(2) }}</span>
+        <span [class.negative]="item.percentChange < 0">{{ item.percentChange > 0 ? '+' : '' }}{{ item.percentChange.toFixed(2) }}%</span>
     </div>
 </button>

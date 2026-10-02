@@ -8,6 +8,7 @@ import { SearchListComponent } from '../search-list/search-list.component';
 import { InstrumentSearchResponse } from '@app/models/instrument-search-response.model';
 
 const POLL_INTERVAL_MS = 3000;
+const DEBOUNCE_TIME_MS = 500;
 
 @Component({
   selector: 'app-search',
@@ -20,6 +21,7 @@ export class SearchComponent implements OnInit {
   @Output() itemSelected = new EventEmitter<InstrumentSearchResponse | null>();
 
   private searchTerm$ = new BehaviorSubject<string>('');
+  private selectedItem$ = new BehaviorSubject<InstrumentSearchResponse | null>(null);
   private focused$ = new BehaviorSubject<boolean>(false);
   searchInput: string = '';
   searchResults: InstrumentSearchResponse[] = [];
@@ -31,7 +33,7 @@ export class SearchComponent implements OnInit {
   ngOnInit(): void {
     const term$ = this.searchTerm$.pipe(
       map(term => term.trim()),
-      debounceTime(500),
+      debounceTime(DEBOUNCE_TIME_MS),
       distinctUntilChanged()
     );
 
@@ -41,10 +43,20 @@ export class SearchComponent implements OnInit {
       ),
       takeUntilDestroyed(this.destroyRef)
     ).subscribe(results => this.searchResults = results);
+
+    this.selectedItem$.pipe(
+      switchMap(item =>
+        item ? timer(POLL_INTERVAL_MS, POLL_INTERVAL_MS).pipe(
+          switchMap(() => this.instrumentService.getQuote(item.instrumentSymbol).pipe(catchError(() => EMPTY))),
+          map(quote => ({ ...item, currentPrice: quote.price, percentChange: quote.changePercent }))
+        ) : EMPTY
+      ),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(updated => this.itemSelected.emit(updated));
   }
 
   private fetchResults(term: string): Observable<InstrumentSearchResponse[]> {
-    const request$: Observable<InstrumentSearchResponse[]> = term === '' ? of([]) : this.instrumentService.searchInstruments(term);
+    const request$: Observable<InstrumentSearchResponse[]> = this.instrumentService.searchInstruments(term);
 
     return request$.pipe(
       catchError(() => of(this.searchResults))
@@ -70,6 +82,7 @@ export class SearchComponent implements OnInit {
 
   onSearchClear(): void {
     this.isItemSelected = false;
+    this.selectedItem$.next(null);
     this.itemSelected.emit(null);
     this.searchInput = '';
     this.searchResults = [];
@@ -78,6 +91,7 @@ export class SearchComponent implements OnInit {
 
   onResultSelected(item: InstrumentSearchResponse): void {
     this.itemSelected.emit(item);
+    this.selectedItem$.next(item);
     this.searchInput = '';
     this.searchTerm$.next('');
     this.searchResults = [];
