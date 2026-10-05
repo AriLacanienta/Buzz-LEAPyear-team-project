@@ -64,4 +64,16 @@ public class Instrument {
     public enum AssetType {
         EQUITY, BOND, FUND, CASH, CRYPTO, ETF
     }
+
+    public String getMarket() {
+    if (currencyCode == null) {
+        return "UNKNOWN";
+    }
+    return switch (currencyCode) {
+        case "USD" -> "US";
+        case "GBP" -> "UK";
+        case "INR" -> "India";
+        default -> currencyCode;
+    };
+}
 }

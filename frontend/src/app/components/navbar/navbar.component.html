@@ -1,6 +1,7 @@
 <header>
   <div class="header-content">
     <nav class="tabs">
+      <button class="logout-btn" (click)="logout()" title="Logout">Logout</button>
       <a routerLink="/account" routerLinkActive="active" class="account-tab">
         <img src="assets/images/joanna.jpg" alt="Account"/>
         <span>{{ accountName$ | async }}</span>

@@ -1,0 +1,135 @@
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #0F1520;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.login-box {
+  background: #1E2D45;
+  padding: 40px;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  width: 100%;
+  max-width: 400px;
+  border: 1px solid #3B82F6;
+
+  h1 {
+    text-align: center;
+    color: #3B82F6;
+    margin-bottom: 30px;
+    font-size: 28px;
+    font-weight: 600;
+  }
+
+  .error-alert {
+    background-color: #1E2D45;
+    color: #dc3545;
+    padding: 12px 16px;
+    border-radius: 4px;
+    border: 1px solid #dc3545;
+    margin-bottom: 20px;
+    font-size: 14px;
+  }
+
+  form {
+    .form-group {
+      margin-bottom: 20px;
+
+      label {
+        display: block;
+        margin-bottom: 8px;
+        color: #9aa1ad;
+        font-weight: 500;
+        font-size: 14px;
+      }
+
+      .form-control {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #3B82F6;
+        border-radius: 5px;
+        font-size: 14px;
+        background-color: #0F1520;
+        color: #9aa1ad;
+        transition: border-color 0.3s;
+
+        &:focus {
+          outline: none;
+          border-color: #3B82F6;
+          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        &.is-invalid {
+          border-color: #dc3545;
+        }
+      }
+
+      .invalid-feedback {
+        color: #dc3545;
+        font-size: 12px;
+        margin-top: 5px;
+        display: block;
+      }
+    }
+  }
+
+  .btn-login {
+    width: 100%;
+    padding: 12px;
+    background-color: #3B82F6;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s;
+
+    &:hover:not(:disabled) {
+      background-color: #2563eb;
+    }
+
+    &:disabled {
+      background-color: #555;
+      cursor: not-allowed;
+    }
+  }
+
+  .forgot-password {
+    text-align: center;
+    margin-top: 15px;
+
+    a {
+      color: #3B82F6;
+      text-decoration: none;
+      font-size: 14px;
+      transition: color 0.3s;
+
+      &:hover {
+        color: #60a5fa;
+        text-decoration: underline;
+      }
+    }
+  }
+
+  .register-link {
+    text-align: center;
+    margin-top: 20px;
+    color: #9aa1ad;
+    font-size: 14px;
+
+    .link {
+      color: #3B82F6;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}

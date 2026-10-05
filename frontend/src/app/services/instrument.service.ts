@@ -14,13 +14,9 @@ export interface QuoteResponse {
   providedIn: 'root'
 })
 export class InstrumentService {
-  private apiUrl = `${environment.apiUrl}/api/v1/quote`;
+  private apiUrl = `${environment.apiUrl}/quote`;
 
   constructor(private http: HttpClient) {}
-
-  getInstruments(assetType: string = 'EQUITY', page: number = 0, size: number = 10): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/market?assetType=${assetType}&page=${page}&size=${size}`);
-  }
   
   searchInstruments(query: string): Observable<InstrumentSearchResponse[]> {
     const params = new HttpParams().set('q', query);
@@ -31,5 +27,13 @@ export class InstrumentService {
 
   getQuote(symbol: string): Observable<QuoteResponse> {
     return this.http.get<QuoteResponse>(`${this.apiUrl}/${encodeURIComponent(symbol)}`);
+  }
+
+  getInstruments(assetType: string = 'EQUITY', market: string | null = null, page: number = 0, size: number = 10): Observable<any> {
+    let url = `${this.apiUrl}/market?assetType=${assetType}&page=${page}&size=${size}`;
+    if (market) {
+      url += `&market=${market}`;
+    }
+    return this.http.get<any>(url);
   }
 }

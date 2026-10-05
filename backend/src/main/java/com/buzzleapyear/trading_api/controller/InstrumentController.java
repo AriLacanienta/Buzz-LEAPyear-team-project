@@ -1,23 +1,21 @@
 package com.buzzleapyear.trading_api.controller;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestMapping;
+import java.util.Optional;
+
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import com.buzzleapyear.trading_api.service.InstrumentService;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.buzzleapyear.trading_api.dto.InstrumentDetailsResponseDto;
 import com.buzzleapyear.trading_api.entity.Instrument;
-import org.springframework.http.ResponseEntity;
 import com.buzzleapyear.trading_api.mapper.InstrumentMapper;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
-import java.util.Optional;
-import java.util.List;
+import com.buzzleapyear.trading_api.service.InstrumentService;
 
 
 
 @RestController
-@RequestMapping("api/v1/instruments") 
+@RequestMapping("/api/v1/instruments") 
 public class InstrumentController {
     private final InstrumentService instrumentService;
     private final InstrumentMapper instrumentMapper;
