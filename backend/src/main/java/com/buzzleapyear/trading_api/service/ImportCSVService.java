@@ -19,6 +19,8 @@ import com.buzzleapyear.trading_api.entity.Client;
 import com.buzzleapyear.trading_api.entity.Holding;
 import com.buzzleapyear.trading_api.entity.Instrument;
 import com.buzzleapyear.trading_api.entity.Instrument.AssetType;
+import com.buzzleapyear.trading_api.entity.TradeOrderStatus.OrderStatus;
+import com.buzzleapyear.trading_api.entity.TradeOrderStatus;
 import com.buzzleapyear.trading_api.entity.Quote;
 import com.buzzleapyear.trading_api.entity.TradeOrder;
 import com.buzzleapyear.trading_api.entity.TradeOrder.OrderSide;
@@ -124,8 +126,8 @@ public class ImportCSVService {
                     Account account = accountCache.get(accountKey);
                     if (account == null){
                         account = new Account();
-                        account.setAccountName(values.client_id + "_Account");
                         account.setClient(client); // Set the Client relationship
+                        account.setAccountName(values.client_id + "_Account");
                         em.persist(account);
                         em.flush();
                         accountCache.put(accountKey, account);
@@ -143,6 +145,13 @@ public class ImportCSVService {
                     em.persist(tradeOrder);
                     em.flush();
 
+                    // Step 6: Create TradeOrderStatus (depends on tradeOrder)
+                    TradeOrderStatus status = new TradeOrderStatus();
+                    status.setTradeOrder(tradeOrder); // Set TradeOrder relationship
+                    status.setTimeUpdated(values.trade_date);
+                    status.setStatus(OrderStatus.FILLED);
+                    em.persist(status);
+                    em.flush();
                     // Step 6: update Holdings
                     Holding holding = holdingRepository.findByAccountIdAndInstrumentId(account.getId(), instrument.getId()).orElse(null);
                     if (holding == null){
