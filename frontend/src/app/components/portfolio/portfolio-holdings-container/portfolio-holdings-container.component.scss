@@ -1,15 +1,20 @@
+$color-white: #ffffff;
+$radius-sm: 0.5rem;
+$spacing-md: 1.25rem;
+$spacing-lg: 2.5rem;
+
 .loading-state,
 .empty-state {
-  padding: 2.5rem 1.25rem;
+  padding: $spacing-lg $spacing-md;
   text-align: center;
-  border-radius: 0.5rem;
-  color: #FFFFFF;
+  border-radius: $radius-sm;
+  color: $color-white;
 }
 
 .holdings-column {
   display: flex;
   flex-direction: row;
-  gap: 1.25rem;
+  gap: $spacing-md;
   flex-wrap: wrap;
   max-width: 100%;
 }

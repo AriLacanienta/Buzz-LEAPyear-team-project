@@ -1,6 +1,11 @@
+$color-white: #ffffff;
+$font-weight-semibold: 600;
+$text-lg: 1.5rem;
+$spacing-xs: 0.5rem;
+
 h2 {
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-  color: #FFFFFF;
+  font-size: $text-lg;
+  font-weight: $font-weight-semibold;
+  margin-bottom: $spacing-xs;
+  color: $color-white;
 }

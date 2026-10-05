@@ -1,14 +1,19 @@
+$spacing-md: 1rem;
+$spacing-xl: 1.875rem;
+$spacing-lg: 1.25rem;
+$max-width: 75%;
+
 main {
-  padding: 1.875rem 1.25rem;
-  max-width: 75%;
+  padding: $spacing-xl $spacing-lg;
+  max-width: $max-width;
   margin: 0 auto;
 }
 
 .portfolio-section {
-  margin-bottom: 1rem;
+  margin-bottom: $spacing-md;
 }
 
 .market-section {
-  margin-bottom: 1rem;
+  margin-bottom: $spacing-md;
 }
 

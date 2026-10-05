@@ -1,80 +1,100 @@
+$bg-darker: #141c2e;
+$border-dark: #1e2d45;
+$color-white: #ffffff;
+$color-slate-400: #90a1b9;
+$color-slate-500: #62748e;
+$color-slate-600: #9aa1ad;
+$color-success: #10b981;
+$color-error: #ef4444;
+$color-primary-light: #51a2ff;
+$color-primary-light-bg: rgba(43, 127, 255, 0.15);
+$font-weight-bold: 700;
+$font-weight-semibold: 600;
+$text-xs: 0.75rem;
+$text-xs-lg: 0.8rem;
+$text-sm: 0.85rem;
+$spacing-xs-half: 0.25rem;
+$spacing-sm: 0.5rem;
+$spacing-md: 2rem;
+$avatar-size: 1.5rem;
+
 table {
-  background-color: #141C2E;
+  background-color: $bg-darker;
   border: none;
   width: 100%;
   
   th {
-    color: #62748E;
-    font-weight: 700;
-    border-bottom: 0.0625rem solid #1E2D45;
+    color: $color-slate-500;
+    font-weight: $font-weight-bold;
+    border-bottom: 0.0625rem solid $border-dark;
   }
   
   td {
-    color: #90A1B9;
-    border-bottom: 0.0625rem solid #1E2D45;
+    color: $color-slate-400;
+    border-bottom: 0.0625rem solid $border-dark;
   }
 
   .cdk-column-instrumentSymbol {
-    color: #FFFFFF;
-    font-weight: 700;
+    color: $color-white;
+    font-weight: $font-weight-bold;
     font-family: 'DM Mono', monospace;
   }
 
   .cdk-column-currentPrice {
-    color: #FFFFFF;
-    font-weight: 600;
+    color: $color-white;
+    font-weight: $font-weight-semibold;
   }
 
   .positive-change {
-    color: #10B981;
-    font-weight: 600;
+    color: $color-success;
+    font-weight: $font-weight-semibold;
   }
 
   .negative-change {
-    color: #EF4444;
-    font-weight: 600;
+    color: $color-error;
+    font-weight: $font-weight-semibold;
   }
 
   .neutral-change {
-    color: #9aa1ad;
-    font-weight: 600;
+    color: $color-slate-600;
+    font-weight: $font-weight-semibold;
   }
 
   .change-value {
     display: flex;
     align-items: center;
-    gap: 0.25rem;
-    font-size: 0.85rem;
+    gap: $spacing-xs-half;
+    font-size: $text-sm;
     opacity: 0.8;
   }
 
   .change-percent {
     display: flex;
     align-items: center;
-    gap: 0.25rem;
-    font-size: 0.8rem;
-    font-weight: 600;
+    gap: $spacing-xs-half;
+    font-size: $text-xs-lg;
+    font-weight: $font-weight-semibold;
   }
 
   .symbol-avatar {
     display: inline-block;
-    width: 1.5rem;
-    height: 1.5rem;
-    line-height: 1.5rem;
+    width: $avatar-size;
+    height: $avatar-size;
+    line-height: $avatar-size;
     border-radius: 50%;
-    background-color: rgba(43, 127, 255, 0.15);
-    border-color: #1E2D45;
-    color: #51A2FF;
+    background-color: $color-primary-light-bg;
+    border-color: $border-dark;
+    color: $color-primary-light;
     text-align: center;
-    font-weight: 600;
-    margin-right: 0.5rem;
+    font-weight: $font-weight-semibold;
+    margin-right: $spacing-sm;
   }
 }
 
 .no-data-message {
-  padding: 2rem;
-  background-color: #141C2E;
-  border: 0.125rem solid #1E2D45;
-  color: #62748E;
+  padding: $spacing-md;
+  background-color: $bg-darker;
+  border: 0.125rem solid $border-dark;
+  color: $color-slate-500;
   text-align: center;
 }

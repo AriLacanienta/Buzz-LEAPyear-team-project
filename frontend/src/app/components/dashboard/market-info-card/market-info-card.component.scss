@@ -1,8 +1,13 @@
+$bg-dark: #0f1520;
+$border-dark: #1e2d45;
+$radius-lg: 0.75rem;
+$spacing-md: 1rem;
+
 .market-info {
-  margin-bottom: 1rem;
-  border-radius: 0.75rem;
-  border: 0.1rem solid #1E2D45;
-  background: #0F1520;
+  margin-bottom: $spacing-md;
+  border-radius: $radius-lg;
+  border: 0.1rem solid $border-dark;
+  background: $bg-dark;
   width: 13.5rem;
   height: 12rem;
 }

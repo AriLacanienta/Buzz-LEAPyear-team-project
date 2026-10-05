@@ -1,17 +1,23 @@
+$border-dark: #1e2d45;
+$bg-darker: #141c2e;
+$radius-lg: 1rem;
+$spacing-md: 1rem;
+$max-width: 75%;
+
 .container {
   margin: 0 auto;
 }
 
 .instruments-table {
-  border: 0.125rem solid #1E2D45;
-  margin-top: 1rem;
-  border-radius: 1rem;
+  border: 0.125rem solid $border-dark;
+  margin-top: $spacing-md;
+  border-radius: $radius-lg;
   overflow: hidden;
-  background-color: #141C2E;
+  background-color: $bg-darker;
 }
 
 main {
-  max-width: 75%;
+  max-width: $max-width;
   margin: 0 auto;
 }
 
