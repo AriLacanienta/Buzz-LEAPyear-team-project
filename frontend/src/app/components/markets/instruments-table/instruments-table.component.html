@@ -1,3 +1,7 @@
+<div class="table-header">
+  <ng-content select="[table-header]"></ng-content>
+</div>
+
 <table mat-table [dataSource]="instruments" *ngIf="instruments.length > 0">
 
   <ng-container matColumnDef="instrumentSymbol">

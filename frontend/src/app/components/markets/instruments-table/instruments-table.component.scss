@@ -1,4 +1,5 @@
-$bg-darker: #141c2e;
+$bg-dark: #1e2d45;
+$bg-darker: #0f1520;
 $border-dark: #1e2d45;
 $color-white: #ffffff;
 $color-slate-400: #90a1b9;
@@ -15,8 +16,15 @@ $text-xs-lg: 0.8rem;
 $text-sm: 0.85rem;
 $spacing-xs-half: 0.25rem;
 $spacing-sm: 0.5rem;
-$spacing-md: 2rem;
+$spacing-md: 1.25rem;
+$spacing-lg: 2rem;
 $avatar-size: 1.5rem;
+
+.table-header {
+  padding: $spacing-md;
+  background-color: $bg-darker;
+  border-bottom: 0.0625rem solid $border-dark;
+}
 
 table {
   background-color: $bg-darker;
@@ -92,7 +100,7 @@ table {
 }
 
 .no-data-message {
-  padding: $spacing-md;
+  padding: $spacing-lg;
   background-color: $bg-darker;
   border: 0.125rem solid $border-dark;
   color: $color-slate-500;

@@ -1,23 +1,23 @@
 <div class="container">
   <main>
     <section class="markets-content">
-      <app-asset-type-filter 
-        [selectedAssetType]="selectedAssetType"
-        [assetTypes]="assetTypes"
-        (assetTypeChange)="onAssetTypeChange($event)">
-      </app-asset-type-filter>
-      
+      <app-market-tabs
+        [markets]="markets"
+        [selectedMarket]="selectedMarket"
+        (marketChange)="onMarketChange($event)">
+      </app-market-tabs>
       <div class="instruments-table">
-        <app-market-tabs
-          [selectedMarket]="selectedMarket"
-          [markets]="markets"
-          (marketChange)="onMarketChange($event)">
-        </app-market-tabs>
-        
         <app-instruments-table
           [instruments]="instruments"
           [selectedMarket]="selectedMarket"
           [displayedColumns]="displayedColumns">
+          <div table-header>
+            <app-asset-type-filter 
+              [selectedAssetType]="selectedAssetType"
+              [assetTypes]="assetTypes"
+              (assetTypeChange)="onAssetTypeChange($event)">
+            </app-asset-type-filter>
+          </div>
         </app-instruments-table>
       </div>
     </section>
