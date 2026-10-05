@@ -25,6 +25,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageImpl;
 import com.buzzleapyear.trading_api.dto.ListMarketEquitySummaryResponseDto;
+import com.buzzleapyear.trading_api.dto.InstrumentSearchResponseDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -222,6 +223,33 @@ public class QuoteService {
             state.marketCap,
             state.timestamp
         ));
+    }
+
+    public Page<InstrumentSearchResponseDto> getInstrumentSearchResults(String query, Pageable pageable) {
+        List<InstrumentSearchResponseDto> responses = new ArrayList<>();
+
+        for (Instrument instrument : instrumentService.searchInstrumentsByQuery(query)) {
+            long instrumentId = instrument.getId();
+            InstrumentQuoteState latestQuote = latestQuotes.get(instrumentId);
+
+            if (latestQuote != null) {
+                responses.add(new InstrumentSearchResponseDto(
+                    instrument.getInstrumentSymbol(),
+                    instrument.getInstrumentName(),
+                    instrument.getAssetType().name(),
+                    instrument.getCurrencyCode(),
+                    latestQuote.currentPrice,
+                    latestQuote.changePercent
+                ));
+            }
+        }
+
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), responses.size());
+
+        List<InstrumentSearchResponseDto> pagedResponses = start >= responses.size() ? List.of() : responses.subList(start, end);
+
+        return new PageImpl<>(pagedResponses, pageable, responses.size());
     }
 
     public Page<ListMarketEquitySummaryResponseDto> getLatestMarketEquityQuotes(AssetType assetType, String currencyCode, Pageable pageable) {

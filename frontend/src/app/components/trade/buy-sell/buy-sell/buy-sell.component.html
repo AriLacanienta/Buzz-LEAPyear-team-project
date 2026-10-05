@@ -1,0 +1,55 @@
+<div class="buy-sell-container">
+    <h2 class="header">Place an Order</h2>
+
+    <div class="toggle">
+        <button class="buy-btn" [class.selected]="isBuy" (click)="toggleOrderType('buy')">Buy</button>
+        <button class="sell-btn" [class.selected]="!isBuy" (click)="toggleOrderType('sell')">Sell</button>
+    </div>
+
+    <div class="tag">
+        <button [class.selected]="selectedTag === 'All'" (click)="selectTag('All')">All</button>
+        <button [class.selected]="selectedTag === 'Stock'" (click)="selectTag('Stock')">Stock</button>
+        <button [class.selected]="selectedTag === 'Crypto'" (click)="selectTag('Crypto')">Crypto</button>
+    </div>
+
+    <app-search (itemSelected)="onSearchItemSelected($event)"></app-search>
+
+    <app-search-result-detail [selectedResult]="selectedResult"></app-search-result-detail>
+
+    <div class="quantity-container">
+        <label for="quantity">QUANTITY / SHARES</label>
+        <input type="number" id="quantity" name="quantity" class="quantity-input" min="0" step="1" placeholder="0" (input)="onQuantityInput($event)" />
+    </div>
+
+    <div *ngIf="selectedResult" class="price-summary">
+        <div class="price-summary-row">
+            <span class="price-label">Indicative price</span>
+            <span class="price-value">${{ selectedResult.currentPrice.toFixed(2) }}</span>
+        </div>
+        <div class="price-summary-row">
+            <span class="price-label">Quantity</span>
+            <span class="price-value">{{ quantity }}</span>
+        </div>
+        <div class="price-summary-row total">
+            <span class="price-label">Estimated total</span>
+            <span class="price-value">$9999.99</span>
+        </div>
+    </div>
+
+    <div class="buying-power">
+        <span class="buying-power-label">{{ isBuy ? 'Available buying power' : 'Cash after sale' }}</span>
+        <span class="buying-power-value">$42,180.00</span>
+    </div>
+
+    <div *ngIf="errorMessage" role="alert" class="error-container">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <circle cx="6" cy="6" r="5.5" stroke="currentColor" stroke-width="1"></circle>
+            <path d="M6 3.5V6.5M6 8.5V8.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"></path>
+        </svg>
+        <span>{{ errorMessage }}</span>
+    </div>
+
+    <button class="place-order-btn" [class.sell]="!isBuy" (click)="onPlaceOrder()">
+        {{ isBuy ? 'Review & Submit Buy' : 'Review & Submit Sell' }}
+    </button>
+</div>

@@ -1,0 +1,17 @@
+<div class="recent-orders-container">
+    <div class="header">
+        <h3>Recent Orders</h3>
+    </div>
+    <div *ngIf="orders && orders.length > 0; else noOrders">
+        <div *ngFor="let order of orders">
+            <p>{{ order.symbol }} - {{ order.type }}</p>
+            <p>Qty: {{ order.quantity }} | Price: ${{ order.price }}</p>
+            <p>{{ order.timestamp | date: 'short' }}</p>
+        </div>
+    </div>
+    <ng-template #noOrders>
+        <div class="no-orders">
+            <p>No orders placed yet. Submit your first order to see it here.</p>
+        </div>
+    </ng-template>
+</div>

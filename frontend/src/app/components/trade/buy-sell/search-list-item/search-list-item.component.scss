@@ -1,0 +1,71 @@
+// Variables from buy-sell component
+$text-xs: 0.75rem;
+$color-white: #ffffff;
+$color-slate-500: #64748b;
+$color-emerald-400: #34d399;
+$color-red: #ef4444;
+$transition-timing: ease-in-out;
+$transition-duration: 200ms;
+
+.container {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-top: 0.625rem;
+  padding-bottom: 0.625rem;
+  text-align: left;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  transition-property: background-color;
+  transition-timing-function: $transition-timing;
+  transition-duration: $transition-duration;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+
+  > div:first-child {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+
+    span:first-child {
+      font-family: monospace;
+      font-size: $text-xs;
+      font-weight: 500;
+      color: $color-white;
+    }
+
+    span:last-child {
+      font-size: 10px;
+      color: $color-slate-500;
+    }
+  }
+
+  > div:last-child {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+
+    span:first-child {
+      font-family: monospace;
+      font-size: $text-xs;
+      color: $color-white;
+    }
+
+    span:last-child {
+      font-family: monospace;
+      font-size: 10px;
+      color: $color-emerald-400;
+
+      &.negative {
+        color: $color-red;
+      }
+    }
+  }
+}

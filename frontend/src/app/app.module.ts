@@ -34,7 +34,6 @@ const routes: Routes = [
   declarations: [
     AppComponent,
     DashboardComponent,
-    TradeComponent,
     MarketsComponent,
     LoginComponent,
     RegisterComponent,
