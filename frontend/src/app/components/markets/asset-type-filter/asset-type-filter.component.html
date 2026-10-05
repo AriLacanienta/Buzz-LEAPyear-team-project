@@ -1,0 +1,11 @@
+<div class="asset-type-filter">
+  <div class="asset-tabs">
+    <button 
+      *ngFor="let asset of assetTypes"
+      class="asset-tab"
+      [class.active]="selectedAssetType === asset"
+      (click)="onAssetTypeSelect(asset)">
+      {{ asset }}
+    </button>
+  </div>
+</div>

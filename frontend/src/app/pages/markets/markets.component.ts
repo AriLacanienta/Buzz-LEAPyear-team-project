@@ -1,12 +1,17 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { InstrumentService } from '@app/services/instrument.service';
-import { MatTableModule } from '@angular/material/table';
 import { Subscription } from 'rxjs';
+import { InstrumentsTableComponent } from '@app/components/markets/instruments-table/instruments-table.component';
+import { AssetTypeFilterComponent } from '@app/components/markets/asset-type-filter/asset-type-filter.component';
+import { MarketTabsComponent } from '@app/components/markets/market-tabs/market-tabs.component';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-markets',
   templateUrl: './markets.component.html',
-  styleUrls: ['./markets.component.scss']
+  styleUrls: ['./markets.component.scss'],
+  imports: [CommonModule, InstrumentsTableComponent, AssetTypeFilterComponent, MarketTabsComponent],
+  standalone: true
 })
 export class MarketsComponent implements OnInit, OnDestroy {
   instruments: any[] = [];
@@ -38,6 +43,7 @@ export class MarketsComponent implements OnInit, OnDestroy {
 
     this.refreshSubscription.add(() => clearInterval(interval));
   }
+
   loadInstruments(): void {
     console.log('Loading instruments with:', {
       assetType: this.selectedAssetType,
@@ -63,70 +69,6 @@ export class MarketsComponent implements OnInit, OnDestroy {
     );
   }
 
-  formatChangePercent(value: number): string {
-    const isPositive = value >= 0;
-    const prefix = isPositive ? '+' : '';
-    return `${prefix}${value}`;
-  }
-
-  getChangePercentClass(value: number): string {
-    if (value > 0) {
-      return 'positive-change';
-    } else if (value < 0) {
-      return 'negative-change';
-    } else {
-      return 'neutral-change';
-    }
-  }
-
-  getSymbolFirstLetter(symbol: string): string {
-    return symbol.charAt(0).toUpperCase();
-  }
-
-  getChangeArrow(value: number): string {
-    if (value > 0) {
-      return '▲';
-    } else if (value < 0) {
-      return '▼';
-    } else {
-      return '';
-    }
-  }
-
-  formatPrice(price: number): string {
-    switch (this.selectedMarket) {
-      case 'US':
-        return '$' + price.toFixed(2);
-      case 'UK':
-        return '£' + price.toFixed(2);
-      case 'India':
-        return '₹' + Math.floor(price);
-      default:
-        return price.toFixed(2);
-    }
-  }
-
-  formatValue(value: number): string {
-    if (value >= 1_000_000_000) {
-      return Math.floor(value / 1_000_000_000) + 'B';
-    } else if (value >= 1_000_000) {
-      return Math.floor(value / 1_000_000) + 'M';
-    } else if (value >= 1_000) {
-      return Math.floor(value / 1_000) + 'K';
-    } else {
-      return value.toString();
-    }
-  }
-
-  getCurrencyCode(market: string): string {
-    const currencyMap: { [key: string]: string } = {
-      'US': 'USD',
-      'UK': 'GBP',
-      'India': 'INR'
-    };
-    return currencyMap[market] || market;
-  }
-
   onMarketChange(market: string): void {
     this.selectedMarket = market;
     this.loadInstruments();
@@ -144,5 +86,5 @@ export class MarketsComponent implements OnInit, OnDestroy {
       this.refreshSubscription.unsubscribe();
     }
   }
-
 }
+

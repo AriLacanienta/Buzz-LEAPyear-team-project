@@ -2,11 +2,17 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { HoldingService } from '@app/services/holding.service';
 import { interval, Subscription } from 'rxjs';
 import { switchMap, startWith } from 'rxjs/operators';
+import { CommonModule } from '@angular/common';
+import { PortfolioHoldingsContainerComponent } from '@app/components/portfolio/portfolio-holdings-container/portfolio-holdings-container.component';
+import { SectionHeaderComponent } from '@app/components/dashboard/section-header/section-header.component';
+import { MarketInfoCardComponent } from '@app/components/dashboard/market-info-card/market-info-card.component';
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.scss']
+  styleUrls: ['./dashboard.component.scss'],
+  imports: [CommonModule, PortfolioHoldingsContainerComponent, SectionHeaderComponent, MarketInfoCardComponent],
+  standalone: true
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   title = 'Buzz Trader';

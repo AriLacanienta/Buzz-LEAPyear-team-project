@@ -1,0 +1,15 @@
+<div *ngIf="isLoading" class="loading-state">
+  <p>Loading your holdings...</p>
+</div>
+
+<div *ngIf="!isLoading && holdings.length === 0" class="empty-state">
+  <p>No holdings found. Start trading to build your portfolio!</p>
+</div>
+
+<div *ngIf="!isLoading && holdings.length > 0" class="holdings-column">
+  <app-portfolio-holding-card 
+    *ngFor="let holding of holdings; let i = index"
+    [holding]="holding"
+    [index]="i">
+  </app-portfolio-holding-card>
+</div>

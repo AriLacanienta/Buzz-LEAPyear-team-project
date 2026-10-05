@@ -5,28 +5,10 @@ main {
 }
 
 .portfolio-section {
-  margin-bottom: 2.5rem;
-
-  h2 {
-    font-size: 1.5rem;
-    font-weight: 600;
-    margin-bottom: 0.25rem;
-    color: #FFFFFF;
-  }
+  margin-bottom: 1rem;
 }
 
-.loading-state,
-.empty-state {
-  padding: 2.5rem 1.25rem;
-  text-align: center;
-  border-radius: 0.5rem;
-  color: #FFFFFF;
+.market-section {
+  margin-bottom: 1rem;
 }
 
-.holdings-column {
-  display: flex;
-  flex-direction: row;
-  gap: 1.25rem;
-  flex-wrap: wrap;
-  max-width: 100%;
-}

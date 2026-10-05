@@ -1,0 +1,80 @@
+table {
+  background-color: #141C2E;
+  border: none;
+  width: 100%;
+  
+  th {
+    color: #62748E;
+    font-weight: 700;
+    border-bottom: 0.0625rem solid #1E2D45;
+  }
+  
+  td {
+    color: #90A1B9;
+    border-bottom: 0.0625rem solid #1E2D45;
+  }
+
+  .cdk-column-instrumentSymbol {
+    color: #FFFFFF;
+    font-weight: 700;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .cdk-column-currentPrice {
+    color: #FFFFFF;
+    font-weight: 600;
+  }
+
+  .positive-change {
+    color: #10B981;
+    font-weight: 600;
+  }
+
+  .negative-change {
+    color: #EF4444;
+    font-weight: 600;
+  }
+
+  .neutral-change {
+    color: #9aa1ad;
+    font-weight: 600;
+  }
+
+  .change-value {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.85rem;
+    opacity: 0.8;
+  }
+
+  .change-percent {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  .symbol-avatar {
+    display: inline-block;
+    width: 1.5rem;
+    height: 1.5rem;
+    line-height: 1.5rem;
+    border-radius: 50%;
+    background-color: rgba(43, 127, 255, 0.15);
+    border-color: #1E2D45;
+    color: #51A2FF;
+    text-align: center;
+    font-weight: 600;
+    margin-right: 0.5rem;
+  }
+}
+
+.no-data-message {
+  padding: 2rem;
+  background-color: #141C2E;
+  border: 0.125rem solid #1E2D45;
+  color: #62748E;
+  text-align: center;
+}

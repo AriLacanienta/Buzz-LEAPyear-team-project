@@ -1,0 +1,12 @@
+<div class="market-tabs-header">
+  <div class="market-tabs">
+    <button 
+      *ngFor="let market of markets"
+      class="market-tab"
+      [class.active]="selectedMarket === market"
+      (click)="onMarketSelect(market)">
+      <span class="currency-code">{{ getCurrencyCode(market) }}</span> 
+      {{ market }} Markets
+    </button>
+  </div>
+</div>

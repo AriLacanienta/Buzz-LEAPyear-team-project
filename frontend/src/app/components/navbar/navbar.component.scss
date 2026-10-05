@@ -74,8 +74,23 @@ header {
       color: #ffffff;
     }
   }
+}
 
-  .logout-btn {
+.navbar-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.market-info {
+  display: flex;
+  gap: .5rem;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+.logout-btn {
     padding: 0.3rem 1rem;
     background-color: transparent;
     color: #9aa1ad;
@@ -97,21 +112,6 @@ header {
       background-color: #1E2D45;
     }
   }
-}
-
-.navbar-right {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.market-info {
-  display: flex;
-  gap: .5rem;
-  align-items: center;
-  font-size: 0.9rem;
-}
 
 .market-text {
   display: flex;
