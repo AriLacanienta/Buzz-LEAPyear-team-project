@@ -1,0 +1,119 @@
+.register-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #0F1520;
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.register-card {
+  background: #1E2D45;
+  padding: 40px;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  width: 100%;
+  max-width: 400px;
+  border: 1px solid #3B82F6;
+
+  h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #3B82F6;
+    font-size: 28px;
+    font-weight: 600;
+  }
+
+  form {
+    .form-group {
+      margin-bottom: 20px;
+
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #9aa1ad;
+      }
+
+      .form-control {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #3B82F6;
+        border-radius: 5px;
+        font-size: 14px;
+        background-color: #0F1520;
+        color: #9aa1ad;
+        transition: border-color 0.3s;
+
+        &:focus {
+          outline: none;
+          border-color: #3B82F6;
+          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        &.is-invalid {
+          border-color: #dc3545;
+        }
+      }
+
+      .error-text {
+        color: #dc3545;
+        font-size: 12px;
+        margin-top: 5px;
+      }
+    }
+
+    .error-alert {
+      background-color: #1E2D45;
+      color: #dc3545;
+      padding: 12px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      border: 1px solid #dc3545;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s;
+
+      &.btn-primary {
+        background-color: #3B82F6;
+        color: white;
+
+        &:hover:not(:disabled) {
+          background-color: #2563eb;
+        }
+
+        &:disabled {
+          background-color: #555;
+          cursor: not-allowed;
+        }
+      }
+    }
+  }
+
+  .login-link {
+    text-align: center;
+    margin-top: 20px;
+    color: #9aa1ad;
+    font-size: 14px;
+
+    .link {
+      color: #3B82F6;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}
