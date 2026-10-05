@@ -1,0 +1,12 @@
+type: object
+required:
+  - content
+  - pagination
+properties:
+  content:
+    type: array
+    items:
+      $ref: '#/components/schemas/MarketEquitySummary'
+    description: Array of market equity summaries
+  pagination:
+    $ref: '#/components/schemas/PaginationMeta'

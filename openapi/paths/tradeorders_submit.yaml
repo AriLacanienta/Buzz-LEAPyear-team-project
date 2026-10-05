@@ -1,0 +1,55 @@
+post:
+  summary: Submit a new trade order
+  description: Submit a new trade order for buy or sell. Order is processed asynchronously and returns immediately with order ID and initial SUBMITTED status.
+  operationId: submitOrder
+  tags:
+    - Trade Orders
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/TradeOrderRequest'
+  responses:
+    '201':
+      description: Order accepted and queued for processing
+      headers:
+        Location:
+          schema:
+            type: string
+          description: URL of the created order resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TradeOrderResponse'
+    '400':
+      description: Invalid order data (missing required fields, invalid values, or invalid account/instrument)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            missingField:
+              value:
+                error: "VALIDATION_ERROR"
+                message: "Quantity must be greater than 0"
+            accountNotFound:
+              value:
+                error: "VALIDATION_ERROR"
+                message: "Account not found"
+            instrumentNotFound:
+              value:
+                error: "VALIDATION_ERROR"
+                message: "Instrument not found"
+    '401':
+      description: Authentication required or token invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '500':
+      description: Server error during order processing
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

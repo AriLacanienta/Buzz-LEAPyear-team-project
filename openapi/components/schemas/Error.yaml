@@ -1,0 +1,14 @@
+type: object
+properties:
+  status:
+    type: integer
+    format: int32
+    description: HTTP status code.
+    minimum: 100
+    exclusiveMaximum: 600
+  title:
+    type: string
+    description: Short description of the problem
+required:
+  - status
+  - title

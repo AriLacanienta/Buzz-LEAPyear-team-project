@@ -1,6 +1,6 @@
 package com.buzzleapyear.trading_api.controller;
 
-import com.buzzleapyear.trading_api.dto.AuthResponse;
+import com.buzzleapyear.trading_api.dto.AuthResponseDto;
 import com.buzzleapyear.trading_api.dto.LoginRequest;
 import com.buzzleapyear.trading_api.dto.RegistrationRequest;
 import com.buzzleapyear.trading_api.entity.User;
@@ -80,7 +80,7 @@ public class AuthController {
             String token = tokenProvider.generateToken(user.getUsername());
 
             // Returning token in response
-            return ResponseEntity.ok(new AuthResponse(token, user.getUsername(), user.getEmail()));
+            return ResponseEntity.ok(new AuthResponseDto(token, user.getUsername(), user.getEmail()));
 
         } catch (Exception e) {
             // If any unexpected error occurs, return 401 Unauthorized
@@ -150,7 +150,7 @@ public class AuthController {
 
             // Returning token with 201 Created status
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(new AuthResponse(token, savedUser.getUsername(), savedUser.getEmail()));
+                    .body(new AuthResponseDto(token, savedUser.getUsername(), savedUser.getEmail()));
 
         } catch (Exception e) {
             // If any error occurs during registration, return 400 Bad Request

@@ -1,0 +1,36 @@
+type: object
+required:
+  - instrumentName
+  - instrumentSymbol
+  - currentPrice
+  - change
+  - changePercent
+  - volume
+  - marketCap
+properties:
+  instrumentName:
+    type: string
+    description: Full name of the instrument
+  instrumentSymbol:
+    type: string
+    description: Trading symbol
+  currentPrice:
+    type: number
+    format: decimal
+    description: Current price
+  change:
+    type: number
+    format: decimal
+    description: Absolute price change
+  changePercent:
+    type: number
+    format: decimal
+    description: Percentage price change
+  volume:
+    type: integer
+    format: int64
+    description: Trading volume
+  marketCap:
+    type: integer
+    format: int64
+    description: Market capitalization

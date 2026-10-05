@@ -1,0 +1,34 @@
+get:
+  summary: Test endpoint
+  description: Basic test endpoint to verify API connectivity and admin authorization.
+  operationId: testIndex
+  tags:
+    - Testing
+  responses:
+    '200':
+      description: Test successful
+      content:
+        text/plain:
+          schema:
+            type: string
+    '401':
+      description: Authentication required or token invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '403':
+      description: User does not have ADMIN role
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "FORBIDDEN"
+            message: "Admin access required"
+    '500':
+      description: Server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

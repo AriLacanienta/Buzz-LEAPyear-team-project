@@ -1,0 +1,60 @@
+post:
+  summary: User registration
+  description: Create a new user account. User is automatically logged in after successful registration.
+  operationId: register
+  security: []
+  tags:
+    - Authentication
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/RegistrationRequest'
+  responses:
+    '201':
+      description: Registration successful, user created and logged in
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AuthResponse'
+    '400':
+      description: Invalid registration data (username/email exists or invalid input)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            usernameExists:
+              value:
+                error: "VALIDATION_ERROR"
+                message: "Username already exists"
+            emailExists:
+              value:
+                error: "VALIDATION_ERROR"
+                message: "Email already exists"
+            invalidInput:
+              value:
+                error: "VALIDATION_ERROR"
+                message: "Invalid email format or password too short"
+    '500':
+      description: Server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "INTERNAL_ERROR"
+            message: "An unexpected error occurred"
+  summary: ''
+  description: ''
+  security: []
+  parameters:
+  responses:
+    '200':
+      description: Registration Successful
+      content:
+        application/json:
+        schema:
+          $ref: ../components/schemas/AuthResponse.yaml
+    

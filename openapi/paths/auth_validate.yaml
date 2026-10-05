@@ -1,0 +1,49 @@
+get:
+  summary: Validate JWT token
+  description: Verify that a JWT token is valid and not expired.
+  operationId: validateToken
+  security: []
+  tags:
+    - Authentication
+  parameters:
+    - name: Authorization
+      in: header
+      required: true
+      description: Bearer token in format "Bearer {token}"
+      schema:
+        type: string
+        example: "Bearer eyJhbGciOiJIUzI1NiIs..."
+  responses:
+    '200':
+      description: Token is valid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ValidationResponse'
+          example:
+            valid: true
+            data: "johndoe"
+    '401':
+      description: Token is invalid, expired, or missing
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            invalidFormat:
+              value:
+                error: "UNAUTHORIZED"
+                message: "Invalid token format"
+            expiredToken:
+              value:
+                error: "UNAUTHORIZED"
+                message: "Token is invalid or expired"
+    '500':
+      description: Server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "INTERNAL_ERROR"
+            message: "An unexpected error occurred"

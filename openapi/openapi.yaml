@@ -1,0 +1,309 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: Buzz Trade API
+  description: REST API for the Buzz Trade platform - a trading application with support for orders, instruments, quotes, and account management.
+  contact:
+    name: Buzz Trade Team
+  license:
+    name: MIT
+
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+  - url: https://api.buzztrade.com
+    description: Production server
+
+paths:
+  '/api/v1/auth/login':
+    $ref: 'paths/auth_login.yaml'
+
+  '/api/v1/auth/register':
+    $ref: 'paths/auth_register.yaml'
+
+  '/api/v1/auth/validate':
+    $ref: 'paths/auth_validate.yaml'
+
+  '/api/v1/tradeorders':
+    $ref: 'paths/tradeorders_submit.yaml'
+
+  '/api/v1/tradeorders/{orderId}':
+    $ref: 'paths/tradeorders_status.yaml'
+
+  '/api/v1/instruments/{symbol}/details':
+    $ref: 'paths/instruments_details.yaml'
+
+  '/api/v1/quote':
+    $ref: 'paths/quote_all.yaml'
+
+  '/api/v1/quote/{symbol}':
+    $ref: 'paths/quote_symbol.yaml'
+
+  '/api/v1/quote/search':
+    $ref: 'paths/quote_search.yaml'
+
+  '/api/v1/quote/market':
+    $ref: 'paths/quote_market.yaml'
+
+  '/api/v1/accounts/{accountId}/holdings':
+    $ref: 'paths/accounts_holdings.yaml'
+
+  '/api/v1/test':
+    $ref: 'paths/test_index.yaml'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT Bearer token authentication. Required for all endpoints except login, register, and validate.
+
+  schemas:
+    # ==================== Error Schemas ====================
+    Error:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          description: Error type or code (e.g., "VALIDATION_ERROR", "UNAUTHORIZED", "NOT_FOUND")
+        message:
+          type: string
+          description: Human-readable error message
+        status:
+          type: integer
+          description: HTTP status code
+        details:
+          type: object
+          description: Additional error details (optional)
+          additionalProperties: true
+
+    # ==================== Auth Schemas ====================
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: User email address
+        password:
+          type: string
+          format: password
+          description: User password
+
+    RegistrationRequest:
+      type: object
+      required:
+        - username
+        - email
+        - firstName
+        - lastName
+        - password
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 50
+          description: Unique username for the account
+        email:
+          type: string
+          format: email
+          description: User email address
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: User's first name
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: User's last name
+        password:
+          type: string
+          format: password
+          minLength: 6
+          description: User password (minimum 6 characters)
+
+    AuthResponse:
+      type: object
+      required:
+        - token
+        - type
+        - username
+        - email
+      properties:
+        token:
+          type: string
+          description: JWT authentication token
+        type:
+          type: string
+          default: Bearer
+          description: Token type (always "Bearer" for JWT)
+        username:
+          type: string
+          description: Authenticated username
+        email:
+          type: string
+          format: email
+          description: Authenticated user's email
+
+    ValidationResponse:
+      type: object
+      required:
+        - valid
+        - data
+      properties:
+        valid:
+          type: boolean
+          description: Whether the token is valid
+        data:
+          type: string
+          description: Username if valid, error message if invalid
+
+    # ==================== Trade Order Schemas ====================
+    OrderSide:
+      type: string
+      enum:
+        - BUY
+        - SELL
+      description: Order side - whether buying or selling
+
+    OrderStatus:
+      type: string
+      enum:
+        - SUBMITTED
+        - ACCEPTED
+        - REJECTED
+        - FILLED
+      description: Current status of the trade order
+
+    TradeOrderRequest:
+      type: object
+      required:
+        - side
+        - instrumentId
+        - quantity
+        - price
+        - accountId
+      properties:
+        side:
+          $ref: '#/components/schemas/OrderSide'
+        instrumentId:
+          type: integer
+          format: int64
+          minimum: 1
+          description: ID of the instrument to trade
+        quantity:
+          type: number
+          format: decimal
+          minimum: 0
+          exclusiveMinimum: true
+          description: Number of units to trade (must be greater than 0)
+        price:
+          type: number
+          format: decimal
+          minimum: 0
+          exclusiveMinimum: true
+          description: Price per unit (must be greater than 0)
+        accountId:
+          type: integer
+          format: int64
+          minimum: 1
+          description: ID of the account placing the order
+
+    TradeOrderResponse:
+      type: object
+      required:
+        - orderId
+        - status
+        - statusMessage
+      properties:
+        orderId:
+          type: integer
+          format: int64
+          description: Unique identifier for the order
+        status:
+          $ref: '#/components/schemas/OrderStatus'
+        statusMessage:
+          type: string
+          description: Human-readable status message
+
+    OrderStatusDetail:
+      type: object
+      required:
+        - orderId
+        - accountId
+        - status
+        - timeUpdated
+      properties:
+        orderId:
+          type: integer
+          format: int64
+          description: Unique identifier for the order
+        accountId:
+          type: integer
+          format: int64
+          description: Associated account ID
+        status:
+          $ref: '#/components/schemas/OrderStatus'
+        reasonText:
+          type: string
+          nullable: true
+          description: Reason for status change (e.g., rejection reason)
+        timeUpdated:
+          type: string
+          format: date-time
+          description: Timestamp of the last status update
+
+    # ==================== Instrument Schemas ====================
+    InstrumentDetails:
+      type: object
+      required:
+        - instrumentName
+        - instrumentSymbol
+        - assetType
+        - currencyCode
+      properties:
+        instrumentName:
+          type: string
+          description: Full name of the instrument (e.g., "Apple Inc.")
+        instrumentSymbol:
+          type: string
+          description: Trading symbol (e.g., "AAPL")
+        assetType:
+          type: string
+          enum:
+            - EQUITY
+            - ETF
+            - BOND
+            - COMMODITY
+          description: Type of asset
+        currencyCode:
+          type: string
+          description: Currency code (e.g., "USD", "GBP", "INR")
+
+    # ==================== Quote Schemas ====================
+    QuoteResponse:
+
+
+    InstrumentSearchResult:
+
+
+    MarketEquitySummary:
+
+
+    PaginationMeta:
+
+
+    PaginatedSearchResults:
+
+    
+security:
+  - BearerAuth: []

@@ -1,14 +1,14 @@
 package com.buzzleapyear.trading_api.dto;
 
-public class AuthResponse {
+public class AuthResponseDto {
     private String token;
     private String type = "Bearer";
     private String username;
     private String email;
 
-    public AuthResponse() {}
+    public AuthResponseDto() {}
 
-    public AuthResponse(String token, String username, String email) {
+    public AuthResponseDto(String token, String username, String email) {
         this.token = token;
         this.username = username;
         this.email = email;

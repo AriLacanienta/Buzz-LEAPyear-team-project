@@ -1,6 +1,7 @@
 paths:
-  /test:
-    get:
+  /auth/login:
+    post:
+    
 
   /tradeorders:
     post:

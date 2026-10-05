@@ -1,0 +1,29 @@
+type: object
+required:
+  - instrumentSymbol
+  - instrumentName
+  - assetType
+  - currencyCode
+  - currentPrice
+  - percentChange
+properties:
+  instrumentSymbol:
+    type: string
+    description: Trading symbol
+  instrumentName:
+    type: string
+    description: Full name of the instrument
+  assetType:
+    type: string
+    description: Type of asset (EQUITY, ETF, etc.)
+  currencyCode:
+    type: string
+    description: Currency code
+  currentPrice:
+    type: number
+    format: decimal
+    description: Current price
+  percentChange:
+    type: number
+    format: decimal
+    description: Percentage change

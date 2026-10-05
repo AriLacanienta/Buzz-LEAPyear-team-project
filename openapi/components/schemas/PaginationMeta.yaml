@@ -1,0 +1,19 @@
+type: object
+required:
+  - totalElements
+  - totalPages
+  - currentPage
+  - pageSize
+properties:
+  totalElements:
+    type: integer
+    description: Total number of elements across all pages
+  totalPages:
+    type: integer
+    description: Total number of pages
+  currentPage:
+    type: integer
+    description: Current page number (0-indexed)
+  pageSize:
+    type: integer
+    description: Number of elements per page

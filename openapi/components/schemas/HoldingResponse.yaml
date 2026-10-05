@@ -1,0 +1,41 @@
+type: object
+required:
+  - instrumentName
+  - instrumentSymbol
+  - quantity
+  - currentPrice
+  - totalValue
+  - change
+  - changePercent
+  - totalCost
+properties:
+  instrumentName:
+    type: string
+    description: Full name of the instrument
+  instrumentSymbol:
+    type: string
+    description: Trading symbol
+  quantity:
+    type: number
+    format: decimal
+    description: Number of units held
+  currentPrice:
+    type: number
+    format: decimal
+    description: Current price per unit
+  totalValue:
+    type: number
+    format: decimal
+    description: Total current value (quantity × currentPrice)
+  change:
+    type: number
+    format: decimal
+    description: Absolute price change since purchase
+  changePercent:
+    type: number
+    format: decimal
+    description: Percentage change since purchase
+  totalCost:
+    type: number
+    format: decimal
+    description: Total cost basis of the holding

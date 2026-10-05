@@ -1,0 +1,41 @@
+get:
+  summary: Get quote by symbol
+  description: Retrieve the latest price quote for a specific instrument by its trading symbol.
+  operationId: getLatestQuoteBySymbol
+  tags:
+    - Quotes
+  parameters:
+    - name: symbol
+      in: path
+      required: true
+      description: Trading symbol of the instrument (e.g., "AAPL", "GOOGL")
+      schema:
+        type: string
+  responses:
+    '200':
+      description: Quote retrieved successfully
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/QuoteResponse'
+    '401':
+      description: Authentication required or token invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '404':
+      description: Instrument not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "NOT_FOUND"
+            message: "Quote not found for symbol"
+    '500':
+      description: Server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

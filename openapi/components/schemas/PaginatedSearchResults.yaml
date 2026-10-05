@@ -1,0 +1,12 @@
+type: object
+required:
+  - content
+  - pagination
+properties:
+  content:
+    type: array
+    items:
+      $ref: '#/components/schemas/InstrumentSearchResult'
+    description: Array of search results
+  pagination:
+    $ref: '#/components/schemas/PaginationMeta'

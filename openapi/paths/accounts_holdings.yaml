@@ -1,0 +1,54 @@
+get:
+  summary: Get account holdings
+  description: Retrieve all securities holdings for a specific account.
+  operationId: getAccountHoldings
+  tags:
+    - Accounts
+  parameters:
+    - name: accountId
+      in: path
+      required: true
+      description: The ID of the account
+      schema:
+        type: integer
+        format: int64
+        minimum: 1
+  responses:
+    '200':
+      description: Holdings retrieved successfully
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/HoldingResponse'
+    '401':
+      description: Authentication required or token invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '403':
+      description: Access denied (user cannot access this account)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "FORBIDDEN"
+            message: "You do not have permission to access this account"
+    '404':
+      description: Account not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "NOT_FOUND"
+            message: "Account not found"
+    '500':
+      description: Server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

@@ -1,0 +1,41 @@
+get:
+  summary: Get instrument details
+  description: Retrieve detailed information about a specific instrument by its trading symbol.
+  operationId: getInstrumentBySymbol
+  tags:
+    - Instruments
+  parameters:
+    - name: symbol
+      in: path
+      required: true
+      description: Trading symbol of the instrument (e.g., "AAPL", "GOOGL")
+      schema:
+        type: string
+  responses:
+    '200':
+      description: Instrument details retrieved successfully
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/InstrumentDetails'
+    '401':
+      description: Authentication required or token invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '404':
+      description: Instrument not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "NOT_FOUND"
+            message: "Instrument not found"
+    '500':
+      description: Server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

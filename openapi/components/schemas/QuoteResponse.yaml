@@ -1,0 +1,57 @@
+type: object
+required:
+  - symbol
+  - price
+  - highPrice
+  - lowPrice
+  - openPrice
+  - previousClosePrice
+  - change
+  - changePercent
+  - volume
+  - marketCap
+  - timestamp
+properties:
+  symbol:
+    type: string
+    description: Trading symbol
+  price:
+    type: number
+    format: decimal
+    description: Current price
+  highPrice:
+    type: number
+    format: decimal
+    description: High price for the period
+  lowPrice:
+    type: number
+    format: decimal
+    description: Low price for the period
+  openPrice:
+    type: number
+    format: decimal
+    description: Opening price for the period
+  previousClosePrice:
+    type: number
+    format: decimal
+    description: Previous day closing price
+  change:
+    type: number
+    format: decimal
+    description: Absolute price change
+  changePercent:
+    type: number
+    format: decimal
+    description: Percentage price change
+  volume:
+    type: integer
+    format: int64
+    description: Trading volume
+  marketCap:
+    type: integer
+    format: int64
+    description: Market capitalization
+  timestamp:
+    type: string
+    format: date-time
+    description: Quote timestamp
