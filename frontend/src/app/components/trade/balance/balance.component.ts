@@ -1,6 +1,8 @@
 import { Component, Input } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
+import { AccountService } from '@app/services/account.service';
 import { BalanceResponse } from '@app/models/balance-response.model';
+import { switchMap, tap } from 'rxjs';
 
 @Component({
   selector: 'app-balance',
@@ -12,12 +14,21 @@ import { BalanceResponse } from '@app/models/balance-response.model';
 export class BalanceComponent {
     balance: BalanceResponse | null = null
 
+    constructor(private accountService: AccountService) {}
+
     ngOnInit() {
-      // Fetch from backend-----
-      this.balance = {
-        cashAvailable: 0,
-        portfolioValue: 0,
-        currencyType: 'USD'
-      };
+      this.fetchBalance();
+    }
+
+    fetchBalance(): void {
+      this.accountService.getMyAccount().pipe(
+        tap(account => console.log('Account ID:', account.accountId)),
+        switchMap(account =>
+          this.accountService.getAccountBalance(account.accountId)
+        )
+      ).subscribe({
+        next: balance => this.balance = balance,
+        error: error => console.error('could not load account balance', error)
+      });
     }
 }
