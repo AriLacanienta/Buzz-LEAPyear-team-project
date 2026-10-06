@@ -1,27 +1,37 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { HoldingService } from '@app/services/holding.service';
+import { InstrumentService } from '@app/services/instrument.service';
 import { interval, Subscription } from 'rxjs';
 import { switchMap, startWith } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
 import { PortfolioHoldingsContainerComponent } from '@app/components/portfolio/portfolio-holdings-container/portfolio-holdings-container.component';
-import { SectionHeaderComponent } from '@app/components/dashboard/section-header/section-header.component';
-import { MarketInfoCardComponent } from '@app/components/dashboard/market-info-card/market-info-card.component';
+import { MarketInfoCardComponent } from '@app/components/portfolio/market-info-card/market-info-card.component';
+
+export interface QuoteResponse {
+  symbol: string;
+  price: number;
+  changePercent: number;
+}
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
-  imports: [CommonModule, PortfolioHoldingsContainerComponent, SectionHeaderComponent, MarketInfoCardComponent],
+  imports: [CommonModule, PortfolioHoldingsContainerComponent, MarketInfoCardComponent],
   standalone: true
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   title = 'Buzz Trader';
   holdings: any[] = [];
+  topGainers: QuoteResponse[] = [];
+  topLosers: QuoteResponse[] = [];
   isLoading = true;
   accountId = 1;
   private refreshSubscription: Subscription | undefined;
+  private gainersSubscription: Subscription | undefined;
+  private losersSubscription: Subscription | undefined;
 
-  constructor(private holdingService: HoldingService) {
+  constructor(private holdingService: HoldingService, private instrumentService: InstrumentService) {
     console.log('DashboardComponent initialized');
   }
 
@@ -46,11 +56,47 @@ export class DashboardComponent implements OnInit, OnDestroy {
           this.isLoading = false;
         }
       });
+
+    this.gainersSubscription = interval(5000)
+      .pipe(
+        startWith(0),
+        switchMap(() => this.instrumentService.getTopGainers(7))
+      )
+      .subscribe({
+        next: (gainers) => {
+          console.log('Top gainers:', gainers);
+          this.topGainers = gainers;
+        },
+        error: (error) => {
+          console.error('Error loading top gainers:', error);
+        }
+      });
+
+    this.losersSubscription = interval(5000)
+      .pipe(
+        startWith(0),
+        switchMap(() => this.instrumentService.getTopLosers(7))
+      )
+      .subscribe({
+        next: (losers) => {
+          console.log('Top losers:', losers);
+          this.topLosers = losers;
+        },
+        error: (error) => {
+          console.error('Error loading top losers:', error);
+        }
+      });
   }
 
   ngOnDestroy(): void {
     if (this.refreshSubscription) {
       this.refreshSubscription.unsubscribe();
+    }
+    if (this.gainersSubscription) {
+      this.gainersSubscription.unsubscribe();
+    }
+    if (this.losersSubscription) {
+      this.losersSubscription.unsubscribe();
     }
   }
 }

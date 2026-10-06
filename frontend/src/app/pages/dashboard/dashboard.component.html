@@ -1,16 +1,29 @@
 <div class="container">
   <main>
     <section class="portfolio-section">
-      <app-section-header title="Portfolio Holdings"></app-section-header>
       <app-portfolio-holdings-container
+        [title]="'Portfolio Holdings'"
         [holdings]="holdings"
         [isLoading]="isLoading">
       </app-portfolio-holdings-container>
     </section>
-
     <section class="market-section">
-      <app-section-header title="Other Information"></app-section-header>
-      <app-market-info-card></app-market-info-card>
+      <div class="cards-container">
+        <app-market-info-card 
+          title="WATCHLIST"
+          content="Stocks to watch">
+        </app-market-info-card>
+        <app-market-info-card 
+          title="TOP GAINERS"
+          content="Best performing stocks today"
+          [data]="topGainers">
+        </app-market-info-card>
+        <app-market-info-card 
+          title="TOP LOSERS"
+          content="Worst performing stocks today"
+          [data]="topLosers">
+        </app-market-info-card>
+      </div>
     </section>
   </main>
 </div>

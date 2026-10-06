@@ -1,0 +1,100 @@
+$bg-dark: #0f1520;
+$border-dark: #1e2d45;
+$radius-lg: 0.75rem;
+$spacing-md: 1rem;
+$spacing-sm: 0.5rem;
+$color-green: #10b981;
+$color-red: #ef4444;
+$color-blue: #51A2FF;
+$color-text: #9aa1ad;
+$color-white: #ffffff;
+
+.market-info {
+  margin-bottom: $spacing-md;
+  border-radius: $radius-lg;
+  border: 0.1rem solid $border-dark;
+  background: $bg-dark;
+  width: 28rem;
+  height: 24rem;
+
+  .top-gainers {
+    color: $color-green;
+  }
+  .top-losers {
+    color: $color-red;
+  }
+  .watchlist {
+    color: $color-blue;
+  }
+
+  .market-info-header {
+    display: flex;
+    flex-direction: row;
+    gap: $spacing-sm;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    align-items: center;
+
+    h2 {
+      margin: 0;
+      color: $color-white;
+    }
+  }
+
+  .data-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    max-height: 20rem;
+    overflow-y: auto;
+
+    .data-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem;
+      border-bottom: 1px solid $border-dark;
+      font-size: 0.85rem;
+
+      .symbol {
+        font-weight: 600;
+        color: $color-white;
+        font-family: 'DM Mono', monospace;
+        min-width: 3rem;
+      }
+
+      .price {
+        color: $color-text;
+        font-family: 'DM Mono', monospace;
+        flex: 1;
+        text-align: center;
+      }
+
+      .change {
+        font-weight: 600;
+        font-family: 'DM Mono', monospace;
+        min-width: 3rem;
+        text-align: right;
+
+        &.positive-change {
+          color: $color-green;
+        }
+
+        &.negative-change {
+          color: $color-red;
+        }
+
+        &.neutral-change {
+          color: $color-text;
+        }
+      }
+    }
+  }
+
+  p {
+    margin: 0;
+    color: $color-text;
+    font-size: 0.9rem;
+  }
+}

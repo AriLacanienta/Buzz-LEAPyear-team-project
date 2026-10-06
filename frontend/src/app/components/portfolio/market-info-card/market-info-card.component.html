@@ -1,0 +1,20 @@
+<mat-card class="market-info">
+    <mat-card-content>
+        <div class="market-info-content">
+            <div class="market-info-header">
+                <h1 [ngClass]="getColorClass()"> | </h1>
+                <h2>{{ title }}</h2>
+            </div>
+            <div *ngIf="data.length > 0" class="data-list">
+                <div *ngFor="let item of data" class="data-item">
+                    <span class="symbol">{{ item.symbol }}</span>
+                    <span class="price">${{ item.price.toFixed(2) }}</span>
+                    <span class="change" [ngClass]="getChangeClass(item.changePercent)">
+                        {{ item.changePercent > 0 ? '+' : '' }}{{ item.changePercent.toFixed(2) }}%
+                    </span>
+                </div>
+            </div>
+            <p *ngIf="data.length === 0">{{ content }}</p>
+        </div>
+    </mat-card-content>
+</mat-card>

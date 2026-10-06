@@ -36,4 +36,36 @@ export class InstrumentService {
     }
     return this.http.get<any>(url);
   }
+
+  getTopGainers(limit: number = 7): Observable<QuoteResponse[]> {
+    return this.getInstruments('EQUITY', null, 0, 100).pipe(
+      map((response: any) => {
+        const instruments = response.content || [];
+        return instruments
+          .sort((a: any, b: any) => (b.changePercent || 0) - (a.changePercent || 0))
+          .slice(0, limit)
+          .map((instrument: any) => ({
+            symbol: instrument.instrumentSymbol,
+            price: instrument.currentPrice,
+            changePercent: instrument.changePercent
+          }));
+      })
+    );
+  }
+
+  getTopLosers(limit: number = 7): Observable<QuoteResponse[]> {
+    return this.getInstruments('EQUITY', null, 0, 100).pipe(
+      map((response: any) => {
+        const instruments = response.content || [];
+        return instruments
+          .sort((a: any, b: any) => (a.changePercent || 0) - (b.changePercent || 0))
+          .slice(0, limit)
+          .map((instrument: any) => ({
+            symbol: instrument.instrumentSymbol,
+            price: instrument.currentPrice,
+            changePercent: instrument.changePercent
+          }));
+      })
+    );
+  }
 }

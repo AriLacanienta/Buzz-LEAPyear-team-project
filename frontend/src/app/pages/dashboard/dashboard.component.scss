@@ -15,5 +15,14 @@ main {
 
 .market-section {
   margin-bottom: $spacing-md;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+
+  .cards-container {
+    display: flex;
+    flex-direction: row;
+    gap: $spacing-md;
+  }
 }
 

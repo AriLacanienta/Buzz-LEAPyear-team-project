@@ -1,7 +1,17 @@
 $color-white: #ffffff;
+$font-weight-semibold: 600;
+$text-lg: 1.5rem;
+$spacing-xs: 0.5rem;
 $radius-sm: 0.5rem;
-$spacing-md: 1.25rem;
+$spacing-md: 1rem;
 $spacing-lg: 2.5rem;
+
+h2 {
+  font-size: $text-lg;
+  font-weight: $font-weight-semibold;
+  margin-bottom: $spacing-xs;
+  color: $color-white;
+}
 
 .loading-state,
 .empty-state {

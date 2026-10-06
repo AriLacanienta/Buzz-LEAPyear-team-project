@@ -1,20 +1,52 @@
+// Color Variables
+$border-dark: #1E2D45;
+$color-text: #9aa1ad;
+$bg-dark: #0F1520;
+$color-white: #ffffff;
+$color-success: #10B981;
+$color-error: #EF4444;
+
+// Spacing Variables
+$padding-sm: 0.3rem;
+$padding-md: 0.5rem;
+$padding-lg: 0.6rem;
+$padding-xl: 2rem;
+$spacing-xs: 0.25rem;
+$spacing-sm: 0.5rem;
+$spacing-md: 1rem;
+$spacing-lg: 1.5rem;
+$spacing-xl: 1.25rem;
+
+// Size Variables
+$max-width: 75%;
+$border-width: 0.125rem;
+$border-width-thin: 0.0625rem;
+$border-width-md: 1px;
+$border-radius-sm: 0.3rem;
+$border-radius-md: 0.5rem;
+$avatar-size: 1.875rem;
+$status-dot-size: 0.4rem;
+$font-size-sm: 0.9rem;
+$font-size-md: 1.25rem;
+$font-weight-normal: 500;
+
 header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.6rem 2rem;
-  border-bottom: 0.125rem solid #1E2D45;
-  margin-bottom: 1.5rem;
+  padding: $padding-lg $padding-xl;
+  border-bottom: $border-width solid $border-dark;
+  margin-bottom: $spacing-lg;
 
   h1 {
     margin: 0;
-    color: #9aa1ad;
+    color: $color-text;
   }
 
   p {
-    color: #9aa1ad;
-    font-size: 1.25rem;
-    margin-bottom: 1.25rem;
+    color: $color-text;
+    font-size: $font-size-md;
+    margin-bottom: $spacing-xl;
   }
 }
 
@@ -22,30 +54,30 @@ header {
   display: flex;
   align-items: center;
   width: 100%;
-  max-width: 75%;
+  max-width: $max-width;
   margin: 0 auto;
 }
 
 .tabs {
   display: flex;
-  gap: 0.5rem;
+  gap: $spacing-sm;
   align-items: center;
 
   .account-tab {
     display: flex;
     align-items: center;
-    gap: 0.6rem;
-    padding: 0.3rem 0.625rem;
+    gap: $padding-lg;
+    padding: $padding-sm 0.625rem;
     text-decoration: none;
-    color: #9aa1ad;
-    font-weight: 500;
-    border-bottom: 0.0625rem solid transparent;
-    border-radius: 0.3rem;
+    color: $color-text;
+    font-weight: $font-weight-normal;
+    border-bottom: $border-width-thin solid transparent;
+    border-radius: $border-radius-sm;
     cursor: pointer;
 
     img {
-      width: 1.875rem;
-      height: 1.875rem;
+      width: $avatar-size;
+      height: $avatar-size;
       border-radius: 50%;
       padding: 0;
       object-fit: cover;
@@ -54,24 +86,24 @@ header {
   }
 
   .tab {
-    padding: 0.3rem 1rem;
+    padding: $padding-sm 1rem;
     text-decoration: none;
-    color: #9aa1ad;
-    font-weight: 500;
-    border-bottom: 0.0625rem solid transparent;
-    border-radius: 0.5rem;
+    color: $color-text;
+    font-weight: $font-weight-normal;
+    border-bottom: $border-width-thin solid transparent;
+    border-radius: $border-radius-md;
     cursor: pointer;
 
     &:hover {
-      color: #1E2D45;
+      color: $border-dark;
     }
 
     &.active {
-      border-bottom-color: #1E2D45;
-      border: 1px solid #1E2D45;
-      border-radius: 0.5rem;
-      background-color: #0F1520;
-      color: #ffffff;
+      border-bottom-color: $border-dark;
+      border: $border-width-md solid $border-dark;
+      border-radius: $border-radius-md;
+      background-color: $bg-dark;
+      color: $color-white;
     }
   }
 }
@@ -80,58 +112,55 @@ header {
   margin-left: auto;
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: $spacing-md;
 }
 
 .market-info {
   display: flex;
-  gap: .5rem;
+  gap: $spacing-sm;
   align-items: center;
-  font-size: 0.9rem;
+  font-size: $font-size-sm;
 }
 
 .logout-btn {
-    padding: 0.3rem 1rem;
+    padding: $padding-sm $padding-md;
     background-color: transparent;
-    color: #9aa1ad;
-    border: 1px solid #1E2D45;
-    border-radius: 0.5rem;
-    font-weight: 500;
+    color: $color-text;
+    border: $border-width-md solid $border-dark;
+    border-radius: $border-radius-md;
+    font-weight: $font-weight-normal;
     cursor: pointer;
-    font-size: 0.9rem;
-    transition: all 0.2s ease;
-    margin-right: 0.5rem;
+    font-size: $font-size-sm;
 
     &:hover {
-      background-color: #0F1520;
-      color: #ffffff;
+      color: $border-dark;
     }
 
     &:active {
-      border-color: #ffffff;
-      background-color: #1E2D45;
+      border-color: $color-white;
+      background-color: $bg-dark;
     }
   }
 
 .market-text {
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: $spacing-xs;
 }
 
 .status-dot {
-  width: 0.4rem;
-  height: 0.4rem;
+  width: $status-dot-size;
+  height: $status-dot-size;
   border-radius: 50%;
   display: inline-block;
 
   &.open {
-    background-color: #10B981;
+    background-color: $color-success;
     animation: blink 2s infinite;
   }
 
   &.closed {
-    background-color: #EF4444;
+    background-color: $color-error;
   }
 }
 
@@ -145,6 +174,6 @@ header {
 }
 
 .navbar-date {
-  color: #9aa1ad;
-  font-weight: 500;
+  color: $color-text;
+  font-weight: $font-weight-normal;
 }

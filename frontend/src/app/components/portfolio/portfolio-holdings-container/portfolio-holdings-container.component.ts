@@ -10,6 +10,7 @@ import { PortfolioHoldingCardComponent } from '@app/components/portfolio/portfol
   standalone: true
 })
 export class PortfolioHoldingsContainerComponent {
+  @Input() title: string = '';
   @Input() holdings: any[] = [];
   @Input() isLoading: boolean = false;
 }
