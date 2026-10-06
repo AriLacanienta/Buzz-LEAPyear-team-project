@@ -8,6 +8,7 @@ export interface QuoteResponse {
   symbol: string;
   price: number;
   changePercent: number;
+  name: string;
 }
 
 @Injectable({
@@ -37,7 +38,7 @@ export class InstrumentService {
     return this.http.get<any>(url);
   }
 
-  getTopGainers(limit: number = 7): Observable<QuoteResponse[]> {
+  getTopGainers(limit: number = 6): Observable<QuoteResponse[]> {
     return this.getInstruments('EQUITY', null, 0, 100).pipe(
       map((response: any) => {
         const instruments = response.content || [];
@@ -47,13 +48,14 @@ export class InstrumentService {
           .map((instrument: any) => ({
             symbol: instrument.instrumentSymbol,
             price: instrument.currentPrice,
-            changePercent: instrument.changePercent
+            changePercent: instrument.changePercent,
+            name: instrument.instrumentName
           }));
       })
     );
   }
 
-  getTopLosers(limit: number = 7): Observable<QuoteResponse[]> {
+  getTopLosers(limit: number = 6): Observable<QuoteResponse[]> {
     return this.getInstruments('EQUITY', null, 0, 100).pipe(
       map((response: any) => {
         const instruments = response.content || [];
@@ -63,7 +65,8 @@ export class InstrumentService {
           .map((instrument: any) => ({
             symbol: instrument.instrumentSymbol,
             price: instrument.currentPrice,
-            changePercent: instrument.changePercent
+            changePercent: instrument.changePercent,
+            name: instrument.instrumentName
           }));
       })
     );

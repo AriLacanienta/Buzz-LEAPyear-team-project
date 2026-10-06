@@ -14,7 +14,7 @@ $spacing-md: 1rem;
 $spacing-xs-half: 0.25rem;
 
 .market-tab {
-  padding: $spacing-xs 1.25rem;
+  padding: $spacing-xs 1.5rem;
   gap: $spacing-xs;
   background-color: $bg-darker;
   border: 0.0625rem;
@@ -23,7 +23,6 @@ $spacing-xs-half: 0.25rem;
   cursor: pointer;
   font-size: $text-sm;
   font-weight: $font-weight-semibold;
-  transition: all 0.3s ease;
 
   &:hover {
     color: $color-white;
@@ -46,9 +45,7 @@ $spacing-xs-half: 0.25rem;
 }
 
 .market-tabs-label {
-  padding: $spacing-md;
-  background-color: $bg-darker;
-  border-bottom: 0.0625rem solid $border-dark;
+  padding: $spacing-xs;
 }
 
 .market-tabs {

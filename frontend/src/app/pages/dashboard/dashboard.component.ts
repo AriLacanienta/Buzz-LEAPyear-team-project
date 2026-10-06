@@ -11,6 +11,7 @@ export interface QuoteResponse {
   symbol: string;
   price: number;
   changePercent: number;
+  name: string;
 }
 
 @Component({
@@ -60,7 +61,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.gainersSubscription = interval(5000)
       .pipe(
         startWith(0),
-        switchMap(() => this.instrumentService.getTopGainers(7))
+        switchMap(() => this.instrumentService.getTopGainers(6))
       )
       .subscribe({
         next: (gainers) => {
@@ -75,7 +76,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.losersSubscription = interval(5000)
       .pipe(
         startWith(0),
-        switchMap(() => this.instrumentService.getTopLosers(7))
+        switchMap(() => this.instrumentService.getTopLosers(6))
       )
       .subscribe({
         next: (losers) => {

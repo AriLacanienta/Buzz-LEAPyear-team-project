@@ -6,6 +6,7 @@ export interface QuoteResponse {
   symbol: string;
   price: number;
   changePercent: number;
+  name: string;
 }
 
 @Component({
@@ -30,6 +31,10 @@ export class MarketInfoCardComponent {
     }
   }
 
+  getSymbolFirstLetter(symbol: string): string {
+    return symbol.charAt(0).toUpperCase();
+  }
+
   getChangeClass(changePercent: number): string {
     if (changePercent > 0) {
       return 'positive-change';
@@ -37,6 +42,32 @@ export class MarketInfoCardComponent {
       return 'negative-change';
     } else {
       return 'neutral-change';
+    }
+  }
+
+  getAvatarClass(): string {
+    if (this.title === 'TOP GAINERS') {
+      return 'avatar-gainer';
+    } else if (this.title === 'TOP LOSERS') {
+      return 'avatar-loser';
+    } else {
+      return '';
+    }
+  }
+
+  formatChangePercent(changePercent: number): string {
+    const sign = changePercent > 0 ? '+' : '';
+    const arrow = changePercent > 0 ? '↗' : changePercent < 0 ? '↘' : '';
+    return `${sign}${changePercent.toFixed(2)}%${arrow}`;
+  }
+
+  getSymbolColor(symbol: string): string {
+    if (this.title === 'TOP GAINERS') {
+      return 'color-green';
+    } else if (this.title === 'TOP LOSERS') {
+      return 'color-red';
+    } else {
+      return 'color-text';
     }
   }
 }
