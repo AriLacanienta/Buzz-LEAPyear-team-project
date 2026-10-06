@@ -11,7 +11,7 @@ public class Analyst {
     @Column(name = "analyst_id")
     private Long id;
     
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
