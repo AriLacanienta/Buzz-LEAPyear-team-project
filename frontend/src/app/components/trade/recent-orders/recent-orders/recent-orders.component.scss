@@ -1,3 +1,20 @@
+$bg-dark: #0f1520;
+$border-dark: #1e2d45;
+$color-white: #ffffff;
+$color-slate-300: #cbd5e1;
+$color-slate-400: #64748b;
+$color-slate-500: #64748b;
+$color-emerald-400: #34d399;
+$color-red-400: #f87171;
+$radius-xl: 0.75rem;
+$radius-full: 9999px;
+$font-weight-semibold: 600;
+$text-xs: 0.75rem;
+$text-sm: 0.875rem;
+$text-sm-line-height: 1.25rem;
+$transition-timing: ease-in-out;
+$transition-duration: 200ms;
+
 :host {
   display: flex;
   flex-direction: column;
@@ -6,35 +23,164 @@
 
 .recent-orders-container {
   flex: 1;
-  background-color: #0f1520;
-  border-color: #1e2d45;
-  border-style: solid;
-  border-width: 1px;
-  border-radius: 16px;
+  background-color: $bg-dark;
+  border: 1px solid $border-dark;
+  border-radius: $radius-xl;
   overflow: hidden;
 }
 
-.header {
-  padding-block: 16px;
-  padding-inline: 20px;
-  border-color: #1e2d45;
-  border-bottom-width: 1px;
-  border-bottom-style: solid;
+.recent-orders-header {
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid $border-dark;
+
+  h3 {
+    font-size: $text-sm;
+    font-weight: $font-weight-semibold;
+    color: $color-white;
+    line-height: $text-sm-line-height;
+    margin: 0;
+  }
 }
 
-.header h3 {
-  color: white;
-  font-weight: 600;
-  font-size: 14px;
-  line-height: 1.5;
+.recent-orders-body {
+  overflow-x: auto;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+table {
+  width: 100%;
+  font-size: $text-xs;
+  border-collapse: collapse;
+}
+
+thead {
+  border-bottom: 1px solid $border-dark;
+}
+
+th {
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-top: 0.625rem;
+  padding-bottom: 0.625rem;
+  text-align: left;
+  font-size: 10px;
+  color: $color-slate-500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: $font-weight-semibold;
+  white-space: nowrap;
+}
+
+tbody {
+  tr {
+    border-bottom: 1px solid $border-dark;
+    transition-property: background-color;
+    transition-timing-function: $transition-timing;
+    transition-duration: $transition-duration;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.02);
+    }
+
+    td {
+      padding-left: 1rem;
+      padding-right: 1rem;
+      padding-top: 0.75rem;
+      padding-bottom: 0.75rem;
+      font-family: monospace;
+
+      &.order-id {
+        color: $color-slate-400;
+      }
+
+      &.side {
+        span {
+          font-family: monospace;
+          font-weight: $font-weight-semibold;
+          font-size: 10px;
+          text-transform: uppercase;
+
+          &.buy {
+            color: $color-emerald-400;
+          }
+
+          &.sell {
+            color: $color-red-400;
+          }
+        }
+      }
+
+      &.instrument {
+        color: $color-white;
+        font-weight: $font-weight-semibold;
+      }
+
+      &.quantity,
+      &.price {
+        color: $color-slate-300;
+      }
+
+      &.total {
+        color: $color-white;
+      }
+
+      &.time {
+        color: $color-slate-500;
+      }
+
+      &.status {
+        .status-badge {
+          font-family: monospace;
+          font-size: 10px;
+          padding-left: 0.5rem;
+          padding-right: 0.5rem;
+          padding-top: 0.125rem;
+          padding-bottom: 0.125rem;
+          border-radius: $radius-full;
+          font-weight: $font-weight-semibold;
+
+          &.status-filled {
+            color: $color-emerald-400;
+            background-color: rgba(16, 185, 129, 0.1);
+          }
+
+          &.status-pending {
+            color: #fbbf24;
+            background-color: rgba(251, 191, 36, 0.1);
+          }
+
+          &.status-cancelled {
+            color: $color-red-400;
+            background-color: rgba(239, 68, 68, 0.1);
+          }
+        }
+      }
+    }
+  }
 }
 
 .no-orders {
-  display: block;
-  color: #64748b;
-  font-size: 12px;
-  line-height: 1.5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem;
+  color: $color-slate-500;
+  font-size: $text-xs;
   text-align: center;
-  padding-block: 40px;
-  padding-inline: 20px;
+  min-height: 200px;
+
+  p {
+    margin: 0;
+  }
 }

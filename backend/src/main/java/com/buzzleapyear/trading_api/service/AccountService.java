@@ -2,7 +2,10 @@ package com.buzzleapyear.trading_api.service;
 import com.buzzleapyear.trading_api.repository.UserRepository;
 import com.buzzleapyear.trading_api.entity.User;
 import com.buzzleapyear.trading_api.repository.ClientRepository;
+import com.buzzleapyear.trading_api.repository.TradeOrderRepository;
+import com.buzzleapyear.trading_api.repository.TradeOrderStatusRepository;
 import com.buzzleapyear.trading_api.dto.CurrentAccountResponseDto;
+import com.buzzleapyear.trading_api.dto.RecentTradeOrderResponseDto;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -14,6 +17,7 @@ import com.buzzleapyear.trading_api.repository.AccountRepository;
 import java.util.Optional;
 import com.buzzleapyear.trading_api.entity.Account;
 import java.math.BigDecimal;
+import org.springframework.data.domain.PageRequest;
 
 @Service
 public class AccountService {
@@ -21,12 +25,22 @@ public class AccountService {
     private final HoldingService holdingService;
     private final UserRepository userRepository;
     private final ClientRepository clientRepository;
+    private TradeOrderRepository tradeOrderRepository;
+    private TradeOrderStatusRepository tradeOrderStatusRepository;
 
-    public AccountService(AccountRepository accountRepository, HoldingService holdingService, UserRepository userRepository, ClientRepository clientRepository) {
+    public AccountService(
+        AccountRepository accountRepository, 
+        HoldingService holdingService, 
+        UserRepository userRepository, 
+        ClientRepository clientRepository,
+        TradeOrderRepository tradeOrderRepository, 
+        TradeOrderStatusRepository tradeOrderStatusRepository) {
         this.accountRepository = accountRepository;
         this.holdingService = holdingService;
         this.userRepository = userRepository;
         this.clientRepository = clientRepository;
+        this.tradeOrderRepository = tradeOrderRepository;
+        this.tradeOrderStatusRepository = tradeOrderStatusRepository;
     }
 
     // Configured to only find a single user account at the moment
@@ -55,9 +69,7 @@ public class AccountService {
 
     @Transactional(readOnly = true)
     public Optional<AccountValueResponseDto> getAccountValue(String id, String username) {
-        Account account = accountRepository.findById(Long.parseLong(id))
-            .filter(account -> account.getClient().getUser().getUsername().equals(username))
-            .orElse(null);
+        Account account = findAccountByIdForUser(Long.parseLong(id), username).orElse(null);
 
         if (account == null) {
             return Optional.empty();
@@ -80,5 +92,39 @@ public class AccountService {
             account.getCashReserved(),
             totalPortfolioValue
         ));
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<Account> findAccountByIdForUser(Long accountId, String username) {
+        return accountRepository.findById(accountId)
+            .filter(acc -> acc.getClient().getUser().getUsername().equals(username));
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<List<RecentTradeOrderResponseDto>> getRecentTradeOrders(Long accountId, String username, int limit) {
+        if (findAccountByIdForUser(accountId, username).isEmpty()) {
+            return Optional.empty();
+        }
+
+        List<RecentTradeOrderResponseDto> recentTradeOrders = tradeOrderRepository
+            .findByAccountIdOrderByOrderDateDesc(accountId, PageRequest.of(0, limit))
+            .stream()
+            .map(order -> {
+                var status = tradeOrderStatusRepository.getLatestStatusById(order.getId());
+                return new RecentTradeOrderResponseDto(
+                    order.getId(),
+                    order.getInstrument().getInstrumentSymbol(),
+                    order.getSide(),
+                    order.getQuantity(),
+                    order.getPrice(),
+                    order.getOrderDate(),
+                    status == null ? null : status.getStatus(),
+                    status == null ? null : status.getTimeUpdated(),
+                    status == null ? null : status.getReasonText()
+                );
+            })
+            .toList();
+
+        return Optional.of(recentTradeOrders);
     }
 }

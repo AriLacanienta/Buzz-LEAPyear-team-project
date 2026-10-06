@@ -1,17 +1,46 @@
 <div class="recent-orders-container">
-    <div class="header">
+    <div class="recent-orders-header">
         <h3>Recent Orders</h3>
     </div>
-    <div *ngIf="orders && orders.length > 0; else noOrders">
-        <div *ngFor="let order of orders">
-            <p>{{ order.symbol }} - {{ order.type }}</p>
-            <p>Qty: {{ order.quantity }} | Price: ${{ order.price }}</p>
-            <p>{{ order.timestamp | date: 'short' }}</p>
-        </div>
+    <div class="recent-orders-body">
+        <table *ngIf="orders && orders.length > 0; else noOrders">
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Side</th>
+                    <th>Instrument</th>
+                    <th>Qty</th>
+                    <th>Price</th>
+                    <th>Total</th>
+                    <th>Time</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let order of orders">
+                    <td class="order-id">{{ order.orderId }}</td>
+                    <td class="side">
+                        <span [class.buy]="order.side === 'BUY'" [class.sell]="order.side === 'SELL'">
+                            {{ order.side.toLowerCase() }}
+                        </span>
+                    </td>
+                    <td class="instrument">{{ order.instrumentSymbol }}</td>
+                    <td class="quantity">{{ order.quantity }}</td>
+                    <td class="price">{{ order.price | currency: 'USD': 'symbol': '1.2-2' }}</td>
+                    <td class="total">{{ (order.quantity * order.price) | currency: 'USD': 'symbol': '1.2-2' }}</td>
+                    <td class="time">{{ order.orderDate | date: 'HH:mm:ss' }}</td>
+                    <td class="status">
+                        <span class="status-badge" [class]="'status-' + order.status.toLowerCase()">
+                            {{ order.status }}
+                        </span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <ng-template #noOrders>
+            <div class="no-orders">
+                <p>No orders placed yet. Submit your first order to see it here.</p>
+            </div>
+        </ng-template>
     </div>
-    <ng-template #noOrders>
-        <div class="no-orders">
-            <p>No orders placed yet. Submit your first order to see it here.</p>
-        </div>
-    </ng-template>
 </div>

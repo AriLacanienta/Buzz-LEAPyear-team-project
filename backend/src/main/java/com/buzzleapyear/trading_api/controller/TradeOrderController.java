@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,6 +27,7 @@ import com.buzzleapyear.trading_api.repository.InstrumentRepository;
 import com.buzzleapyear.trading_api.repository.TradeOrderRepository;
 import com.buzzleapyear.trading_api.repository.TradeOrderStatusRepository;
 import com.buzzleapyear.trading_api.service.ProcessOrderService;
+import com.buzzleapyear.trading_api.service.AccountService;
 
 import jakarta.validation.Valid;
 
@@ -46,18 +48,21 @@ public class TradeOrderController {
     private final TradeOrderStatusRepository tradeOrderStatusRepository;
     private final AccountRepository accountRepository;
     private final InstrumentRepository instrumentRepository;
+    private final AccountService accountService;
 
     public TradeOrderController(
             ProcessOrderService processOrderService,
             TradeOrderRepository tradeOrderRepository,
             TradeOrderStatusRepository tradeOrderStatusRepository,
             AccountRepository accountRepository,
-            InstrumentRepository instrumentRepository) {
+            InstrumentRepository instrumentRepository,
+            AccountService accountService) {
         this.processOrderService = processOrderService;
         this.tradeOrderRepository = tradeOrderRepository;
         this.tradeOrderStatusRepository = tradeOrderStatusRepository;
         this.accountRepository = accountRepository;
         this.instrumentRepository = instrumentRepository;
+        this.accountService = accountService;
     }
 
     /**
@@ -69,14 +74,16 @@ public class TradeOrderController {
      * @return 202 Accepted with TradeOrderResponseDTO containing orderId
      */
     @PostMapping
-    public ResponseEntity<TradeOrderResponseDTO> submitOrder(@Valid @RequestBody TradeOrderDTO orderDTO) {
+    public ResponseEntity<TradeOrderResponseDTO> submitOrder(@Valid @RequestBody TradeOrderDTO orderDTO, Authentication authentication) {
         logger.info("Received POST /api/v1/tradeorders - side: {}, instrument: {}, qty: {}, price: {}",
             orderDTO.getSide(), orderDTO.getInstrumentId(), orderDTO.getQuantity(), orderDTO.getPrice());
         
         try {
             // Validate and load account
-            Account account = accountRepository.findById(orderDTO.getAccountId())
-                .orElseThrow(() -> new IllegalArgumentException("Account not found: " + orderDTO.getAccountId()));
+            Account account = accountService.findAccountByIdForUser(orderDTO.getAccountId(), authentication.getName()).orElse(null);
+            if (account == null) {
+                return ResponseEntity.notFound().build();
+            }
             
             // Validate and load instrument
             Instrument instrument = instrumentRepository.findById(orderDTO.getInstrumentId())
@@ -135,7 +142,7 @@ public class TradeOrderController {
      * @return 200 OK with OrderStatusDTO if found, 404 Not Found otherwise
      */
     @GetMapping("/{orderId}")
-    public ResponseEntity<OrderStatusDTO> getOrderStatus(@PathVariable Long orderId) {
+    public ResponseEntity<OrderStatusDTO> getOrderStatus(@PathVariable Long orderId, Authentication authentication) {
         logger.info("Received GET /api/v1/tradeorders/{}", orderId);
         
         try {
@@ -145,6 +152,10 @@ public class TradeOrderController {
             
             if (order == null) {
                 logger.warn("Order not found: {}", orderId);
+                return ResponseEntity.notFound().build();
+            }
+
+            if (accountService.findAccountByIdForUser(order.getAccount().getId(), authentication.getName()).isEmpty()) {
                 return ResponseEntity.notFound().build();
             }
             

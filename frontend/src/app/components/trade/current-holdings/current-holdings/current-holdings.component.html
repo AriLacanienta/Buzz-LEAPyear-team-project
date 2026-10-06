@@ -13,7 +13,17 @@
                     <th>Action</th>
                 </tr>
             </thead>
-            <tbody></tbody>
+            <tbody>
+                <tr *ngFor="let holding of currentHoldings">
+                    <td class="ticker">{{ holding.instrumentSymbol }}</td>
+                    <td class="quantity">{{ holding.quantity }}</td>
+                    <td class="price">{{ holding.currentPrice | currency: 'USD': 'symbol': '1.2-2' }}</td>
+                    <td class="value">{{ holding.totalValue | currency: 'USD': 'symbol': '1.2-2' }}</td>
+                    <td class="action">
+                        <button class="sell-button">Sell</button>
+                    </td>
+                </tr>
+            </tbody>
         </table>
     </div>
 </div>
