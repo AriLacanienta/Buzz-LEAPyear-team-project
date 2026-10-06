@@ -13,8 +13,8 @@ import java.util.List;
 public interface TradeOrderRepository extends JpaRepository<TradeOrder, Long> {
     List<TradeOrder> findByAccountId(Long accountId);
     
-    @Query("SELECT DISTINCT to FROM TradeOrder to LEFT JOIN FETCH to.instrument WHERE to.account.id = ?1 ORDER BY to.orderDate DESC")
-    Page<TradeOrder> findByAccountIdOrderByOrderDateDesc(Long accountId, Pageable pageable);
+    @Query("SELECT o FROM TradeOrder o LEFT JOIN FETCH o.instrument WHERE o.account.id = ?1 ORDER BY o.orderDate DESC")
+    List<TradeOrder> findByAccountIdOrderByOrderDateDesc(Long accountId, Pageable pageable);
     
     List<TradeOrder> findByInstrumentId(Long instrumentId);
 }

@@ -46,6 +46,21 @@ $transition-duration: 200ms;
   }
 }
 
+.no-holdings {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem;
+  color: $color-slate-500;
+  font-size: $text-xs;
+  text-align: center;
+  min-height: 200px;
+
+  p {
+    margin: 0;
+  }
+}
+
 table {
   width: 100%;
   font-size: $text-xs;

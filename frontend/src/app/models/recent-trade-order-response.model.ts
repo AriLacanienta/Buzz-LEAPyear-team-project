@@ -17,7 +17,7 @@ export interface RecentTradeOrderResponse {
   quantity: number;
   price: number;
   orderDate: string | Date;
-  status: OrderStatus;
-  timeUpdated: string | Date;
-  reasonText: string;
+  status: OrderStatus | null;
+  timeUpdated: string | Date | null;
+  reasonText: string | null;
 }

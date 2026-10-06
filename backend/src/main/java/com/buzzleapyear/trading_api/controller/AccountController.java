@@ -35,7 +35,7 @@ public class AccountController {
 
     @GetMapping("/{id}/tradeorders")
     public ResponseEntity<List<RecentTradeOrderResponseDto>> getRecentTradeOrders(
-        @PathVariable Long accountId,
+        @PathVariable("id") Long accountId,
         @RequestParam(defaultValue = "10") int limit,
         Authentication authentication) {
             if (limit < 1 || limit > 100) {

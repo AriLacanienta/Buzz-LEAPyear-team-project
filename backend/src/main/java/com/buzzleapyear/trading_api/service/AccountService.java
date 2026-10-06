@@ -3,6 +3,7 @@ import com.buzzleapyear.trading_api.repository.UserRepository;
 import com.buzzleapyear.trading_api.entity.User;
 import com.buzzleapyear.trading_api.repository.ClientRepository;
 import com.buzzleapyear.trading_api.repository.TradeOrderRepository;
+import com.buzzleapyear.trading_api.entity.TradeOrderStatus;
 import com.buzzleapyear.trading_api.repository.TradeOrderStatusRepository;
 import com.buzzleapyear.trading_api.dto.CurrentAccountResponseDto;
 import com.buzzleapyear.trading_api.dto.RecentTradeOrderResponseDto;
@@ -110,7 +111,7 @@ public class AccountService {
             .findByAccountIdOrderByOrderDateDesc(accountId, PageRequest.of(0, limit))
             .stream()
             .map(order -> {
-                var status = tradeOrderStatusRepository.getLatestStatusById(order.getId());
+                TradeOrderStatus status = tradeOrderStatusRepository.findFirstByTradeOrderIdOrderByTimeUpdatedDesc(order.getId());
                 return new RecentTradeOrderResponseDto(
                     order.getId(),
                     order.getInstrument().getInstrumentSymbol(),

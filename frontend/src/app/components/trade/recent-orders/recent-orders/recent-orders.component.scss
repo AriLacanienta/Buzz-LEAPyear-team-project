@@ -100,10 +100,6 @@ tbody {
       padding-bottom: 0.75rem;
       font-family: monospace;
 
-      &.order-id {
-        color: $color-slate-400;
-      }
-
       &.side {
         span {
           font-family: monospace;
@@ -137,6 +133,7 @@ tbody {
 
       &.time {
         color: $color-slate-500;
+        white-space: nowrap;
       }
 
       &.status {

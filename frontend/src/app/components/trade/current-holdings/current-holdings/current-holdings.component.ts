@@ -1,4 +1,4 @@
-import { CurrencyPipe, NgFor } from '@angular/common';
+import { CurrencyPipe, NgFor, NgIf } from '@angular/common';
 import { Component, OnInit, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CurrentHoldingsResponse } from '@app/models/current-holdings-response.model';
@@ -11,7 +11,7 @@ const POLL_INTERVAL_MS = 3000;
 @Component({
   selector: 'app-current-holdings',
   standalone: true,
-  imports: [NgFor, CurrencyPipe],
+  imports: [NgFor, NgIf, CurrencyPipe],
   templateUrl: './current-holdings.component.html',
   styleUrl: './current-holdings.component.scss'
 })
