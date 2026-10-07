@@ -184,6 +184,11 @@ $shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
     outline: none;
     border-color: #3080ff99;
   }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
 }
 
 .price-summary {
@@ -232,6 +237,14 @@ $shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
   }
 }
 
+.not-held-notice {
+  font-size: $text-xs;
+  color: #f87171;
+  padding-bottom: 0.375rem;
+  margin-bottom: 0.375rem;
+  border-bottom: 1px solid $border-dark;
+}
+
 .buying-power {
   display: flex;
   align-items: center;
@@ -248,12 +261,16 @@ $shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
   font-family: monospace;
   font-weight: 500;
   color: $color-emerald;
+
+  &.negative {
+    color: $color-red;
+  }
 }
 
 .sell {
   background-color: $color-red !important;
 
-  &:hover {
+  &:hover:not(:disabled) {
     background-color: #dc2626 !important;
   }
 }
@@ -304,6 +321,20 @@ $shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
   span {
     font-size: $text-xs;
     color: #f87171;
+    line-height: 1;
+  }
+}
+
+.success-container {
+  background-color: rgba($color-emerald, 0.1);
+  border: 1px solid rgba($color-emerald, 0.2);
+  border-radius: $radius-lg;
+  padding: 0.625rem 0.75rem;
+  margin-bottom: 1rem;
+
+  span {
+    font-size: $text-xs;
+    color: #34d399;
     line-height: 1;
   }
 }

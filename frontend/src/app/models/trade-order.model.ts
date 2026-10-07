@@ -3,7 +3,7 @@ export type OrderStatus = 'SUBMITTED' | 'VALIDATED' | 'FILLED' | 'REJECTED';
 
 export interface TradeOrderPreviewRequest {
     side: OrderSide;
-    symbol: string;
+    instrumentSymbol: string;
     quantity: number;
     accountId: string | number;
 }

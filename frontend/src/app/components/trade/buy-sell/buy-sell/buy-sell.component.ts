@@ -1,16 +1,19 @@
   import { Component, DestroyRef, OnInit } from '@angular/core';
+import { HoldingService } from '@app/services/holding.service';
+import { TradeOrderService } from '@app/services/trade-order.service';
+import { TradeOrderPreviewRequest, TradeOrderPreviewResponse } from '@app/models/trade-order.model';
 import { SearchComponent } from '../search/search.component';
 import { SearchResultDetailComponent } from '../search-result-detail/search-result-detail.component';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { InstrumentSearchResponse } from '@app/models/instrument-search-response.model';
 import { AccountService } from '@app/services/account.service';
-import { BalanceResponse } from '@app/models/balance-response.model';
-import { switchMap, timer } from 'rxjs';
+import { merge, switchMap, timer, of, Subject } from 'rxjs';
+import { catchError, debounceTime } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
-const POLL_INTERVAL_MS = 3000;
-
 type OrderType = 'buy' | 'sell';
+
+const PREVIEW_POLL_INTERVAL_MS = 3000;
 
 @Component({
   selector: 'app-buy-sell',
@@ -22,30 +25,61 @@ type OrderType = 'buy' | 'sell';
 export class BuySellComponent implements OnInit {
   isBuy: boolean = true;
   quantity: number = 0;
+  successMessage: string = '';
   errorMessage: string = '';
   selectedTag: string = 'All';
   selectedResult: InstrumentSearchResponse | null = null;
   instruments: InstrumentSearchResponse[] | null = null;
-  buyingPower: number = 0;
+  preview: TradeOrderPreviewResponse | null = null;
+  cashAvailable: number | null = null;
+  isSubmitting: boolean = false;
 
-  constructor(private accountService: AccountService, private destroyRef: DestroyRef) {}
+  private accountId: string | null = null;
+  private ownsSelected: boolean | null = null;
+  private previewTrigger$ = new Subject<void>();
+
+  constructor(
+    private accountService: AccountService, 
+    private holdingService: HoldingService,
+    private tradeOrderService: TradeOrderService, 
+    private destroyRef: DestroyRef
+  ) {}
 
   ngOnInit(): void {
-    this.fetchBuyingPower();
-  }
-
-  fetchBuyingPower(): void {
     this.accountService.getMyAccount().pipe(
-      switchMap(account => this.accountService.getAccountBalance(account.accountId)),
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
-      next: (balance: BalanceResponse) => this.buyingPower = balance.cashAvailable,
-      error: error => console.error('Could not load buying power', error)
+      next: account => {
+        this.accountId = account.accountId;
+        this.loadCashAvailable();
+        this.checkOwnership();
+        this.requestPreview();
+      }
+    })
+
+    merge(
+      this.previewTrigger$.pipe(debounceTime(300)),
+      timer(0, PREVIEW_POLL_INTERVAL_MS)
+    ).pipe(
+      switchMap(() => {
+        const request = this.buildPreviewRequest();
+        if (!request) {
+          return of(null);
+        }
+        return this.tradeOrderService.previewOrder(request).pipe(catchError(() => of(null)));
+      }),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(preview => {
+      this.preview = preview;
+      if (preview) {
+        this.cashAvailable = preview.cashAvailable;
+      }
     });
   }
 
   toggleOrderType(side: OrderType): void {
     this.isBuy = side === 'buy';
+    this.requestPreview();
   }
 
   selectTag(tag: string): void {
@@ -60,16 +94,22 @@ export class BuySellComponent implements OnInit {
     input.value = input.value.replace(/^0+(?=\d)/, '');
 
     this.quantity = parseInt(input.value, 10) || 0;
+    this.requestPreview();
   }
 
   onSearchItemSelected(item: InstrumentSearchResponse | null): void {
+    const symbolChanged = item?.instrumentSymbol !== this.selectedResult?.instrumentSymbol;
     this.selectedResult = item;
-    console.log('Selected item from search:', item);
-    // Handle selected item (populate quantity, set symbol, etc.)
+
+    if (symbolChanged) {
+      this.checkOwnership();
+    }
+    this.requestPreview();
   }
 
   onPlaceOrder(): void {
     this.errorMessage = '';
+    this.successMessage = '';
 
     if (!this.selectedResult) {
       this.errorMessage = 'Please select an instrument.';
@@ -100,5 +140,96 @@ export class BuySellComponent implements OnInit {
 
   submitOrder(side: OrderType): void {
 
+  }
+
+  private checkOwnership(): void {
+    this.ownsSelected = null;
+    const symbol = this.selectedResult?.instrumentSymbol;
+    if (!this.accountId || !symbol) {
+      return;
+    }
+    this.holdingService.getHoldingsByAccountId(this.accountId).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: holdings => {
+        if (symbol === this.selectedResult?.instrumentSymbol) {
+          this.ownsSelected = holdings.some(h => h.instrumentSymbol === symbol);
+        }
+      },
+      error: error => console.error('Could not load holdings', error)
+    });
+  }
+
+  private isPreviewRejected(side: 'BUY' | 'SELL'): boolean {
+    const preview = this.preview;
+    const matchesInput = preview 
+    && preview.side === side 
+    && preview.symbol === this.selectedResult?.instrumentSymbol 
+    && Number(preview.quantity) === this.quantity;
+
+    if (preview && matchesInput && !preview.valid) {
+      this.errorMessage = preview.reason ?? 'Order is not valid.';
+      return true;
+    }
+    return false;
+  }
+
+  private requestPreview(): void {
+    this.previewTrigger$.next();
+  }
+
+  private buildPreviewRequest(): TradeOrderPreviewRequest | null {
+    if (!this.accountId || !this.selectedResult || this.quantity <= 0) {
+      return null;
+    }
+
+    return {
+      side: this.isBuy ? 'BUY' : 'SELL',
+      instrumentSymbol: this.selectedResult.instrumentSymbol,
+      quantity: this.quantity,
+      accountId: this.accountId
+    };
+  }
+
+  private loadCashAvailable(): void {
+    if (!this.accountId) {
+      return;
+    }
+    this.accountService.getAccountBalance(this.accountId).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: balance => this.cashAvailable = balance.cashAvailable,
+      error: error => console.error('Could not load account balance', error)
+    });
+  }
+
+  get estimatedTotal(): number | null {
+    if(this.preview?.estimatedValue != null) {
+      return this.preview.estimatedValue;
+    }
+    return this.selectedResult && this.quantity > 0 ? this.selectedResult.currentPrice * this.quantity : null;
+  }
+
+  get indicativePrice(): number | null {
+    return this.preview?.livePrice ?? this.selectedResult?.currentPrice ?? null;
+  }
+
+  get buyingPowerValue(): number | null {
+    return this.preview?.cashAfter ?? this.cashAvailable;
+  }
+
+  get isNotHeld(): boolean {
+    return !this.isBuy && this.ownsSelected === false;
+  }
+
+  get isInsufficientCash(): boolean {
+    return this.isBuy && this.buyingPowerValue != null && this.buyingPowerValue < 0;
+  }
+
+  get buyingPowerLabel(): string {
+    if (!this.preview) {
+      return 'Available buying power';
+    }
+    return this.isBuy ? 'Available buying power' : 'Cash after sale';
   }
 }

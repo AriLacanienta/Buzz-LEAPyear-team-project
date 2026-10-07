@@ -1,9 +1,10 @@
 import { Component, OnInit, DestroyRef } from '@angular/core';
 import { NgIf, NgFor, DatePipe, CurrencyPipe } from '@angular/common';
+import { merge, of, switchMap } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { switchMap } from 'rxjs';
 import { AccountService } from '@app/services/account.service';
 import { RecentTradeOrderResponse } from '@app/models/recent-trade-order-response.model';
+import { TradeOrderService } from '@app/services/trade-order.service';
 
 @Component({
   selector: 'app-recent-orders',
@@ -17,6 +18,7 @@ export class RecentOrdersComponent implements OnInit {
 
   constructor(
     private accountService: AccountService,
+    private tradeOrderService: TradeOrderService,
     private destroyRef: DestroyRef
   ) {}
 
@@ -25,7 +27,8 @@ export class RecentOrdersComponent implements OnInit {
   }
 
   private fetchRecentOrders(): void {
-    this.accountService.getMyAccount().pipe(
+    merge(of(null), this.tradeOrderService.orderPlaced$).pipe(
+      switchMap(() => this.accountService.getMyAccount()),
       switchMap(account => this.accountService.getRecentTradeOrders(account.accountId, 10)),
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
