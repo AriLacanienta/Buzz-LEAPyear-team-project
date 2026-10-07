@@ -128,6 +128,7 @@ public class ImportCSVService {
                         account = new Account();
                         account.setClient(client); // Set the Client relationship
                         account.setAccountName(values.client_id + "_Account");
+                        account.setCashAvailable(new BigDecimal(10_000));
                         em.persist(account);
                         em.flush();
                         accountCache.put(accountKey, account);
