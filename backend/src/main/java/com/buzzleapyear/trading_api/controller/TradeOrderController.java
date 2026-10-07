@@ -2,6 +2,7 @@ package com.buzzleapyear.trading_api.controller;
 
 import java.net.URI;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,9 +13,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.buzzleapyear.trading_api.dto.OrderStatusDTO;
+import com.buzzleapyear.trading_api.dto.RecentOrderResponseDTO;
 import com.buzzleapyear.trading_api.dto.TradeOrderDTO;
 import com.buzzleapyear.trading_api.dto.TradeOrderResponseDTO;
 import com.buzzleapyear.trading_api.entity.Account;
@@ -26,6 +29,7 @@ import com.buzzleapyear.trading_api.repository.InstrumentRepository;
 import com.buzzleapyear.trading_api.repository.TradeOrderRepository;
 import com.buzzleapyear.trading_api.repository.TradeOrderStatusRepository;
 import com.buzzleapyear.trading_api.service.ProcessOrderService;
+import com.buzzleapyear.trading_api.service.TradeOrderService;
 
 import jakarta.validation.Valid;
 
@@ -46,18 +50,21 @@ public class TradeOrderController {
     private final TradeOrderStatusRepository tradeOrderStatusRepository;
     private final AccountRepository accountRepository;
     private final InstrumentRepository instrumentRepository;
+    private final TradeOrderService tradeOrderService;
 
     public TradeOrderController(
             ProcessOrderService processOrderService,
             TradeOrderRepository tradeOrderRepository,
             TradeOrderStatusRepository tradeOrderStatusRepository,
             AccountRepository accountRepository,
-            InstrumentRepository instrumentRepository) {
+            InstrumentRepository instrumentRepository,
+            TradeOrderService tradeOrderService) {
         this.processOrderService = processOrderService;
         this.tradeOrderRepository = tradeOrderRepository;
         this.tradeOrderStatusRepository = tradeOrderStatusRepository;
         this.accountRepository = accountRepository;
         this.instrumentRepository = instrumentRepository;
+        this.tradeOrderService = tradeOrderService;
     }
 
     /**
@@ -172,5 +179,14 @@ public class TradeOrderController {
             logger.error("Error retrieving order status", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+    }
+
+    @GetMapping("/accounts/{accountId}/orders")
+    public ResponseEntity<List<RecentOrderResponseDTO>> getRecentOrders(
+        @PathVariable Long accountId,
+        @RequestParam(defaultValue = "20") int limit) {
+        
+        List<RecentOrderResponseDTO> orders = tradeOrderService.getRecentOrdersByAccountId(accountId, limit);
+        return ResponseEntity.ok(orders);
     }
 }

@@ -6,6 +6,9 @@ import { switchMap, startWith } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
 import { PortfolioHoldingsContainerComponent } from '@app/components/portfolio/portfolio-holdings-container/portfolio-holdings-container.component';
 import { MarketInfoCardComponent } from '@app/components/portfolio/market-info-card/market-info-card.component';
+import { RecentOrdersComponent } from '@app/components/portfolio/recent-orders-table/recent-orders.component';
+import { RecentOrderService } from '../../services/recent-order.service';
+import { RecentOrder } from '../../models/recent-order.model';
 
 export interface QuoteResponse {
   symbol: string;
@@ -18,7 +21,7 @@ export interface QuoteResponse {
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
-  imports: [CommonModule, PortfolioHoldingsContainerComponent, MarketInfoCardComponent],
+  imports: [CommonModule, PortfolioHoldingsContainerComponent, MarketInfoCardComponent, RecentOrdersComponent],
   standalone: true
 })
 export class DashboardComponent implements OnInit, OnDestroy {
@@ -31,8 +34,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private refreshSubscription: Subscription | undefined;
   private gainersSubscription: Subscription | undefined;
   private losersSubscription: Subscription | undefined;
-
-  constructor(private holdingService: HoldingService, private instrumentService: InstrumentService) {
+  recentOrders: RecentOrder[] = [];
+  private orderSubscription: Subscription | undefined;
+  
+  constructor(private holdingService: HoldingService, private instrumentService: InstrumentService, private recentOrderService: RecentOrderService) {
     console.log('DashboardComponent initialized');
   }
 
@@ -87,6 +92,22 @@ export class DashboardComponent implements OnInit, OnDestroy {
           console.error('Error loading top losers:', error);
         }
       });
+    this.loadRecentOrders();
+  }
+
+  private loadRecentOrders(): void {
+    if (this.accountId) {
+      this.orderSubscription = this.recentOrderService.getRecentOrdersByAccountId(this.accountId, 20)
+        .subscribe({
+          next: (orders) => {
+            console.log('Recent orders:', orders);
+            this.recentOrders = orders;
+          },
+          error: (error) => {
+            console.error('Error loading recent orders:', error);
+          }
+        });
+    }
   }
 
   ngOnDestroy(): void {
@@ -98,6 +119,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
     if (this.losersSubscription) {
       this.losersSubscription.unsubscribe();
+    }
+    if (this.orderSubscription) {
+      this.orderSubscription.unsubscribe();
     }
   }
 }

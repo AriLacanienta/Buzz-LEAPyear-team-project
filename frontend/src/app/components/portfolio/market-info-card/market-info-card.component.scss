@@ -20,7 +20,7 @@ $color-secondary-text: #62748E;
   border: 0.1rem solid $border-dark;
   background: $bg-dark;
   width: 28rem;
-  height: 24rem;
+  height: 24.5rem;
 
   .top-gainers {
     color: $color-green;
@@ -85,6 +85,7 @@ $color-secondary-text: #62748E;
       align-items: center;
       padding: 0.15rem;
       font-size: 0.85rem;
+      overflow: hidden;
 
       .symbol {
         font-weight: 600;

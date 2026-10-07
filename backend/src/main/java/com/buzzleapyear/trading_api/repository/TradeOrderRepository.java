@@ -10,4 +10,5 @@ import java.util.List;
 public interface TradeOrderRepository extends JpaRepository<TradeOrder, Long> {
     List<TradeOrder> findByAccountId(Long accountId);
     List<TradeOrder> findByInstrumentId(Long instrumentId);
+    List<TradeOrder> findByAccountIdOrderByOrderDateDesc(Long accountId);
 }

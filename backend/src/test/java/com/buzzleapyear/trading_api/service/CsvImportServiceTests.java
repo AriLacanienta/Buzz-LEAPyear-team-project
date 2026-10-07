@@ -57,11 +57,11 @@ class CsvImportServiceTests {
 
         @Test
         void testHappyPath() {
-            final String TEST_LINE = "T0001,2026-01-05,C001,Alice Chen,J. Okafor,AAPL,Equity,BUY,120,185.32,USD,22238.40\r\n";
+            final String TEST_LINE = "T0001,2026-01-05,C001,Joanna Smith,J. Okafor,AAPL,Equity,BUY,120,185.32,USD,22238.40\r\n";
             LineValues result = testService.parseLine(TEST_LINE);
 
             Assertions.assertAll("parsed values",
-                () -> Assertions.assertEquals("Alice Chen", result.client_name),
+                () -> Assertions.assertEquals("Joanna Smith", result.client_name),
                 () -> Assertions.assertEquals("J. Okafor", result.advisor),
                 () -> Assertions.assertEquals("T0001", result.trade_id),
                 () -> Assertions.assertEquals("C001", result.client_id),
@@ -130,7 +130,7 @@ class CsvImportServiceTests {
         @Test
         void testSingleRowImportCreatesAllRequiredEntities() throws IOException {
             String csvContent = "trade_id,trade_date,client_id,client_name,advisor,instrument,asset_class,side,quantity,price,currency,value\n" +
-                    "T0001,2026-01-05,C001,Alice Chen,J. Okafor,AAPL,Equity,BUY,120,185.32,USD,22238.40";
+                    "T0001,2026-01-05,C001,Joanna Smith,J. Okafor,AAPL,Equity,BUY,120,185.32,USD,22238.40";
 
             ByteArrayInputStream inputStream = new ByteArrayInputStream(csvContent.getBytes());
 
@@ -176,7 +176,7 @@ class CsvImportServiceTests {
         @Test
         void testUserDataIsPersisted() throws IOException {
             String csvContent = "trade_id,trade_date,client_id,client_name,advisor,instrument,asset_class,side,quantity,price,currency,value\n" +
-                    "T0001,2026-01-05,C001,Alice Chen,J. Okafor,AAPL,Equity,BUY,120,185.32,USD,22238.40";
+                    "T0001,2026-01-05,C001,Joanna Smith,J. Okafor,AAPL,Equity,BUY,120,185.32,USD,22238.40";
 
             ByteArrayInputStream inputStream = new ByteArrayInputStream(csvContent.getBytes());
 
@@ -201,8 +201,8 @@ class CsvImportServiceTests {
 
             User persistedUser = userCaptor.getValue();
             Assertions.assertAll("User entity data validation",
-                () -> Assertions.assertEquals("Alice", persistedUser.getFirstName()),
-                () -> Assertions.assertEquals("Chen", persistedUser.getLastName()),
+                () -> Assertions.assertEquals("Joanna", persistedUser.getFirstName()),
+                () -> Assertions.assertEquals("Smith", persistedUser.getLastName()),
                 () -> Assertions.assertNotNull(persistedUser.getUsername()),
                 () -> Assertions.assertTrue(persistedUser.getUsername().contains("C001")),
                 () -> Assertions.assertEquals("C001@trading.local", persistedUser.getEmail()),
@@ -215,7 +215,7 @@ class CsvImportServiceTests {
         @Test
         void testClientDataIsPersisted() throws IOException {
             String csvContent = "trade_id,trade_date,client_id,client_name,advisor,instrument,asset_class,side,quantity,price,currency,value\n" +
-                    "T0001,2026-01-05,C001,Alice Chen,J. Okafor,AAPL,Equity,BUY,120,185.32,USD,22238.40";
+                    "T0001,2026-01-05,C001,Joanna Smith,J. Okafor,AAPL,Equity,BUY,120,185.32,USD,22238.40";
 
             ByteArrayInputStream inputStream = new ByteArrayInputStream(csvContent.getBytes());
 
@@ -261,7 +261,7 @@ class CsvImportServiceTests {
         @Test
         void testInstrumentDataIsPersisted() throws IOException {
             String csvContent = "trade_id,trade_date,client_id,client_name,advisor,instrument,asset_class,side,quantity,price,currency,value\n" +
-                    "T0001,2026-01-05,C001,Alice Chen,J. Okafor,AAPL,Equity,BUY,120,185.32,USD,22238.40";
+                    "T0001,2026-01-05,C001,Joanna Smith,J. Okafor,AAPL,Equity,BUY,120,185.32,USD,22238.40";
 
             ByteArrayInputStream inputStream = new ByteArrayInputStream(csvContent.getBytes());
 
@@ -290,7 +290,7 @@ class CsvImportServiceTests {
         @Test
         void testAccountDataIsPersisted() throws IOException {
             String csvContent = "trade_id,trade_date,client_id,client_name,advisor,instrument,asset_class,side,quantity,price,currency,value\n" +
-                    "T0001,2026-01-05,C001,Alice Chen,J. Okafor,AAPL,Equity,BUY,120,185.32,USD,22238.40";
+                    "T0001,2026-01-05,C001,Joanna Smith,J. Okafor,AAPL,Equity,BUY,120,185.32,USD,22238.40";
 
             ByteArrayInputStream inputStream = new ByteArrayInputStream(csvContent.getBytes());
 
@@ -327,7 +327,7 @@ class CsvImportServiceTests {
         @Test
         void testTradeOrderDataIsPersisted() throws IOException {
             String csvContent = "trade_id,trade_date,client_id,client_name,advisor,instrument,asset_class,side,quantity,price,currency,value\n" +
-                    "T0001,2026-01-05,C001,Alice Chen,J. Okafor,AAPL,Equity,BUY,120,185.32,USD,22238.40";
+                    "T0001,2026-01-05,C001,Joanna Smith,J. Okafor,AAPL,Equity,BUY,120,185.32,USD,22238.40";
 
             ByteArrayInputStream inputStream = new ByteArrayInputStream(csvContent.getBytes());
 
@@ -368,8 +368,8 @@ class CsvImportServiceTests {
         @Test
         void testCachingBehaviorForSameUser() throws IOException {
             String csvContent = "trade_id,trade_date,client_id,client_name,advisor,instrument,asset_class,side,quantity,price,currency,value\n" +
-                    "T0001,2026-01-05,C001,Alice Chen,J. Okafor,AAPL,Equity,BUY,120,185.32,USD,22238.40\n" +
-                    "T0002,2026-01-06,C001,Alice Chen,J. Okafor,GOOGL,Equity,BUY,50,2800.00,USD,140000.00";
+                    "T0001,2026-01-05,C001,Joanna Smith,J. Okafor,AAPL,Equity,BUY,120,185.32,USD,22238.40\n" +
+                    "T0002,2026-01-06,C001,Joanna Smith,J. Okafor,GOOGL,Equity,BUY,50,2800.00,USD,140000.00";
 
             ByteArrayInputStream inputStream = new ByteArrayInputStream(csvContent.getBytes());
 
@@ -401,7 +401,7 @@ class CsvImportServiceTests {
         @Test
         void testCachingBehaviorForSameInstrument() throws IOException {
             String csvContent = "trade_id,trade_date,client_id,client_name,advisor,instrument,asset_class,side,quantity,price,currency,value\n" +
-                    "T0001,2026-01-05,C001,Alice Chen,J. Okafor,AAPL,Equity,BUY,120,185.32,USD,22238.40\n" +
+                    "T0001,2026-01-05,C001,Joanna Smith,J. Okafor,AAPL,Equity,BUY,120,185.32,USD,22238.40\n" +
                     "T0002,2026-01-06,C002,Bob Smith,Jane Doe,AAPL,Equity,SELL,50,186.00,USD,9300.00";
 
             ByteArrayInputStream inputStream = new ByteArrayInputStream(csvContent.getBytes());
@@ -434,7 +434,7 @@ class CsvImportServiceTests {
         @Test
         void testMultipleClientsFromDifferentAdvisors() throws IOException {
             String csvContent = "trade_id,trade_date,client_id,client_name,advisor,instrument,asset_class,side,quantity,price,currency,value\n" +
-                    "T0001,2026-01-05,C001,Alice Chen,J. Okafor,AAPL,Equity,BUY,120,185.32,USD,22238.40\n" +
+                    "T0001,2026-01-05,C001,Joanna Smith,J. Okafor,AAPL,Equity,BUY,120,185.32,USD,22238.40\n" +
                     "T0002,2026-01-06,C002,Bob Smith,Jane Doe,GOOGL,Equity,BUY,50,2800.00,USD,140000.00";
 
             ByteArrayInputStream inputStream = new ByteArrayInputStream(csvContent.getBytes());
@@ -467,7 +467,7 @@ class CsvImportServiceTests {
         @Test
         void testTransactionFlushCalls() throws IOException {
             String csvContent = "trade_id,trade_date,client_id,client_name,advisor,instrument,asset_class,side,quantity,price,currency,value\n" +
-                    "T0001,2026-01-05,C001,Alice Chen,J. Okafor,AAPL,Equity,BUY,120,185.32,USD,22238.40";
+                    "T0001,2026-01-05,C001,Joanna Smith,J. Okafor,AAPL,Equity,BUY,120,185.32,USD,22238.40";
 
             ByteArrayInputStream inputStream = new ByteArrayInputStream(csvContent.getBytes());
 

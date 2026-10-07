@@ -72,7 +72,7 @@ Comprehensive tests using mocked EntityManager to verify entity persistence with
 
 **C. Caching & Relationship Tests:**
 - **`testCachingBehaviorForSameUser()`**
-  - Tests importing 2 trades from same user (Alice Chen)
+  - Tests importing 2 trades from same user (Joanna Smith)
   - Validates only 1 User is persisted (caching prevents duplicates)
   - Confirms 1 Client is created per user
 

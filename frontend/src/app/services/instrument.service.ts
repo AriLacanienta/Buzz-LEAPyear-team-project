@@ -60,6 +60,7 @@ export class InstrumentService {
       map((response: any) => {
         const instruments = response.content || [];
         return instruments
+          .filter((a: any) => (a.changePercent || 0) < 0)
           .sort((a: any, b: any) => (a.changePercent || 0) - (b.changePercent || 0))
           .slice(0, limit)
           .map((instrument: any) => ({
