@@ -81,9 +81,9 @@ public class ImportCSVService {
                         String[] nameParts = values.client_name.split(" ", 2);
                         user.setFirstName(nameParts[0]);
                         user.setLastName(nameParts.length > 1 ? nameParts[1] : nameParts[0]);
-                        user.setUsername(values.client_id + "_" + System.currentTimeMillis());
-                        user.setEmail(values.client_id + "@trading.local");
-                        user.setPasswordHash("hashed_password");
+                        user.setUsername(values.client_id);
+                        user.setEmail(values.client_id + "@trading.demo");
+                        user.setPasswordHash("$2a$10$QEG13Tgr8.fgIP4n1.CxVeEoUhKYjWF7S2HK4mwhWh9V0zz80GUzi");
                         user.setCreatedAt(LocalDateTime.now());
                         user.setUpdatedAt(LocalDateTime.now());
                         em.persist(user);
