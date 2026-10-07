@@ -47,26 +47,6 @@
                 <span class="price-value">{{estimatedTotal != null ? (estimatedTotal | currency) : '--'}}</span>
             </div>
         </ng-template>
-        <div class="price-summary-row">
-            <span class="price-label">Indicative price</span>
-            <span class="price-value">{{ indicativePrice | currency }}</span>
-        </div>
-        <div class="price-summary-row">
-            <span class="price-label">Quantity</span>
-            <span class="price-value">{{ quantity }}</span>
-        </div>
-        <div *ngIf="!isBuy && preview" class="price-summary-row">
-            <span class="price-label">Shares held</span>
-            <span class="price-value">{{ preview.holdingQuantity }}</span>
-        </div>
-        <div *ngIf="!isBuy && preview?.realizedPnL != null" class="price-summary-row">
-            <span class="price-label">Estimated P/L</span>
-            <span class="price-value">{{ preview?.realizedPnL | currency}}</span>
-        </div>
-        <div class="price-summary-row total">
-            <span class="price-label">Estimated total</span>
-            <span class="price-value">{{estimatedTotal != null ? (estimatedTotal | currency) : '--'}}</span>
-        </div>
     </div>
 
     <div class="buying-power">
@@ -94,7 +74,7 @@
         <span>{{ errorMessage }}</span>
     </div>
 
-    <button class="place-order-btn" [class.sell]="!isBuy" [disabled]="isSubmitting || isNotHeld" (click)="onPlaceOrder()">
+    <button class="place-order-btn" [class.sell]="!isBuy" [disabled]="isSubmitting || isNotHeld || isInsufficientCash" (click)="onPlaceOrder()">
         {{ isSubmitting ? 'Submitting...' : (isBuy ? 'Review & Submit Buy' : 'Review & Submit Sell') }}
     </button>
 </div>
