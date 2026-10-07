@@ -288,6 +288,10 @@ public class QuoteService {
         return new PageImpl<>(pagedResponses, pageable, responses.size());
     }
 
+    public Optional<BigDecimal> getLatestPrice(String symbol) {
+        return getLatestQuoteBySymbol(symbol).map(QuoteResponseDto::price);
+    }
+
     private BigDecimal generateNextPrice(BigDecimal prevPrice, double volatility, double drift) {
         double shock = ThreadLocalRandom.current().nextGaussian(); // Random value ranging *mostly* from -3 to 3, but generally closer to 0
         double changePercent = drift + volatility * shock; // Scale the random value

@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.buzzleapyear.trading_api.dto.OrderStatusDTO;
 import com.buzzleapyear.trading_api.dto.TradeOrderDTO;
 import com.buzzleapyear.trading_api.dto.TradeOrderResponseDTO;
+import com.buzzleapyear.trading_api.dto.TradeOrderPreviewRequestDto;
+import com.buzzleapyear.trading_api.dto.TradeOrderPreviewResponseDto;
 import com.buzzleapyear.trading_api.entity.Account;
 import com.buzzleapyear.trading_api.entity.Instrument;
 import com.buzzleapyear.trading_api.entity.TradeOrder;
@@ -28,6 +30,7 @@ import com.buzzleapyear.trading_api.repository.TradeOrderRepository;
 import com.buzzleapyear.trading_api.repository.TradeOrderStatusRepository;
 import com.buzzleapyear.trading_api.service.ProcessOrderService;
 import com.buzzleapyear.trading_api.service.AccountService;
+import com.buzzleapyear.trading_api.service.OrderProcessor;
 
 import jakarta.validation.Valid;
 
@@ -49,6 +52,7 @@ public class TradeOrderController {
     private final AccountRepository accountRepository;
     private final InstrumentRepository instrumentRepository;
     private final AccountService accountService;
+    private final OrderProcessor orderProcessor;
 
     public TradeOrderController(
             ProcessOrderService processOrderService,
@@ -56,13 +60,32 @@ public class TradeOrderController {
             TradeOrderStatusRepository tradeOrderStatusRepository,
             AccountRepository accountRepository,
             InstrumentRepository instrumentRepository,
-            AccountService accountService) {
+            AccountService accountService,
+            OrderProcessor orderProcessor) {
         this.processOrderService = processOrderService;
         this.tradeOrderRepository = tradeOrderRepository;
         this.tradeOrderStatusRepository = tradeOrderStatusRepository;
         this.accountRepository = accountRepository;
         this.instrumentRepository = instrumentRepository;
         this.accountService = accountService;
+        this.orderProcessor = orderProcessor;
+    }
+
+    /*
+    * Estimate a trade at current live price without being placed
+    */
+    @PostMapping("/preview")
+    public ResponseEntity<TradeOrderPreviewResponseDto> previewOrder(@Valid @RequestBody TradeOrderPreviewRequestDto request, Authentication authentication) {
+        Account account = accountService.findAccountByIdForUser(request.accountId(), authentication.getName()).orElse(null);
+        if (account == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Instrument instrument = instrumentRepository.findByInstrumentSymbol(request.instrumentSymbol()).orElse(null);
+        if (instrument == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(orderProcessor.previewOrder(account, instrument, request.side(), request.quantity()));
     }
 
     /**
@@ -76,27 +99,27 @@ public class TradeOrderController {
     @PostMapping
     public ResponseEntity<TradeOrderResponseDTO> submitOrder(@Valid @RequestBody TradeOrderDTO orderDTO, Authentication authentication) {
         logger.info("Received POST /api/v1/tradeorders - side: {}, instrument: {}, qty: {}, price: {}",
-            orderDTO.getSide(), orderDTO.getInstrumentId(), orderDTO.getQuantity(), orderDTO.getPrice());
+            orderDTO.side(), orderDTO.instrumentSymbol(), orderDTO.quantity(), orderDTO.price());
         
         try {
             // Validate and load account
-            Account account = accountService.findAccountByIdForUser(orderDTO.getAccountId(), authentication.getName()).orElse(null);
+            Account account = accountService.findAccountByIdForUser(orderDTO.accountId(), authentication.getName()).orElse(null);
             if (account == null) {
                 return ResponseEntity.notFound().build();
             }
             
             // Validate and load instrument
-            Instrument instrument = instrumentRepository.findById(orderDTO.getInstrumentId())
-                .orElseThrow(() -> new IllegalArgumentException("Instrument not found: " + orderDTO.getInstrumentId()));
+            Instrument instrument = instrumentRepository.findByInstrumentSymbol(orderDTO.instrumentSymbol())
+                .orElseThrow(() -> new IllegalArgumentException("Instrument not found: " + orderDTO.instrumentSymbol()));
             
             // Create TradeOrder entity from DTO
             TradeOrder order = new TradeOrder();
             order.setAccount(account);
             order.setInstrument(instrument);
-            order.setSide(orderDTO.getSide());
-            order.setQuantity(orderDTO.getQuantity());
-            order.setPrice(orderDTO.getPrice());
-            order.setValue(orderDTO.getPrice().multiply(orderDTO.getQuantity()));
+            order.setSide(orderDTO.side());
+            order.setQuantity(orderDTO.quantity());
+            order.setPrice(orderDTO.price());
+            order.setValue(orderDTO.price().multiply(orderDTO.quantity()));
             order.setOrderDate(LocalDateTime.now());
             
             // Save order to database (generates ID)
@@ -117,10 +140,13 @@ public class TradeOrderController {
             processOrderService.submitOrder(order);
 
             logger.info("Return 201 Created for order ID: {}", order.getId());
+            TradeOrderStatus latestStatus = tradeOrderStatusRepository.getLatestStatusById(order.getId());
+            String message = latestStatus.getReasonText() != null ? latestStatus.getReasonText() : "Order " + latestStatus.getStatus().name().toLowerCase();
+
             TradeOrderResponseDTO response = new TradeOrderResponseDTO(
                 order.getId(),
-                tradeOrderStatusRepository.getLatestStatusById(order.getId()).getStatus(),
-                "Order Processed"
+                latestStatus.getStatus(),
+                message
             );
             return ResponseEntity.created(
                 new URI(String.format("/tradeorder/%s", order.getId())))

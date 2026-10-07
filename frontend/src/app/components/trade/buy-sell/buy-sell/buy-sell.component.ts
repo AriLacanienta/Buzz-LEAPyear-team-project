@@ -1,15 +1,21 @@
-import { Component, OnInit } from '@angular/core';
+  import { Component, DestroyRef, OnInit } from '@angular/core';
 import { SearchComponent } from '../search/search.component';
 import { SearchResultDetailComponent } from '../search-result-detail/search-result-detail.component';
-import { CommonModule } from '@angular/common';
+import { CommonModule, CurrencyPipe } from '@angular/common';
 import { InstrumentSearchResponse } from '@app/models/instrument-search-response.model';
+import { AccountService } from '@app/services/account.service';
+import { BalanceResponse } from '@app/models/balance-response.model';
+import { switchMap, timer } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+
+const POLL_INTERVAL_MS = 3000;
 
 type OrderType = 'buy' | 'sell';
 
 @Component({
   selector: 'app-buy-sell',
   standalone: true,
-  imports: [CommonModule, SearchComponent, SearchResultDetailComponent],
+  imports: [CommonModule, CurrencyPipe, SearchComponent, SearchResultDetailComponent],
   templateUrl: './buy-sell.component.html',
   styleUrl: './buy-sell.component.scss'
 })
@@ -20,9 +26,22 @@ export class BuySellComponent implements OnInit {
   selectedTag: string = 'All';
   selectedResult: InstrumentSearchResponse | null = null;
   instruments: InstrumentSearchResponse[] | null = null;
+  buyingPower: number = 0;
+
+  constructor(private accountService: AccountService, private destroyRef: DestroyRef) {}
 
   ngOnInit(): void {
-    
+    this.fetchBuyingPower();
+  }
+
+  fetchBuyingPower(): void {
+    this.accountService.getMyAccount().pipe(
+      switchMap(account => this.accountService.getAccountBalance(account.accountId)),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: (balance: BalanceResponse) => this.buyingPower = balance.cashAvailable,
+      error: error => console.error('Could not load buying power', error)
+    });
   }
 
   toggleOrderType(side: OrderType): void {

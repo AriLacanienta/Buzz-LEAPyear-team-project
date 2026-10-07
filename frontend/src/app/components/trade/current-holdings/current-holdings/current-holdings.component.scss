@@ -14,7 +14,17 @@ $text-xs-line-height: 1rem;
 $transition-timing: ease-in-out;
 $transition-duration: 200ms;
 
+:host {
+  display: block;
+  height: 30rem;
+  box-sizing: border-box;
+}
+
 .current-holdings-container {
+  box-sizing: border-box;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
   background-color: $bg-dark;
   border: 1px solid $border-dark;
   border-radius: $radius-xl;
@@ -38,7 +48,10 @@ $transition-duration: 200ms;
 }
 
 .current-holdings-body {
-  overflow-x: auto;
+  overflow: auto;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
   scrollbar-width: none;
 
   &::-webkit-scrollbar {

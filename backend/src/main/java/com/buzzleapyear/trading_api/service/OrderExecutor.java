@@ -7,6 +7,7 @@ import com.buzzleapyear.trading_api.entity.TradeOrder;
 import com.buzzleapyear.trading_api.repository.AccountRepository;
 import com.buzzleapyear.trading_api.repository.HoldingRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,6 +45,7 @@ public class OrderExecutor {
      * @param instrument the instrument being purchased
      * @param order the trade order
      */
+    @Transactional
     public void executeBuyOrder(Account account, Instrument instrument, TradeOrder order) {
         logger.info("Executing BUY order ID: {} for {} shares at ${}", 
             order.getId(), order.getQuantity(), order.getPrice());
@@ -106,6 +108,7 @@ public class OrderExecutor {
      * @param instrument the instrument being sold
      * @param order the trade order
      */
+    @Transactional
     public void executeSellOrder(Account account, Instrument instrument, TradeOrder order) {
         logger.info("Executing SELL order ID: {} for {} shares at ${}", 
             order.getId(), order.getQuantity(), order.getPrice());

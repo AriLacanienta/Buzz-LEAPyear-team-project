@@ -16,13 +16,16 @@ $transition-timing: ease-in-out;
 $transition-duration: 200ms;
 
 :host {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
+  display: block;
+  height: 30rem;
+  box-sizing: border-box;
 }
 
 .recent-orders-container {
-  flex: 1;
+  height: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
   background-color: $bg-dark;
   border: 1px solid $border-dark;
   border-radius: $radius-xl;
@@ -46,7 +49,10 @@ $transition-duration: 200ms;
 }
 
 .recent-orders-body {
-  overflow-x: auto;
+  overflow: auto;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
   scrollbar-width: none;
 
   &::-webkit-scrollbar {

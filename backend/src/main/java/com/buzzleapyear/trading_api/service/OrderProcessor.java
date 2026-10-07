@@ -1,6 +1,7 @@
 package com.buzzleapyear.trading_api.service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 
 import org.slf4j.Logger;
@@ -8,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+import com.buzzleapyear.trading_api.repository.HoldingRepository;
 
 import com.buzzleapyear.trading_api.entity.Account;
 import com.buzzleapyear.trading_api.entity.TradeOrder;
@@ -15,11 +17,16 @@ import com.buzzleapyear.trading_api.entity.TradeOrder.OrderSide;
 import com.buzzleapyear.trading_api.entity.TradeOrderStatus;
 import com.buzzleapyear.trading_api.entity.TradeOrderStatus.OrderStatus;
 import com.buzzleapyear.trading_api.repository.AccountRepository;
+import com.buzzleapyear.trading_api.repository.TradeOrderRepository;
 import com.buzzleapyear.trading_api.repository.TradeOrderStatusRepository;
+import com.buzzleapyear.trading_api.service.QuoteService;
+import com.buzzleapyear.trading_api.dto.TradeOrderPreviewResponseDto;
+import com.buzzleapyear.trading_api.entity.Instrument;
+import com.buzzleapyear.trading_api.entity.Holding;
 
 /**
- * OrderProcessor handles order processing workflow
- * Orchestrates: validation -> price matching -> execution
+ * OrderProcessor handles order preview and processing workflow
+ * Orchestrates: price matching -> validation -> execution
  * 
  * @author Ari Lacanienta
  */
@@ -30,21 +37,30 @@ public class OrderProcessor {
     
     private final OrderValidator orderValidator;
     private final OrderExecutor orderExecutor;
-    private final MarketQuoteService marketQuoteService;
+    private final TradeOrderRepository tradeOrderRepository;
     private final TradeOrderStatusRepository tradeOrderStatusRepository;
+    private final HoldingRepository holdingRepository;
     private final AccountRepository accountRepository;
+    private final QuoteService quoteService;
+
+    // Maximum allowed drift between quoted price and the live price
+    private static final BigDecimal PRICE_TOLERANCE = new BigDecimal("0.01");
 
     public OrderProcessor(
             OrderValidator orderValidator,
             OrderExecutor orderExecutor,
-            MarketQuoteService marketQuoteService,
+            TradeOrderRepository tradeOrderRepository,
             TradeOrderStatusRepository tradeOrderStatusRepository,
-            AccountRepository accountRepository) {
+            HoldingRepository holdingRepository,
+            AccountRepository accountRepository,
+            QuoteService quoteService) {
         this.orderValidator = orderValidator;
         this.orderExecutor = orderExecutor;
-        this.marketQuoteService = marketQuoteService;
+        this.tradeOrderRepository = tradeOrderRepository;
         this.tradeOrderStatusRepository = tradeOrderStatusRepository;
+        this.holdingRepository = holdingRepository;
         this.accountRepository = accountRepository;
+        this.quoteService = quoteService;
     }
 
     /**
@@ -59,7 +75,27 @@ public class OrderProcessor {
                     
             Account account = order.getAccount();
 
-            // Step 1: Validate order against business rules
+            // Step 1: Price the order from the live quote service
+            BigDecimal marketPrice = quoteService.getLatestPrice(order.getInstrument().getInstrumentSymbol()).orElse(null);
+            if (marketPrice == null) {
+                String reason = "No market quote available for " + order.getInstrument().getInstrumentSymbol();
+                logOrderStatus(order, OrderStatus.REJECTED, reason);
+                logger.warn("Order ID: {} rejected: {}", order.getId(), reason);
+                return;
+            }
+
+            if (!isWithinTolerance(order.getPrice(), marketPrice)) {
+                String reason = String.format("Price moved: quoted $%.2f, market $%.2f", order.getPrice(), marketPrice);
+                logOrderStatus(order, OrderStatus.REJECTED, reason);
+                logger.warn("Order ID: {} rejected: {}", order.getId(), reason);
+                return;
+            }
+
+            order.setPrice(marketPrice);
+            order.setValue(marketPrice.multiply(order.getQuantity()).setScale(2, RoundingMode.HALF_UP));
+            tradeOrderRepository.save(order);
+
+            // Step 2: Validate order against business rules
             logger.info("Validating order ID: {}", order.getId());
             OrderValidator.ValidationResult validationResult = orderValidator.validate(order, account);
             if (!validationResult.isValid()) {
@@ -67,7 +103,7 @@ public class OrderProcessor {
                 return;
             }
 
-            // Step 2: Log VALIDATED status and reserve cash if BUY order
+            // Step 3: Log VALIDATED status and reserve cash if BUY order
             logger.info("Order ID: {} passed validation", order.getId());
             logOrderStatus(order, OrderStatus.VALIDATED, null);
             
@@ -85,20 +121,9 @@ public class OrderProcessor {
                     order.getId(), latestStatus.getStatus());
                 return;
             }
+            // Step 4: Execute the order
+            executeValidOrder(order, account);
 
-            // Step 4: Get market quote and perform price matching
-            logger.info("Fetching market quote for instrument: {}", order.getInstrument().getInstrumentSymbol());
-            BigDecimal marketPrice = marketQuoteService.getLatestPrice(order.getInstrument());
-            
-            if (marketPrice == null) {
-                String reason = "No market quote available for " + order.getInstrument().getInstrumentSymbol();
-                handleOrderRejection(order, account, reason);
-                logger.warn("Order ID: {} rejected: {}", order.getId(), reason);
-                return;
-            }
-
-            // Step 5: Price matching and execution
-            executeValidOrder(order, account, marketPrice);
         } catch (Exception e) {
             logger.error("Unexpected error processing order ID: {}", order != null ? order.getId() : "unknown", e);
             if (order != null) {
@@ -107,40 +132,107 @@ public class OrderProcessor {
         }
     }
 
+    public TradeOrderPreviewResponseDto previewOrder(Account account, Instrument instrument, OrderSide side, BigDecimal quantity) {
+        Holding holding = holdingRepository.findByAccountIdAndInstrumentId(account.getId(), instrument.getId()).orElse(null);
+
+        BigDecimal heldQuantity = holding != null ? holding.getQuantity() : BigDecimal.ZERO;
+        BigDecimal heldCost = holding != null ? holding.getTotalCost() : BigDecimal.ZERO;
+        BigDecimal cashAvailable = account.getCashAvailable();
+
+        BigDecimal livePrice = quoteService.getLatestPrice(instrument.getInstrumentSymbol()).orElse(null);
+        if (livePrice == null) {
+            return new TradeOrderPreviewResponseDto(
+                instrument.getInstrumentSymbol(),
+                side,
+                quantity,
+                null,
+                null,
+                cashAvailable,
+                cashAvailable,
+                heldQuantity,
+                heldQuantity,
+                null,
+                null,
+                false,
+                "No market quote available for " + instrument.getInstrumentSymbol());
+        }
+
+        BigDecimal estimatedValue = livePrice.multiply(quantity).setScale(2, RoundingMode.HALF_UP);
+
+        TradeOrder draft = new TradeOrder();
+        draft.setAccount(account);
+        draft.setInstrument(instrument);
+        draft.setSide(side);
+        draft.setQuantity(quantity);
+        draft.setPrice(livePrice);
+        
+        OrderValidator.ValidationResult result = orderValidator.validate(draft, account);
+
+        BigDecimal cashAfter;
+        BigDecimal holdingQuantityAfter;
+        BigDecimal averageCostAfter = null;
+        BigDecimal realizedPnL = null;
+
+        if (side == OrderSide.BUY) {
+            cashAfter = cashAvailable.subtract(estimatedValue);
+            holdingQuantityAfter = heldQuantity.add(quantity);
+            averageCostAfter = heldCost.add(estimatedValue).divide(holdingQuantityAfter, 4, RoundingMode.HALF_UP);
+        } 
+        else {
+            cashAfter = cashAvailable.add(estimatedValue);
+            holdingQuantityAfter = heldQuantity.subtract(quantity);
+            if (heldQuantity.signum() > 0) {
+                BigDecimal averageCost = heldCost.divide(heldQuantity, 4, RoundingMode.HALF_UP);
+                realizedPnL = estimatedValue.subtract(averageCost.multiply(quantity)).setScale(2, RoundingMode.HALF_UP);
+                averageCostAfter = holdingQuantityAfter.signum() > 0 ? averageCost : null;
+            }
+        }
+
+        return new TradeOrderPreviewResponseDto(
+            instrument.getInstrumentSymbol(),
+            side,
+            quantity,
+            livePrice,
+            estimatedValue,
+            cashAvailable,
+            cashAfter,
+            heldQuantity,
+            holdingQuantityAfter,
+            averageCostAfter,
+            realizedPnL,
+            result.isValid(),
+            result.getReason()
+        );
+    }
+
+    private boolean isWithinTolerance(BigDecimal quotedPrice, BigDecimal marketPrice) {
+        BigDecimal deviation = quotedPrice.subtract(marketPrice).abs().divide(marketPrice, 6, RoundingMode.HALF_UP);
+        return deviation.compareTo(PRICE_TOLERANCE) <= 0;
+    }
+
     /**
      * Execute the validated order - updates Account cash, Holdings, and TradeOrderStatus atomically
-     * @param refreshedOrder
+     * @param order
      * @param account
      * @param marketPrice
      */
-    @Transactional(isolation = Isolation.SERIALIZABLE)
-    private void executeValidOrder(TradeOrder refreshedOrder, Account account, BigDecimal marketPrice){
-        if (refreshedOrder.getPrice().compareTo(marketPrice) == 0) {
-            // Price matches - execute the order
-            logger.info("Price match confirmed for order ID: {}. Market: {}, Order: {}", 
-                refreshedOrder.getId(), marketPrice, refreshedOrder.getPrice());
-            
-            try {
-                if (refreshedOrder.getSide() == OrderSide.BUY) {
-                    orderExecutor.executeBuyOrder(account, refreshedOrder.getInstrument(), refreshedOrder);
-                } else {
-                    orderExecutor.executeSellOrder(account, refreshedOrder.getInstrument(), refreshedOrder);
-                }
-                
-                logOrderStatus(refreshedOrder, OrderStatus.FILLED, null);
-                logger.info("Order ID: {} FILLED successfully", refreshedOrder.getId());
-            } catch (Exception e) {
-                // If execution fails, restore cash and reject
-                String reason = "Execution failed: " + e.getMessage();
-                handleOrderRejection(refreshedOrder, account, reason);
-                logger.error("Order ID: {} execution failed", refreshedOrder.getId(), e);
+
+    private void executeValidOrder(TradeOrder order, Account account) {
+        try {
+            if (order.getSide() == OrderSide.BUY) {
+                orderExecutor.executeBuyOrder(account, order.getInstrument(), order);
             }
-        } else {
-            // Price mismatch - reject the order
-            String reason = String.format("Price mismatch: market $%.2f ≠ order $%.2f", 
-                marketPrice, refreshedOrder.getPrice());
-            handleOrderRejection(refreshedOrder, account, reason);
-            logger.warn("Order ID: {} rejected: {}", refreshedOrder.getId(), reason);
+            else {
+                orderExecutor.executeSellOrder(account, order.getInstrument(), order);
+            }
+
+            logOrderStatus(order, OrderStatus.FILLED, null);
+            logger.info("Order ID: {} FILLED successfully at {}", order.getId(), order.getPrice());
+        }
+        catch (Exception e) {
+            String reason = "Execution failed: " + e.getMessage();
+            handleOrderRejection(order, account, reason);
+            logger.error("Order ID: {} execcution failed", order.getId(), e);
         }
     }
 

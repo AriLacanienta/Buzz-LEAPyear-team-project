@@ -12,12 +12,19 @@
 
 @media (min-width: 64rem) {
   .container {
-    grid-template-columns: 420px 1fr;
+    grid-template-columns: 1fr 1.5fr;
   }
 }
 
 main {
   display: contents;
+}
+
+.left-column,
+.right-column {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
 .trade-content {

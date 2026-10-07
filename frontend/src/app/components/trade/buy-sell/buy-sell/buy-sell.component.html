@@ -38,7 +38,7 @@
 
     <div class="buying-power">
         <span class="buying-power-label">{{ isBuy ? 'Available buying power' : 'Cash after sale' }}</span>
-        <span class="buying-power-value">$42,180.00</span>
+        <span class="buying-power-value">{{ buyingPower | currency: 'USD': 'symbol': '1.2-2' }}</span>
     </div>
 
     <div *ngIf="errorMessage" role="alert" class="error-container">
