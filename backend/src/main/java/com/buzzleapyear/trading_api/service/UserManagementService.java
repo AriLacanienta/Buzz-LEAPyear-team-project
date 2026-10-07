@@ -10,7 +10,7 @@ public class UserManagementService {
     private UserRepository userRepository;
 
     public void assignRole(int userId, String role) {
-        userRepository.getReferenceById(null)
+        userRepository.getReferenceById(null);
     }
 
 }
