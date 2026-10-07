@@ -156,16 +156,24 @@ tbody {
           &.status-filled {
             color: $color-emerald-400;
             background-color: rgba(16, 185, 129, 0.1);
+            box-shadow: 0 0 8px rgba(16, 185, 129, 0.3);
           }
 
           &.status-pending {
             color: #fbbf24;
             background-color: rgba(251, 191, 36, 0.1);
+            box-shadow: 0 0 8px rgba(251, 191, 36, 0.2);
           }
 
           &.status-cancelled {
             color: $color-red-400;
             background-color: rgba(239, 68, 68, 0.1);
+          }
+
+          &.status-rejected {
+            color: $color-red-400;
+            background-color: rgba(239, 68, 68, 0.1);
+            box-shadow: 0 0 8px rgba(239, 68, 68, 0.3);
           }
         }
       }

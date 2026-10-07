@@ -8,10 +8,10 @@ import { CommonModule, CurrencyPipe } from '@angular/common';
 import { InstrumentSearchResponse } from '@app/models/instrument-search-response.model';
 import { AccountService } from '@app/services/account.service';
 import { merge, switchMap, timer, of, Subject } from 'rxjs';
-import { catchError, debounceTime } from 'rxjs/operators';
+import { catchError, debounceTime, finalize } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
-type OrderType = 'buy' | 'sell';
+type OrderType = 'BUY' | 'SELL';
 
 const PREVIEW_POLL_INTERVAL_MS = 3000;
 
@@ -78,7 +78,7 @@ export class BuySellComponent implements OnInit {
   }
 
   toggleOrderType(side: OrderType): void {
-    this.isBuy = side === 'buy';
+    this.isBuy = side === 'BUY';
     this.requestPreview();
   }
 
@@ -121,25 +121,48 @@ export class BuySellComponent implements OnInit {
       return;
     }
 
-    this.isBuy ? this.handleBuy() : this.handleSell();
+    const side = this.isBuy ? 'BUY' : 'SELL';
+    if (this.isPreviewRejected(side)) {
+      return;
+    }
+    //this.submitOrder(side);
   }
 
-  handleBuy(): void {
-    // check if account has sufficient balance before placing a buy order
-    // If balance is insufficient, set this.errorMessage and return.
-    // Proceed with placing the buy order if balance is sufficient.
-    this.submitOrder('buy');
-  }
+  submitOrder(side: 'BUY' | 'SELL'): void {
+    if (!this.selectedResult || !this.accountId) {
+      this.errorMessage = 'Account not loaded yet. Please try again.';
+      return;
+    }
+    const symbol = this.selectedResult?.instrumentSymbol;
+    const quantity = this.quantity;
+    const price = this.preview?.livePrice ?? this.selectedResult.currentPrice;
 
-  handleSell(): void {
-    // check if account has sufficient holdings before placing a sell order
-    // If holdings are insufficient, set this.errorMessage and return.
-    // Proceed with placing the sell order if holdings are sufficient.
-    this.submitOrder('sell');
-  }
-
-  submitOrder(side: OrderType): void {
-
+    this.isSubmitting = true;
+    this.tradeOrderService.submitOrder({
+      side,
+      instrumentSymbol: symbol,
+      quantity,
+      price,
+      accountId: this.accountId
+    }).pipe(
+      finalize(() => this.isSubmitting = false),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: response => {
+        if (response.status === 'FILLED') {
+          this.successMessage = `${side === 'BUY' ? 'Bought' : 'Sold'} ${quantity} ${symbol} (order #${response.orderId})`;
+          this.quantity = 0;
+        }
+        else {
+          this.errorMessage = this.formatErrorMessage(response.statusMessage) || 'Order was rejected.';
+        }
+        this.tradeOrderService.notifyOrderplaced();
+        this.loadCashAvailable();
+        this.checkOwnership();
+        this.requestPreview();
+      },
+      error: () => this.errorMessage = 'Order could not be submitted.'
+    });
   }
 
   private checkOwnership(): void {
@@ -162,10 +185,10 @@ export class BuySellComponent implements OnInit {
 
   private isPreviewRejected(side: 'BUY' | 'SELL'): boolean {
     const preview = this.preview;
-    const matchesInput = preview 
-    && preview.side === side 
-    && preview.symbol === this.selectedResult?.instrumentSymbol 
-    && Number(preview.quantity) === this.quantity;
+    const matchesInput = preview
+      && preview.side === side
+      && preview.symbol === this.selectedResult?.instrumentSymbol
+      && Number(preview.quantity) === this.quantity;
 
     if (preview && matchesInput && !preview.valid) {
       this.errorMessage = preview.reason ?? 'Order is not valid.';
@@ -204,7 +227,7 @@ export class BuySellComponent implements OnInit {
   }
 
   get estimatedTotal(): number | null {
-    if(this.preview?.estimatedValue != null) {
+    if (this.preview?.estimatedValue != null) {
       return this.preview.estimatedValue;
     }
     return this.selectedResult && this.quantity > 0 ? this.selectedResult.currentPrice * this.quantity : null;
@@ -231,5 +254,10 @@ export class BuySellComponent implements OnInit {
       return 'Available buying power';
     }
     return this.isBuy ? 'Available buying power' : 'Cash after sale';
+  }
+
+  private formatErrorMessage(message: string | null): string | null {
+    if (!message) return null;
+    return message.replace(/\b(\d+)\.0+\b/g, '$1');
   }
 }
