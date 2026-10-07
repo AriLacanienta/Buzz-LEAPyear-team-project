@@ -9,8 +9,8 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:${POSTGRES_PORT}/${POSTGRES_DB}
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
-    ports:
-      - "${HOST_APP_PORT}:6767"
+    # ports:
+    #   - "${HOST_APP_PORT}:6767"
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:6767/actuator/health"]
       interval: 1m30s
@@ -28,8 +28,8 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    ports:
-     - "${POSTGRES_PORT}:5432"
+    # ports:
+    #  - "${POSTGRES_PORT}:5432"
     healthcheck:
       test: ["CMD", "pg_isready", "-d", "${POSTGRES_DB}", "-U"," ${POSTGRES_USER}"]
       interval: 2m
