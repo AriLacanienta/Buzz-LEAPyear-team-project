@@ -31,12 +31,9 @@ import com.buzzleapyear.trading_api.repository.InstrumentRepository;
 import com.buzzleapyear.trading_api.repository.TradeOrderRepository;
 import com.buzzleapyear.trading_api.repository.TradeOrderStatusRepository;
 import com.buzzleapyear.trading_api.service.ProcessOrderService;
-<<<<<<< HEAD
 import com.buzzleapyear.trading_api.service.TradeOrderService;
-=======
 import com.buzzleapyear.trading_api.service.AccountService;
 import com.buzzleapyear.trading_api.service.OrderProcessor;
->>>>>>> origin/feature/buy-sell-trade
 
 import jakarta.validation.Valid;
 
@@ -57,12 +54,9 @@ public class TradeOrderController {
     private final TradeOrderStatusRepository tradeOrderStatusRepository;
     private final AccountRepository accountRepository;
     private final InstrumentRepository instrumentRepository;
-<<<<<<< HEAD
     private final TradeOrderService tradeOrderService;
-=======
     private final AccountService accountService;
     private final OrderProcessor orderProcessor;
->>>>>>> origin/feature/buy-sell-trade
 
     public TradeOrderController(
             ProcessOrderService processOrderService,
@@ -70,20 +64,15 @@ public class TradeOrderController {
             TradeOrderStatusRepository tradeOrderStatusRepository,
             AccountRepository accountRepository,
             InstrumentRepository instrumentRepository,
-<<<<<<< HEAD
-            TradeOrderService tradeOrderService) {
-=======
+            TradeOrderService tradeOrderService,
             AccountService accountService,
             OrderProcessor orderProcessor) {
->>>>>>> origin/feature/buy-sell-trade
         this.processOrderService = processOrderService;
         this.tradeOrderRepository = tradeOrderRepository;
         this.tradeOrderStatusRepository = tradeOrderStatusRepository;
         this.accountRepository = accountRepository;
         this.instrumentRepository = instrumentRepository;
-<<<<<<< HEAD
         this.tradeOrderService = tradeOrderService;
-=======
         this.accountService = accountService;
         this.orderProcessor = orderProcessor;
     }
@@ -103,7 +92,6 @@ public class TradeOrderController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(orderProcessor.previewOrder(account, instrument, request.side(), request.quantity()));
->>>>>>> origin/feature/buy-sell-trade
     }
 
     /**
