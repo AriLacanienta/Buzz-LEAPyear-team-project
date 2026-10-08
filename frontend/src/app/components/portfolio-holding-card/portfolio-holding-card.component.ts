@@ -37,7 +37,6 @@ export class PortfolioHoldingCardComponent implements OnDestroy, OnChanges {
         if (this.priceHistory.length === 0 || this.currentSymbol !== targetSymbol) {
           this.currentSymbol = targetSymbol;
           
-          // Generate a truly random historical walk profile unique to this specific ticker index
           const randomFactor = 0.004 * (this.index + 1); 
           const baseVariations = [-4, -2, -3.5, 1, -1.5, 0];
           
@@ -73,7 +72,6 @@ export class PortfolioHoldingCardComponent implements OnDestroy, OnChanges {
       return time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
     });
 
-    // 💡 DYNAMIC RANGE SCALING MATH: Find array boundary extrema metrics
     const minPrice = Math.min(...this.priceHistory);
     const maxPrice = Math.max(...this.priceHistory);
     const priceRange = maxPrice - minPrice;
