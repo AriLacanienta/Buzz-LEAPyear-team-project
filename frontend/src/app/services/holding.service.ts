@@ -7,17 +7,17 @@ import { environment } from '@environments/environment';
   providedIn: 'root'
 })
 export class HoldingService {
-  private apiUrl = `${environment.apiUrl}/accounts`;
+  private apiUrl = `${environment.apiUrl}/holdings`;
 
   constructor(private http: HttpClient) {}
 
   getAllHoldings(): Observable<any[]> {
-    const url = `${this.apiUrl}/holdings`;
+    const url = `${this.apiUrl}`;
     return this.http.get<any[]>(url);
   }
 
   getHoldingsByAccountId(accountId: string | number): Observable<any[]> {
-    const url = `${this.apiUrl}/${encodeURIComponent(accountId)}/holdings`;
+    const url = `${this.apiUrl}/${encodeURIComponent(accountId)}`;
     return this.http.get<any[]>(url);
   }
 }

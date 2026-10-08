@@ -12,7 +12,7 @@ import com.buzzleapyear.trading_api.service.AccountService;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/v1/accounts")
+@RequestMapping("/api/v1/holdings")
 public class HoldingController {
     private final HoldingService holdingService;
     private final AccountService accountService;
@@ -22,7 +22,7 @@ public class HoldingController {
         this.accountService = accountService;
     }
 
-    @GetMapping("/{accountId}/holdings")
+    @GetMapping("/{accountId}")
     public ResponseEntity<List<HoldingResponseDto>> getAccountHoldings(@PathVariable Long accountId, Authentication authentication) {
         if (accountService.findAccountByIdForUser(accountId, authentication.getName()).isEmpty()) {
             return ResponseEntity.notFound().build();

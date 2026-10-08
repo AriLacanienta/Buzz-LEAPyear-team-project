@@ -205,8 +205,8 @@ class CsvImportServiceTests {
                 () -> Assertions.assertEquals("Smith", persistedUser.getLastName()),
                 () -> Assertions.assertNotNull(persistedUser.getUsername()),
                 () -> Assertions.assertTrue(persistedUser.getUsername().contains("C001")),
-                () -> Assertions.assertEquals("C001@trading.local", persistedUser.getEmail()),
-                () -> Assertions.assertEquals("hashed_password", persistedUser.getPasswordHash()),
+                () -> Assertions.assertEquals("C001@trading.demo", persistedUser.getEmail()),
+                () -> Assertions.assertEquals("$2a$10$QEG13Tgr8.fgIP4n1.CxVeEoUhKYjWF7S2HK4mwhWh9V0zz80GUzi", persistedUser.getPasswordHash()),
                 () -> Assertions.assertNotNull(persistedUser.getCreatedAt()),
                 () -> Assertions.assertNotNull(persistedUser.getUpdatedAt())
             );
