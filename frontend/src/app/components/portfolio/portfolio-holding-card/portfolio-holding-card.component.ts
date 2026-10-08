@@ -25,7 +25,7 @@ export class PortfolioHoldingCardComponent implements OnDestroy, OnChanges {
   // Track the symbol associated with the current price history
   private currentSymbol: string = '';
   
-  private currentSymbol: string = ''; 
+  //private currentSymbol: string = ''; 
 
   constructor(private cdr: ChangeDetectorRef) {}
 
