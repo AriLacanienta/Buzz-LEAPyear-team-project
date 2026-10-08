@@ -5,12 +5,14 @@ import { interval, Subscription } from 'rxjs';
 import { switchMap, startWith } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
 import { PortfolioHoldingsContainerComponent } from '@app/components/portfolio/portfolio-holdings-container/portfolio-holdings-container.component';
+import { PortfolioHoldingCardComponent } from '@app/components/portfolio/portfolio-holding-card/portfolio-holding-card.component';
 import { MarketInfoCardComponent } from '@app/components/portfolio/market-info-card/market-info-card.component';
 import { RecentOrdersComponent } from '@app/components/trade/recent-orders/recent-orders/recent-orders.component';
 import { CurrentHoldingsComponent } from '@app/components/trade/current-holdings/current-holdings/current-holdings.component';
 import { RecentOrderService } from '../../services/recent-order.service';
 import { AccountService } from '@app/services/account.service';
 import { RecentOrder } from '../../models/recent-order.model';
+import { HighchartsChartModule } from 'highcharts-angular';
 
 export interface QuoteResponse {
   symbol: string;
@@ -24,7 +26,15 @@ import * as Highcharts from 'highcharts';
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
-  imports: [CommonModule, PortfolioHoldingsContainerComponent, MarketInfoCardComponent, RecentOrdersComponent, CurrentHoldingsComponent],
+  imports: [
+    CommonModule,
+    HighchartsChartModule,
+    PortfolioHoldingsContainerComponent,
+    PortfolioHoldingCardComponent,
+    MarketInfoCardComponent,
+    RecentOrdersComponent,
+    CurrentHoldingsComponent
+  ],
   standalone: true
 })
 export class DashboardComponent implements OnInit, OnDestroy {
