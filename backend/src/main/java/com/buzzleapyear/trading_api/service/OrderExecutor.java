@@ -46,19 +46,17 @@ public class OrderExecutor {
      * @param order the trade order
      */
     @Transactional
-    public void executeBuyOrder(Account account, Instrument instrument, TradeOrder order) {
+    public void executeBuyOrder(Account account, Instrument instrument, TradeOrder order, BigDecimal acceptedPrice) {
         logger.info("Executing BUY order ID: {} for {} shares at ${}", 
             order.getId(), order.getQuantity(), order.getPrice());
         
         // Get or create holding for this instrument
         Holding holding = getOrCreateHolding(account, instrument);
 
+        updateCashReserved(account, order, acceptedPrice);
+
         // Update holding quantity and total cost
         updateHoldingQuantity(holding, order, instrument);
-
-
-        // Deduct from cash reserved (was already deducted from available on VALIDATED)
-        updateCashReserved(account, order);
     }
 
     private Holding getOrCreateHolding(Account account, Instrument instrument) {
@@ -87,12 +85,18 @@ public class OrderExecutor {
             instrument.getInstrumentSymbol(), holding.getQuantity(), holding.getTotalCost());
     }
 
-        private void updateCashReserved(Account account, TradeOrder order) {
-        BigDecimal orderCost = order.getPrice().multiply(order.getQuantity());
-        account.setCashReserved(account.getCashReserved().subtract(orderCost));
+        private void updateCashReserved(Account account, TradeOrder order, BigDecimal acceptedPrice) {
+        BigDecimal acceptedCost = acceptedPrice.multiply(order.getQuantity());
+        BigDecimal executionCost = order.getPrice().multiply(order.getQuantity());
+        BigDecimal priceDifference = executionCost.subtract(acceptedCost);
+        if (priceDifference.signum() > 0 && account.getCashAvailable().compareTo(priceDifference) < 0) {
+            throw new IllegalStateException("Insufficent available cash for the execution price");
+        }
+        account.setCashAvailable(account.getCashAvailable().subtract(priceDifference));
+        account.setCashReserved(account.getCashReserved().subtract(acceptedCost));
         accountRepository.save(account);
-        logger.info("Account cash updated - reserved reduced by: ${}. New reserved: ${}", 
-            orderCost, account.getCashReserved());
+        logger.info("Account cash updated - execution price: ${}. New reserved: ${}", 
+            executionCost, account.getCashReserved());
     }
 
     /**
@@ -132,6 +136,9 @@ public class OrderExecutor {
 
         // If quantity reaches 0, delete the holding; otherwise save
         if (holding.getQuantity().compareTo(BigDecimal.ZERO) <= 0) {
+             if (account.getHoldings() != null) {
+                account.getHoldings().removeIf(h -> h.getId().equals(holding.getId()));
+            }
             holdingRepository.delete(holding);
             logger.info("Holding deleted: {} (quantity reduced to zero)", instrument.getInstrumentSymbol());
         } else {

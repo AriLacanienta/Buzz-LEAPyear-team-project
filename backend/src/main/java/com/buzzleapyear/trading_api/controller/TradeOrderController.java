@@ -1,6 +1,5 @@
 package com.buzzleapyear.trading_api.controller;
 
-import java.net.URI;
 import java.time.LocalDateTime;
 
 import org.slf4j.Logger;
@@ -132,25 +131,20 @@ public class TradeOrderController {
             submittedStatus.setStatus(TradeOrderStatus.OrderStatus.SUBMITTED);
             submittedStatus.setTimeUpdated(LocalDateTime.now());
             submittedStatus.setReasonText(null);
-            order.addStatus(submittedStatus);
-            tradeOrderRepository.save(order);
+            tradeOrderStatusRepository.save(submittedStatus);
             logger.info("SUBMITTED status logged for order ID: {}", order.getId());
             
             // Submit for processing
-            processOrderService.submitOrder(order);
+            processOrderService.submitOrder(order.getId());
 
-            logger.info("Return 201 Created for order ID: {}", order.getId());
-            TradeOrderStatus latestStatus = tradeOrderStatusRepository.getLatestStatusById(order.getId());
-            String message = latestStatus.getReasonText() != null ? latestStatus.getReasonText() : "Order " + latestStatus.getStatus().name().toLowerCase();
+            logger.info("Return 202 Created for order ID: {}", order.getId());
 
             TradeOrderResponseDTO response = new TradeOrderResponseDTO(
                 order.getId(),
-                latestStatus.getStatus(),
-                message
+                TradeOrderStatus.OrderStatus.SUBMITTED,
+                "Order submitted for processing"
             );
-            return ResponseEntity.created(
-                new URI(String.format("/tradeorder/%s", order.getId())))
-                .body(response);
+            return ResponseEntity.accepted().body(response);
             
         } catch (IllegalArgumentException e) {
             logger.error("Validation error: {}", e.getMessage());

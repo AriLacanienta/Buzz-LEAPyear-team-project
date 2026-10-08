@@ -1,16 +1,15 @@
 <div class="current-holdings-container">
     <div class="current-holdings-header">
-        <h3>Current Holdings</h3>
+        <h3>Positions</h3>
     </div>
     <div class="current-holdings-body">
         <table *ngIf="currentHoldings.length > 0; else noHoldings">
             <thead>
                 <tr>
-                    <th>Ticker</th>
+                    <th>Instrument</th>
                     <th>Shares</th>
                     <th>Price</th>
                     <th>Value</th>
-                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -19,9 +18,6 @@
                     <td class="quantity">{{ holding.quantity }}</td>
                     <td class="price">{{ holding.currentPrice | currency: 'USD': 'symbol': '1.2-2' }}</td>
                     <td class="value">{{ holding.totalValue | currency: 'USD': 'symbol': '1.2-2' }}</td>
-                    <td class="action">
-                        <button class="sell-button">Sell</button>
-                    </td>
                 </tr>
             </tbody>
         </table>

@@ -60,6 +60,45 @@ $transition-duration: 200ms;
   }
 }
 
+.recent-orders-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-top: 1px solid $border-dark;
+  color: $color-slate-300;
+  font-size: $text-xs;
+
+  .pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  button {
+    border: 1px solid $border-dark;
+    border-radius: 4px;
+    padding: 0.25rem 0.5rem;
+    background: transparent;
+    color: $color-white;
+    cursor: pointer;
+    font-size: 10px;
+
+    &:disabled {
+      color: $color-slate-500;
+      cursor: default;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .recent-orders-pagination {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
 table {
   width: 100%;
   font-size: $text-xs;
@@ -152,6 +191,13 @@ tbody {
           padding-bottom: 0.125rem;
           border-radius: $radius-full;
           font-weight: $font-weight-semibold;
+
+          &.status-submitted,
+          &.status-accepted,
+          &.status-validated {
+            color: #fbbf24;
+            background-color: rgba(251, 191, 36, 0.1);
+          }
 
           &.status-filled {
             color: $color-emerald-400;

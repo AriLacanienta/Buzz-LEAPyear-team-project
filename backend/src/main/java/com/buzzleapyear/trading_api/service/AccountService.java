@@ -19,6 +19,8 @@ import java.util.Optional;
 import com.buzzleapyear.trading_api.entity.Account;
 import java.math.BigDecimal;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Page;
+import com.buzzleapyear.trading_api.entity.TradeOrder;
 
 @Service
 public class AccountService {
@@ -102,15 +104,15 @@ public class AccountService {
     }
 
     @Transactional(readOnly = true)
-    public Optional<List<RecentTradeOrderResponseDto>> getRecentTradeOrders(Long accountId, String username, int limit) {
+    public Optional<Page<RecentTradeOrderResponseDto>> getRecentTradeOrders(Long accountId, String username, int page, int size) {
         if (findAccountByIdForUser(accountId, username).isEmpty()) {
             return Optional.empty();
         }
 
-        List<RecentTradeOrderResponseDto> recentTradeOrders = tradeOrderRepository
-            .findByAccountIdOrderByOrderDateDesc(accountId, PageRequest.of(0, limit))
-            .stream()
-            .map(order -> {
+        Page<TradeOrder> orders = tradeOrderRepository
+            .findByAccountIdOrderByOrderDateDesc(accountId, PageRequest.of(page, size));
+
+            return Optional.of(orders.map( order -> {
                 TradeOrderStatus status = tradeOrderStatusRepository.findFirstByTradeOrderIdOrderByTimeUpdatedDesc(order.getId());
                 return new RecentTradeOrderResponseDto(
                     order.getId(),
@@ -123,9 +125,6 @@ public class AccountService {
                     status == null ? null : status.getTimeUpdated(),
                     status == null ? null : status.getReasonText()
                 );
-            })
-            .toList();
-
-        return Optional.of(recentTradeOrders);
+            }));
     }
 }

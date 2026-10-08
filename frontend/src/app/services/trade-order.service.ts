@@ -2,7 +2,7 @@ import { Injectable } from "@angular/core";
 import { environment } from "../../environments/environment";
 import { Observable, Subject } from "rxjs";
 import { HttpClient } from "@angular/common/http";
-import { OrderStatusResponse, TradeOrderPreviewRequest, TradeOrderPreviewResponse, TradeOrderRequest, TradeOrderResponse } from "@app/models/trade-order.model";
+import { OrderStatus, OrderStatusResponse, TradeOrderPreviewRequest, TradeOrderPreviewResponse, TradeOrderRequest, TradeOrderResponse } from "@app/models/trade-order.model";
 
 @Injectable({
     providedIn: 'root'
@@ -10,7 +10,9 @@ import { OrderStatusResponse, TradeOrderPreviewRequest, TradeOrderPreviewRespons
 export class TradeOrderService {
     private apiUrl = `${environment.apiUrl}/tradeorders`;
     private orderPlacedSubject = new Subject<void>();
+    private orderCompletedSubject = new Subject<OrderStatus>();
     orderPlaced$ = this.orderPlacedSubject.asObservable();
+    orderCompleted$ = this.orderCompletedSubject.asObservable();
 
     constructor(private http: HttpClient) {}
 
@@ -28,5 +30,9 @@ export class TradeOrderService {
 
     notifyOrderplaced(): void {
         this.orderPlacedSubject.next();
+    }
+
+    notifyOrderCompleted(status: OrderStatus): void {
+        this.orderCompletedSubject.next(status);
     }
 }

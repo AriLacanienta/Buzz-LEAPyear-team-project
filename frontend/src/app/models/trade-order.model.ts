@@ -1,5 +1,5 @@
 export type OrderSide = 'BUY' | 'SELL';
-export type OrderStatus = 'SUBMITTED' | 'VALIDATED' | 'FILLED' | 'REJECTED';
+export type OrderStatus = 'SUBMITTED' | 'ACCEPTED' | 'VALIDATED' | 'FILLED' | 'REJECTED';
 
 export interface TradeOrderPreviewRequest {
     side: OrderSide;

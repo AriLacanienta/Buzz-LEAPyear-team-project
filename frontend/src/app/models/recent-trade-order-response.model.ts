@@ -5,6 +5,7 @@ enum OrderSide {
 
 enum OrderStatus {
   SUBMITTED = 'SUBMITTED',
+  ACCEPTED = 'ACCEPTED',
   VALIDATED = 'VALIDATED',
   FILLED = 'FILLED',
   REJECTED = 'REJECTED'
@@ -20,4 +21,14 @@ export interface RecentTradeOrderResponse {
   status: OrderStatus | null;
   timeUpdated: string | Date | null;
   reasonText: string | null;
+}
+
+export interface SpringPage<T> {
+  content: T[];
+  number: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  first: boolean;
+  last: boolean;
 }

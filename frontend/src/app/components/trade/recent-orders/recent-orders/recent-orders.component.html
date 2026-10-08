@@ -6,7 +6,7 @@
         <table *ngIf="orders && orders.length > 0; else noOrders">
             <thead>
                 <tr>
-                    <th>Time</th>
+                    <th>Date</th>
                     <th>Side</th>
                     <th>Instrument</th>
                     <th>Qty</th>
@@ -17,7 +17,7 @@
             </thead>
             <tbody>
                 <tr *ngFor="let order of orders; trackBy: trackByOrderId">
-                    <td class="time">{{ order.orderDate | date: 'HH:mm:ss' }}</td>
+                    <td class="time">{{ order.orderDate | date: 'MMM d, yyyy HH:mm:ss' }}</td>
                     <td class="side">
                         <span [class.buy]="order.side === 'BUY'" [class.sell]="order.side === 'SELL'">
                             {{ order.side.toLowerCase() }}
@@ -41,5 +41,13 @@
                 <p>No orders placed yet. Submit your first order to see it here.</p>
             </div>
         </ng-template>
+    </div>
+    <div class="recent-orders-pagination" *ngIf="totalElements > 0">
+        <span>Showing {{ firstOrderNumber }}-{{ lastOrderNumber }} of {{ totalElements }}</span>
+        <div class="pagination-controls">
+            <button type="button" (click)="previousPage()" [disabled]="pageIndex === 0">Previous</button>
+            <span>Page {{ pageIndex + 1 }} of {{ totalPages }}</span>
+            <button type="button" (click)="nextPage()" [disabled]="pageIndex + 1 >= totalPages">Next</button>
+        </div>
     </div>
 </div>

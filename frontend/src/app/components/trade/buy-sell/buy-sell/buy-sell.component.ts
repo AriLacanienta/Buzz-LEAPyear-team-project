@@ -8,12 +8,13 @@ import { CommonModule, CurrencyPipe } from '@angular/common';
 import { InstrumentSearchResponse } from '@app/models/instrument-search-response.model';
 import { AccountService } from '@app/services/account.service';
 import { merge, switchMap, timer, of, Subject } from 'rxjs';
-import { catchError, debounceTime, finalize } from 'rxjs/operators';
+import { catchError, debounceTime, filter, finalize, take, tap } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 type OrderType = 'BUY' | 'SELL';
 
 const PREVIEW_POLL_INTERVAL_MS = 3000;
+const SUCCESS_MESSAGE_TIMEOUT = 2000;
 
 @Component({
   selector: 'app-buy-sell',
@@ -94,6 +95,9 @@ export class BuySellComponent implements OnInit {
     input.value = input.value.replace(/^0+(?=\d)/, '');
 
     this.quantity = parseInt(input.value, 10) || 0;
+    // Clear error and success messages when user changes quantity
+    this.errorMessage = '';
+    this.successMessage = '';
     this.requestPreview();
   }
 
@@ -101,7 +105,9 @@ export class BuySellComponent implements OnInit {
     const symbolChanged = item?.instrumentSymbol !== this.selectedResult?.instrumentSymbol;
     this.selectedResult = item;
 
-    if (symbolChanged) {
+    if (symbolChanged || item === null) {
+      this.successMessage = '';
+      this.errorMessage = '';
       this.checkOwnership();
     }
     this.requestPreview();
@@ -125,7 +131,7 @@ export class BuySellComponent implements OnInit {
     if (this.isPreviewRejected(side)) {
       return;
     }
-    //this.submitOrder(side);
+    this.submitOrder(side);
   }
 
   submitOrder(side: 'BUY' | 'SELL'): void {
@@ -149,19 +155,47 @@ export class BuySellComponent implements OnInit {
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
       next: response => {
-        if (response.status === 'FILLED') {
-          this.successMessage = `${side === 'BUY' ? 'Bought' : 'Sold'} ${quantity} ${symbol} (order #${response.orderId})`;
-          this.quantity = 0;
-        }
-        else {
-          this.errorMessage = this.formatErrorMessage(response.statusMessage) || 'Order was rejected.';
-        }
+        this.quantity = 0;
+        this.successMessage = `Order #${response.orderId} submitted`;
         this.tradeOrderService.notifyOrderplaced();
-        this.loadCashAvailable();
-        this.checkOwnership();
-        this.requestPreview();
+        this.watchOrderCompletion(response.orderId, side, quantity, symbol);
       },
-      error: () => this.errorMessage = 'Order could not be submitted.'
+      error: () => this.errorMessage = 'Order could not be submitted'
+    });
+  }
+
+  private watchOrderCompletion(orderId: number, side: 'BUY' | 'SELL', quantity: number, symbol: string): void {
+    timer(0, 300).pipe(
+      switchMap(() => this.tradeOrderService.getOrderStatus(orderId).pipe(catchError(() => of(null)))),
+      tap(status => {
+        if (status?.status === 'ACCEPTED') {
+          this.successMessage = `Order #${orderId} accepted`;
+        }
+      }),
+      filter(status => status !== null && (status.status === 'FILLED' || status.status === 'REJECTED')),
+      take(1),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(status => {
+      if (!status) {
+        return;
+      }
+
+      this.tradeOrderService.notifyOrderCompleted(status.status);
+      this.loadCashAvailable();
+      this.checkOwnership();
+      this.requestPreview();
+
+      if (status.status === 'FILLED') {
+        this.successMessage = `${side === 'BUY' ? 'Bought' : 'Sold'} ${quantity} ${symbol} (order #${orderId})`;
+        setTimeout(() => {
+          this.successMessage = '';
+        }, SUCCESS_MESSAGE_TIMEOUT);
+      }
+      else {
+        // Clear the submitted message and show the error
+        this.successMessage = '';
+        this.errorMessage = this.formatErrorMessage(status.reasonText) || 'Order was rejected.';
+      }
     });
   }
 

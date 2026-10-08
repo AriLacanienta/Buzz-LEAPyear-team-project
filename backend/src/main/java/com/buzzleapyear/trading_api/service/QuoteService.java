@@ -42,6 +42,8 @@ public class QuoteService {
     private final double MAX_DRIFT;
     private static final Logger logger = LoggerFactory.getLogger(QuoteService.class);
 
+    public record QuoteSnapshot(BigDecimal price, LocalDateTime timestamp) {}
+
     private static class InstrumentQuoteState {
         double volatility;
         double drift;
@@ -203,8 +205,7 @@ public class QuoteService {
             return Optional.empty();
         }
 
-        Long instrumentId = instrument.get().getId();
-        InstrumentQuoteState state = latestQuotes.get(instrumentId);
+        InstrumentQuoteState state = latestQuotes.get(instrument.get().getId());
 
         if (state == null || state.currentPrice == null) {
             return Optional.empty();
@@ -212,17 +213,32 @@ public class QuoteService {
 
         return Optional.of(new QuoteResponseDto(
             symbol,
-            state.currentPrice, 
-            state.highPrice, 
-            state.lowPrice, 
-            state.openPrice, 
-            state.previousClosePrice, 
+            state.currentPrice,
+            state.highPrice,
+            state.lowPrice,
+            state.openPrice,
+            state.previousClosePrice,
             state.change,
-            state.changePercent, 
+            state.changePercent,
             state.volume,
             state.marketCap,
             state.timestamp
         ));
+    }
+
+    public Optional<QuoteSnapshot> getLatestQuoteSnapshotBySymbol(String symbol) {
+        Optional<Instrument> instrument = instrumentService.getInstrumentBySymbol(symbol);
+        if (instrument.isEmpty()) {
+            return Optional.empty();
+        }
+
+        InstrumentQuoteState state = latestQuotes.get(instrument.get().getId());
+
+        if (state == null || state.currentPrice == null) {
+            return Optional.empty();
+        }
+
+        return Optional.of(new QuoteSnapshot(state.currentPrice, state.timestamp));
     }
 
     public Page<InstrumentSearchResponseDto> getInstrumentSearchResults(String query, Pageable pageable) {

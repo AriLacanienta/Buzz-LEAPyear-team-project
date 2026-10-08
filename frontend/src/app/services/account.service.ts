@@ -4,7 +4,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { BalanceResponse } from '@app/models/balance-response.model';
 import { CurrentAccountResponse } from '@app/models/current-account-response.model';
-import { RecentTradeOrderResponse } from '@app/models/recent-trade-order-response.model';
+import { RecentTradeOrderResponse, SpringPage } from '@app/models/recent-trade-order-response.model';
 
 @Injectable({
   providedIn: 'root'
@@ -32,9 +32,11 @@ export class AccountService {
       return this.http.get<BalanceResponse>(`${this.apiUrl}/${encodeURIComponent(id)}`);
   }
 
-  getRecentTradeOrders(accountId: string | number, limit = 10): Observable<RecentTradeOrderResponse[]> {
-    const params = new HttpParams().set('limit', String(limit));
+  getRecentTradeOrders(accountId: string | number, page =0, size = 10): Observable<SpringPage<RecentTradeOrderResponse>> {
+    const params = new HttpParams()
+      .set('page', String(page))
+      .set('size', String(size));
     const url = `${this.apiUrl}/${encodeURIComponent(accountId)}/tradeorders`;
-    return this.http.get<RecentTradeOrderResponse[]>(url, { params });
+    return this.http.get<SpringPage<RecentTradeOrderResponse>>(url, { params });
   }
 }

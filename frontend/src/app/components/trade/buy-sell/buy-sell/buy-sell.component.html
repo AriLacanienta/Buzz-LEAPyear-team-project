@@ -62,8 +62,10 @@
         <span>Insufficient cash for this order.</span>
     </div>
 
-    <div *ngIf="successMessage" role="status" class="success-container">
-        <span>{{ successMessage }}</span>
+    <div *ngIf="successMessage" role="status" [ngClass]="{ 'order-accepted': successMessage.includes('accepted'), 'order-submitted': successMessage.includes('submitted'), 'order-filled': successMessage.includes('Bought') || successMessage.includes('Sold') }">
+        <span *ngIf="successMessage.includes('submitted')" class="animate-spin">⟳</span>
+        <span *ngIf="successMessage.includes('accepted') || successMessage.includes('Bought') || successMessage.includes('Sold')">✓</span>
+        <span class="font-medium capitalize">{{ successMessage.includes('accepted') ? 'Order accepted' : successMessage.includes('submitted') ? 'Order submitted' : successMessage }}</span>
     </div>
 
     <div *ngIf="errorMessage" role="alert" class="error-container">
@@ -74,7 +76,7 @@
         <span>{{ errorMessage }}</span>
     </div>
 
-    <button class="place-order-btn" [class.sell]="!isBuy" [disabled]="isSubmitting || isNotHeld || isInsufficientCash" (click)="onPlaceOrder()">
+    <button class="place-order-btn" [class.sell]="!isBuy" [disabled]="isSubmitting || isNotHeld || isInsufficientCash || successMessage" (click)="onPlaceOrder()">
         {{ isSubmitting ? 'Submitting...' : (isBuy ? 'Review & Submit Buy' : 'Review & Submit Sell') }}
     </button>
 </div>

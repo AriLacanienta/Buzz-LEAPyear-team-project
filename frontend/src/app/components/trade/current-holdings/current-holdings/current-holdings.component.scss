@@ -48,14 +48,28 @@ $transition-duration: 200ms;
 }
 
 .current-holdings-body {
-  overflow: auto;
+  overflow-y: auto;
   flex: 1;
   min-height: 0;
   overflow: auto;
-  scrollbar-width: none;
+  scrollbar-width: thin;
+  scrollbar-color: $border-dark transparent;
 
   &::-webkit-scrollbar {
-    display: none;
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: $border-dark;
+    border-radius: 3px;
+
+    &:hover {
+      background-color: $color-slate-500;
+    }
   }
 }
 
