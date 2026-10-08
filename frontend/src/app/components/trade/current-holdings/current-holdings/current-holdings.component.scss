@@ -16,7 +16,7 @@ $transition-duration: 200ms;
 
 :host {
   display: block;
-  height: 30rem;
+  height: clamp(20rem, 35vw, 30rem);
   box-sizing: border-box;
 }
 
@@ -32,14 +32,14 @@ $transition-duration: 200ms;
 }
 
 .current-holdings-header {
-  padding-left: 1.25rem;
-  padding-right: 1.25rem;
-  padding-top: 1rem;
-  padding-bottom: 1rem;
+  padding-left: clamp(0.75rem, 2vw, 1.25rem);
+  padding-right: clamp(0.75rem, 2vw, 1.25rem);
+  padding-top: clamp(0.6rem, 1.5vw, 1rem);
+  padding-bottom: clamp(0.6rem, 1.5vw, 1rem);
   border-bottom: 1px solid $border-dark;
 
   h3 {
-    font-size: $text-sm;
+    font-size: clamp(0.8rem, 1.2vw, $text-sm);
     font-weight: $font-weight-semibold;
     color: $color-white;
     line-height: $text-sm-line-height;
@@ -77,11 +77,11 @@ $transition-duration: 200ms;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2.5rem;
+  padding: clamp(1rem, 3vw, 2.5rem);
   color: $color-slate-500;
-  font-size: $text-xs;
+  font-size: clamp(0.7rem, 1.1vw, $text-xs);
   text-align: center;
-  min-height: 200px;
+  min-height: clamp(150px, 30vh, 200px);
 
   p {
     margin: 0;
@@ -90,7 +90,7 @@ $transition-duration: 200ms;
 
 table {
   width: 100%;
-  font-size: $text-xs;
+  font-size: clamp(0.7rem, 1.1vw, $text-xs);
   line-height: $text-xs-line-height;
   border-collapse: collapse;
 }
@@ -100,12 +100,12 @@ thead {
 }
 
 th {
-  padding-left: 1rem;
-  padding-right: 1rem;
-  padding-top: 0.625rem;
-  padding-bottom: 0.625rem;
+  padding-left: clamp(0.6rem, 1.5vw, 1rem);
+  padding-right: clamp(0.6rem, 1.5vw, 1rem);
+  padding-top: clamp(0.4rem, 1vw, 0.625rem);
+  padding-bottom: clamp(0.4rem, 1vw, 0.625rem);
   text-align: left;
-  font-size: 10px;
+  font-size: clamp(0.65rem, 1vw, 10px);
   color: $color-slate-500;
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -128,11 +128,12 @@ tbody {
     }
 
     td {
-      padding-left: 1rem;
-      padding-right: 1rem;
-      padding-top: 0.75rem;
-      padding-bottom: 0.75rem;
+      padding-left: clamp(0.5rem, 1.2vw, 1rem);
+      padding-right: clamp(0.5rem, 1.2vw, 1rem);
+      padding-top: clamp(0.4rem, 1vw, 0.75rem);
+      padding-bottom: clamp(0.4rem, 1vw, 0.75rem);
       font-family: monospace;
+      font-size: clamp(0.65rem, 0.95vw, $text-xs);
 
       &.ticker {
         color: $color-white;
@@ -149,19 +150,19 @@ tbody {
       }
 
       &.action {
-        padding-left: 1rem;
-        padding-right: 1rem;
+        padding-left: clamp(0.5rem, 1.2vw, 1rem);
+        padding-right: clamp(0.5rem, 1.2vw, 1rem);
       }
     }
   }
 }
 
 .sell-button {
-  font-size: 10px;
-  padding-left: 0.625rem;
-  padding-right: 0.625rem;
-  padding-top: 0.25rem;
-  padding-bottom: 0.25rem;
+  font-size: clamp(0.6rem, 0.9vw, 10px);
+  padding-left: clamp(0.4rem, 1vw, 0.625rem);
+  padding-right: clamp(0.4rem, 1vw, 0.625rem);
+  padding-top: clamp(0.15rem, 0.5vw, 0.25rem);
+  padding-bottom: clamp(0.15rem, 0.5vw, 0.25rem);
   border-radius: $radius-md;
   background-color: rgba(239, 68, 68, 0.1);
   border: 1px solid rgba(239, 68, 68, 0.2);

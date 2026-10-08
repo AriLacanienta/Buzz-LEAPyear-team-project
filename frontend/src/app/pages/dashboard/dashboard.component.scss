@@ -33,3 +33,21 @@ main {
   }
 }
 
+.trade-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.trade-content h2 {
+  color: #e8eaf0;
+  font-size: 1.875rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.trade-content p {
+  color: #e8eaf0;
+  font-size: 1rem;
+  margin: 0;
+}
