@@ -1,5 +1,26 @@
 <div class="container">
   <main>
+    <section class="portfolio-chart-section">
+      <p class="portfolio-label">Total Portfolio Value</p>
+      <div class="total-balance">
+        <span class="value">${{ totalPortfolioValue.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) }}</span>
+        <div class="portfolio-stats">
+          <span class="stat today-change" [ngClass]="{ positive: todayChange >= 0, negative: todayChange < 0 }">
+            {{ todayChange >= 0 ? '+' : '-' }}${{ Math.abs(todayChange).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) }} today ({{ todayChangePercent >= 0 ? '+' : '' }}{{ todayChangePercent }}%)
+          </span>
+          <span class="stat all-time-change" [ngClass]="{ positive: allTimeChange >= 0, negative: allTimeChange < 0 }">
+            {{ allTimeChange >= 0 ? '+' : '-' }}${{ Math.abs(allTimeChange).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) }} all time ({{ allTimeChangePercent >= 0 ? '+' : '' }}{{ allTimeChangePercent }}%)
+          </span>
+        </div>
+      </div>
+      <div class="chart-wrapper">
+        <highcharts-chart 
+          [Highcharts]="Highcharts"
+          [options]="portfolioChartOptions">
+        </highcharts-chart>
+      </div>
+    </section>
+
     <section class="portfolio-section">
       <h2>Top Holdings</h2>
       
@@ -12,11 +33,15 @@
       </div>
 
       <div *ngIf="!isLoading && holdings.length > 0" class="holdings-column">
-        <app-portfolio-holding-card 
-          *ngFor="let holding of holdings; let i = index"
-          [holding]="holding"
-          [index]="i">
-        </app-portfolio-holding-card>
+        <!-- 💡 UPDATE THIS IN YOUR PARENT COMPONENT HTML (e.g. dashboard.component.html) -->
+<div class="holdings-grid">
+  <app-portfolio-holding-card 
+    *ngFor="let item of holdings; let i = index; trackBy: trackBySymbol" 
+    [holding]="item" 
+    [index]="i">
+  </app-portfolio-holding-card>
+</div>
+
       </div>
     </section>
   </main>
