@@ -36,51 +36,84 @@ $spacing-lg: 0.75rem;
 $spacing-xl: 1rem;
 
 .holding-card {
-  border-radius: $border-radius-lg;
-  border: $border-width solid $border-dark;
-  background: $bg-dark;
-  width: $card-width;
-  height: $card-height;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  border: 0.1rem solid #1E2D45;
+  background: #0F1520;
   
+  // 💡 OPTIMIZED FOR ZOOM: Stretch to fill the parent layout slot completely
+  width: 100%; 
+  max-width: 100%; // Prevents bounding breakout frames
+  height: auto;
+  min-height: 18rem;
+  overflow: hidden;
+
+  // Modern subtle hover feedback to make the dashboard look interactive
+  transition: transform 0.2s ease, border-color 0.2s ease;
+  &:hover {
+    transform: translateY(-4px);
+    border-color: #3b82f6;
+  }
 
   mat-card-content {
-    padding: $spacing-xl;
+    padding: 1rem;
     display: flex;
     flex-direction: column;
-    gap: $spacing-sm;
+    gap: 0.5rem;
   }
 }
 
 .card-header {
   display: flex;
   align-items: center;
-  gap: $spacing-lg;
+  gap: 0.75rem;
 
   .symbol-icon {
-    width: $icon-size;
-    height: $icon-size;
+    width: 2rem;
+    height: 2rem;
     border-radius: 50%;
     background: var(--symbol-bg);
     color: var(--symbol-color);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: $font-weight-semibold;
-    font-size: $icon-font-size;
+    font-weight: 600;
+    font-size: 1.125rem;
   }
 
   .symbol-info {
     flex: 1;
     .symbol {
-      font-weight: $font-weight-bold;
-      font-size: $font-size-md;
-      color: $color-white;
+      font-weight: 700;
+      font-size: 1rem;
+      color: #f1f5f9;
       font-family: 'DM Mono', monospace;
     }
     .name {
-      font-size: $font-size-label;
-      color: $color-text-secondary;
-      margin-top: $spacing-none;
+      font-size: 0.75rem;
+      color: #62748E;
+      margin-top: 0.125rem;
+    }
+  }
+}
+
+.chart-container {
+  position: relative;
+  width: 100%;
+  height: 100px; // Slightly dialed back from 180px to provide better padding proportions
+  margin: 0.5rem 0;
+  padding: 0;
+  overflow: hidden;
+  flex-shrink: 0;
+  
+  ::ng-deep {
+    .highcharts-container,
+    svg {
+      width: 100% !important;
+      height: 100% !important;
+      left: 0 !important;
+      top: 0 !important;
+      margin: 0 !important;
     }
   }
 }

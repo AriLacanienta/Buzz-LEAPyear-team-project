@@ -26,6 +26,9 @@ export class PortfolioHoldingCardComponent implements OnDestroy, OnChanges {
   
   // Rolling window of price data points (max 8 points) for trend visualization
   private priceHistory: number[] = [];
+
+  // Track the symbol associated with the current price history
+  private currentSymbol: string = '';
   
   // Track current symbol to detect when holding changes and reinitialize chart data 
 
