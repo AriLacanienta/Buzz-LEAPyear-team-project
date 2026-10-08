@@ -1,8 +1,10 @@
 export interface CurrentHoldingsResponse {
-    symbol: string;
+    instrumentName: string;
+    instrumentSymbol: string;
     quantity: number;
-    averagePrice: number;
-    value: number;
-    orderType: string;
-    currencyType: string;
+    currentPrice: number;
+    totalValue: number;
+    change: number;
+    changePercent: number;
+    totalCost: number;
 }

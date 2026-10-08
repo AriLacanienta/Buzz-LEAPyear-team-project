@@ -1,19 +1,21 @@
 <div class="container">
   <main>
-    <section class="trade-content">
-      <app-buy-sell></app-buy-sell>
-    </section>
-
-    <section class="trade-content">
-      <app-recent-orders></app-recent-orders>
-    </section>
-
-    <section class="trade-content">
-      <app-balance></app-balance>
-    </section>
-
-    <section class="trade-content">
-      <app-current-holdings></app-current-holdings>
-    </section>
+    <div class="left-column">
+      <section class="trade-content">
+        <app-buy-sell></app-buy-sell>
+      </section>
+      <section class="trade-content">
+        <app-balance></app-balance>
+      </section>
+    </div>
+    
+    <div class="right-column">
+      <section class="trade-content">
+        <app-recent-orders></app-recent-orders>
+      </section>
+      <section class="trade-content">
+        <app-current-holdings></app-current-holdings>
+      </section>
+    </div>
   </main>
 </div>

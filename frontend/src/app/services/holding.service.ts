@@ -13,13 +13,11 @@ export class HoldingService {
 
   getAllHoldings(): Observable<any[]> {
     const url = `${this.apiUrl}/holdings`;
-    console.log('Calling all holdings endpoint:', url);
     return this.http.get<any[]>(url);
   }
 
   getHoldingsByAccountId(accountId: string | number): Observable<any[]> {
-    const url = `${this.apiUrl}/${accountId}/holdings`;
-    console.log('Calling holdings endpoint:', url);
+    const url = `${this.apiUrl}/${encodeURIComponent(accountId)}/holdings`;
     return this.http.get<any[]>(url);
   }
 }

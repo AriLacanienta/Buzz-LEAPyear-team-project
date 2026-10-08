@@ -130,7 +130,7 @@ public class OrderValidator {
             logger.warn("Order ID: {} failed validation: {}", order.getId(), reason);
             return new ValidationResult(false, reason);
         }
-        
+        /*
         // Check risk profile
         if (!validateRiskProfile(account, order)) {
             // TODO: Get ready for international markets
@@ -146,6 +146,7 @@ public class OrderValidator {
             logger.warn("Order ID: {} failed validation: {}", order.getId(), reason);
             return new ValidationResult(false, reason);
         }
+        */
         
         // Check side-specific rules
         if (order.getSide() == TradeOrder.OrderSide.BUY) {

@@ -11,6 +11,9 @@ import java.util.List;
 public interface TradeOrderStatusRepository extends JpaRepository<TradeOrderStatus, Long> {
     List<TradeOrderStatus> findByTradeOrderId(Long tradeOrderId);
 
-    @Query ("SELECT tos FROM TradeOrderStatus tos WHERE tos.tradeOrder.id = ?1 ORDER BY tos.timeUpdated DESC LIMIT 1")
-    TradeOrderStatus getLatestStatusById(Long orderId);
+    TradeOrderStatus findFirstByTradeOrderIdOrderByTimeUpdatedDesc(Long tradeOrderId);
+
+    default TradeOrderStatus getLatestStatusById(Long tradeOrderId) {
+        return findFirstByTradeOrderIdOrderByTimeUpdatedDesc(tradeOrderId);
+    }
 }
