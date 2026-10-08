@@ -1,9 +1,19 @@
 <header>
   <div class="header-content">
+    <div class="buzz-trader">
+      <div class="rocket">
+        <div class="rocket-icon">
+          <mat-icon>rocket_launch</mat-icon>
+        </div>
+        <div class="rocket-square"></div>
+      </div>
+      <span [style.color]="getAppNameColor('buzz')">Buzz </span> <span [style.color]="getAppNameColor('trader')">Trader</span>
+    </div>
+    <div class="divider">|</div>
     <nav class="tabs">
       <a routerLink="/account" routerLinkActive="active" class="account-tab">
         <img src="assets/images/joanna.jpg" alt="Account"/>
-        <span>{{ accountName$ | async }}</span>
+        <span class="account-name">{{ accountName$ | async }}</span>
       </a>
       <a routerLink="/portfolio" routerLinkActive="active" class="tab">Portfolio</a>
       <a routerLink="/markets" routerLinkActive="active" class="tab">Markets</a>
@@ -14,14 +24,14 @@
     <div class="navbar-right">
       <button class="logout-btn" (click)="logout()" title="Logout">Logout</button>
       <div class="market-info">
-        |
+        <div class="divider">|</div>
         <div class="market-text">
           <span class="status-dot" [class.open]="(marketStatusDisplay$ | async)?.class === 'open'" [class.closed]="(marketStatusDisplay$ | async)?.class === 'closed'"></span>
           <span [class]="'market-status ' + (marketStatusDisplay$ | async)?.class">
             {{ (marketStatusDisplay$ | async)?.text }}
           </span>
         </div>
-        |
+        <div class="divider">|</div>
         <span class="navbar-date">{{ formattedDate$ | async }}</span>
       </div>
     </div>

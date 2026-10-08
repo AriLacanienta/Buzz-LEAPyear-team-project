@@ -66,7 +66,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.gainersSubscription = interval(5000)
       .pipe(
         startWith(0),
-        switchMap(() => this.instrumentService.getTopGainers(6))
+        switchMap(() => this.instrumentService.getTopGainers(4))
       )
       .subscribe({
         next: (gainers) => {
@@ -81,7 +81,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.losersSubscription = interval(5000)
       .pipe(
         startWith(0),
-        switchMap(() => this.instrumentService.getTopLosers(6))
+        switchMap(() => this.instrumentService.getTopLosers(4))
       )
       .subscribe({
         next: (losers) => {

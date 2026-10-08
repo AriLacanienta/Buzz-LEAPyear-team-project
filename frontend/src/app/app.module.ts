@@ -17,6 +17,7 @@ import { authGuard } from './auth.guard';
 import { AccountComponent } from './pages/account/account.component';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { MatTableModule } from '@angular/material/table';
+import { MatIconModule } from '@angular/material/icon';
 import { PortfolioHoldingCardComponent } from './components/portfolio/portfolio-holding-card/portfolio-holding-card.component';
 
 const routes: Routes = [
@@ -46,6 +47,7 @@ const routes: Routes = [
     HttpClientModule,
     RouterModule.forRoot(routes),
     MatTableModule,
+    MatIconModule,
     PortfolioHoldingCardComponent,
     MarketsComponent,
     DashboardComponent

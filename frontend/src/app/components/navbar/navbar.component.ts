@@ -9,7 +9,8 @@ import { Observable } from 'rxjs';
 @Component({
   selector: 'app-navbar',
   templateUrl: './navbar.component.html',
-  styleUrls: ['./navbar.component.scss']
+  styleUrls: ['./navbar.component.scss'],
+
 })
 export class NavbarComponent {
   accountName$ = this.accountService.accountName$.pipe(
@@ -36,5 +37,9 @@ export class NavbarComponent {
   logout(): void {
     this.authService.logout();
     this.router.navigate(['/login']);
+  }
+
+  getAppNameColor(word: String): string {
+    return word.toLowerCase() === 'buzz' ? 'white' : '#3B82F6';
   }
 }

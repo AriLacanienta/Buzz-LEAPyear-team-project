@@ -1,28 +1,35 @@
 $spacing-md: 1rem;
 $spacing-xl: 1.875rem;
 $spacing-lg: 1.25rem;
-$max-width: 75%;
+$max-width: 85%;
 
 main {
-  padding: $spacing-xl $spacing-lg;
+  padding: clamp(0.875rem, 4vw, $spacing-xl) clamp(0.875rem, 3vw, $spacing-lg);
   max-width: $max-width;
   margin: 0 auto;
 }
 
 .portfolio-section {
-  margin-bottom: $spacing-md;
+  margin-bottom: clamp(0.65rem, 1.5vw, $spacing-md);
 }
 
 .market-section {
-  margin-bottom: $spacing-md;
+  margin-bottom: clamp(0.65rem, 1.5vw, $spacing-md);
   display: flex;
   flex-direction: column;
-  gap: $spacing-md;
+  gap: clamp(0.65rem, 1.5vw, $spacing-md);
+  width: 100%;
 
   .cards-container {
     display: flex;
     flex-direction: row;
-    gap: $spacing-md;
+    gap: clamp(0.65rem, 1.5vw, $spacing-md);
+    width: 100%;
+
+    app-market-info-card {
+      flex: 1 1 0;
+      min-width: 0;
+    }
   }
 }
 

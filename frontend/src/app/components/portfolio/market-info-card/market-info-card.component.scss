@@ -15,12 +15,16 @@ $font-weight-semibold: 600;
 $color-secondary-text: #62748E;
 
 .market-info {
-  margin-bottom: $spacing-md;
+  flex: 1 1 0;
+  min-width: 0;
+  margin-bottom: 0;
   border-radius: $radius-lg;
   border: 0.1rem solid $border-dark;
   background: $bg-dark;
-  width: 28rem;
-  height: 24.5rem;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
 
   .top-gainers {
     color: $color-green;
@@ -35,30 +39,42 @@ $color-secondary-text: #62748E;
   .market-info-header {
     display: flex;
     flex-direction: row;
-    gap: $spacing-sm;
-    font-size: 1rem;
+    gap: clamp(0.35rem, 1.5vw, $spacing-sm);
+    font-size: clamp(0.75rem, 2vw, 1rem);
     font-weight: 700;
-    margin-bottom: 1rem;
+    margin-bottom: clamp(0.55rem, 1.8vw, 1rem);
     align-items: center;
+    flex-shrink: 0;
+    padding: clamp(0.65rem, 2.5vw, 1rem);
+    border-bottom: 0.1rem solid $border-dark;
+
+    h1 {
+      margin: 0;
+      font-size: clamp(0.8rem, 1.5vw, 1.75rem);
+      line-height: 1;
+    }
 
     h2 {
       margin: 0;
+      font-size: clamp(0.8rem, 1.35vw, 1.75rem);
       color: $color-white;
     }
   }
 
   .symbol-avatar {
     display: inline-block;
-    width: $avatar-size;
-    height: $avatar-size;
-    line-height: $avatar-size;
+    width: clamp(1.4rem, 2.5vw, $avatar-size);
+    height: clamp(1.4rem, 2.5vw, $avatar-size);
+    line-height: clamp(1.4rem, 2.5vw, $avatar-size);
     border-radius: 0.25rem;
     background-color: $color-primary-light-bg;
     border-color: $border-dark;
     color: $color-primary-light;
     text-align: center;
     font-weight: $font-weight-semibold;
-    margin-right: $spacing-sm;
+    font-size: clamp(0.65rem, 1.5vw, 1rem);
+    margin-right: clamp(0.35rem, 0.8vw, $spacing-sm);
+    flex-shrink: 0;
 
     &.avatar-gainer {
       background-color: rgba($color-green, 0.2);
@@ -70,46 +86,46 @@ $color-secondary-text: #62748E;
       color: $color-red;
     }
   }
-}
-
   .data-list {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
-    max-height: 20rem;
-    overflow-y: auto;
+    gap: clamp(0.6rem, 1.2vw, 0.75rem);
+    flex: 1;
+    overflow: hidden;
+    padding: clamp(0.65rem, 2.5vw, 1rem);
 
     .data-item {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 0.15rem;
-      font-size: 0.85rem;
-      overflow: hidden;
+      font-size: clamp(0.7rem, 1.5vw, 0.9rem);
+      gap: clamp(0.35rem, 0.8vw, 0.5rem);
 
       .symbol {
         font-weight: 600;
         color: $color-white;
         font-family: 'DM Mono', monospace;
-        min-width: 3rem;
+        min-width: clamp(1.8rem, 3vw, 3rem);
+        flex-shrink: 0;
+        font-size: clamp(0.65rem, 1.2vw, 0.85rem);
       }
 
       .symbol-details {
         display: flex;
         flex-direction: column;
-        gap: 0.25rem;
-        min-width: 8rem;
-        flex: 0 0 8rem;
+        gap: clamp(0.05rem, 0.3vw, 0.15rem);
+        min-width: clamp(5.5rem, 8vw, 8rem);
+        flex: 0 0 clamp(5.5rem, 8vw, 8rem);
 
         .symbol {
           font-weight: 700;
           color: $color-white;
           font-family: 'DM Mono', monospace;
-          font-size: 1rem;
+          font-size: clamp(0.65rem, 1.2vw, 1rem);
         }
 
         .name {
-          font-size: 0.6rem;
+          font-size: clamp(0.55rem, 1vw, 0.75rem);
           color: $color-secondary-text;
           font-family: inherit;
         }
@@ -120,13 +136,16 @@ $color-secondary-text: #62748E;
         font-family: 'DM Mono', monospace;
         flex: 1;
         text-align: center;
+        font-size: clamp(0.7rem, 1.5vw, 0.9rem);
       }
 
       .change {
         font-weight: 600;
         font-family: 'DM Mono', monospace;
-        min-width: 3rem;
+        min-width: clamp(2.2rem, 3.5vw, 3rem);
         text-align: right;
+        flex-shrink: 0;
+        font-size: clamp(0.7rem, 1.5vw, 0.9rem);
 
         &.positive-change {
           color: $color-green;
@@ -146,6 +165,9 @@ $color-secondary-text: #62748E;
   p {
     margin: 0;
     color: $color-text;
-    font-size: 0.9rem;
+    font-size: clamp(0.7rem, 1.5vw, 0.95rem);
+    padding: clamp(0.65rem, 2.5vw, 1rem);
+    border-top: 0.1rem solid $border-dark;
+    flex-shrink: 0;
   }
-
+}

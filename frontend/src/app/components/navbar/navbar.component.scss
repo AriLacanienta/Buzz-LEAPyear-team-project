@@ -5,12 +5,15 @@ $bg-dark: #0F1520;
 $color-white: #ffffff;
 $color-success: #10B981;
 $color-error: #EF4444;
+$color-rocket: #3B82F6;
+$color-rocket-dark: #51A2FF;
 
 // Spacing Variables
+$padding-xs: 0.25rem;
 $padding-sm: 0.3rem;
 $padding-md: 0.5rem;
 $padding-lg: 0.6rem;
-$padding-xl: 2rem;
+$padding-xl: 1rem;
 $spacing-xs: 0.25rem;
 $spacing-sm: 0.5rem;
 $spacing-md: 1rem;
@@ -18,7 +21,7 @@ $spacing-lg: 1.5rem;
 $spacing-xl: 1.25rem;
 
 // Size Variables
-$max-width: 75%;
+$max-width: 95%;
 $border-width: 0.125rem;
 $border-width-thin: 0.0625rem;
 $border-width-md: 1px;
@@ -37,6 +40,7 @@ header {
   padding: $padding-lg $padding-xl;
   border-bottom: $border-width solid $border-dark;
   margin-bottom: $spacing-lg;
+  flex-wrap: nowrap;
 
   h1 {
     margin: 0;
@@ -58,10 +62,52 @@ header {
   margin: 0 auto;
 }
 
+.buzz-trader {
+  font-size: $font-size-sm;
+  padding: $padding-sm $padding-md;
+  font-weight: $font-weight-normal;
+  padding-right: $spacing-md;
+  align-items: center;
+  display: flex;
+  gap: $spacing-xs;
+}
+
+.rocket {
+  color: $color-rocket;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  mat-icon {
+    position: relative;
+    z-index: 1;
+    size: 1rem;
+  }
+}
+
+.rocket-square {
+  position: absolute;
+  width: 1.75rem;
+  height: 1.75rem;
+  background-color: rgba($color-rocket-dark, 0.2);
+  z-index: 0;
+  border-radius: $border-radius-sm;
+  border: $border-width-thin solid $color-rocket;
+}
+
+.divider {
+  color: $border-dark;
+  font-size: $font-size-md;
+  font-weight: $font-weight-normal;
+}
+
 .tabs {
   display: flex;
-  gap: $spacing-sm;
+  gap: clamp(0.025rem, 0.1vw, 0.1rem);
   align-items: center;
+  padding-left: $spacing-sm;
+  flex: auto;
 
   .account-tab {
     display: flex;
@@ -82,6 +128,10 @@ header {
       padding: 0;
       object-fit: cover;
       flex-shrink: 0;
+    }
+    .account-name {
+      font-weight: $font-weight-normal;
+      color: $color-white;
     }
   }
 
