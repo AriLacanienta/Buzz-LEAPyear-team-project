@@ -28,7 +28,7 @@ const routes: Routes = [
   { path: 'account', component: AccountComponent, canActivate: [authGuard] },
   { path: 'portfolio', component: DashboardComponent, canActivate: [authGuard] },
   { path: 'trade', component: TradeComponent, canActivate: [authGuard] },
-  { path: 'markets', component: MarketsComponent, canActivate: [authGuard]},
+  { path: 'markets', component: MarketsComponent, canActivate: [authGuard] },
   { path: '', redirectTo: '/login', pathMatch: 'full' }
 ];
 
