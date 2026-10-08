@@ -18,6 +18,8 @@ import { AccountComponent } from './pages/account/account.component';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { MatTableModule } from '@angular/material/table';
 import { PortfolioHoldingCardComponent } from './components/portfolio-holding-card/portfolio-holding-card.component';
+import { HoldingService } from './services/holding.service';
+import { HighchartsChartModule } from 'highcharts-angular';
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -48,9 +50,11 @@ const routes: Routes = [
     HttpClientModule,
     RouterModule.forRoot(routes),
     MatTableModule,
-    PortfolioHoldingCardComponent
+    PortfolioHoldingCardComponent,
+    HighchartsChartModule
   ],
   providers: [
+    { provide: HoldingService, useClass: HoldingService },
     // Register HTTP interceptor to add JWT token to all requests
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }
   ],
