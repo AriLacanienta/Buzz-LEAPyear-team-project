@@ -10,6 +10,14 @@
       </span>
     </div>
 
+    <!-- Stock Price Chart -->
+    <div class="chart-container">
+      <highcharts-chart 
+        [Highcharts]="Highcharts"
+        [options]="chartOptions">
+      </highcharts-chart>
+    </div>
+
     <!-- Total Value -->
     <div class="total-value">
       ${{ formatTotalValue(holding.totalValue) }}
