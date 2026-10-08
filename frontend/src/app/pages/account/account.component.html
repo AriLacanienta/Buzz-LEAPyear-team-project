@@ -3,13 +3,52 @@
 
   <main>
     <section class="profile-section">
-      <ul>
-          <li>Profile Photo</li>
-          <li>Name</li>
-          <li>Email</li>
-          <li>Phone Number</li>
-          <li>Address</li>
-        </ul>
+      <h2>Personal Information</h2>
+
+      <!-- Loading state -->
+      <div *ngIf="loading" class="loading-state">
+        <p>Loading profile...</p>
+      </div>
+
+      <!-- Error state -->
+      <div *ngIf="errorMessage && !loading" class="error-state">
+        <p>{{ errorMessage }}</p>
+      </div>
+
+      <!-- User profile data -->
+      <div *ngIf="userProfile && !loading" class="profile-content">
+        <!-- Profile Header -->
+        <div class="profile-header">
+          <img src="https://via.placeholder.com/150?text=Profile" alt="Profile Photo" class="profile-photo">
+          <div class="profile-info-header">
+            <h3>{{ userProfile.firstName }} {{ userProfile.lastName }}</h3>
+            <p class="username">{{ '@' }}{{ userProfile.username }}</p>
+          </div>
+        </div>
+
+        <!-- Profile Details Grid -->
+        <div class="profile-details">
+          <div class="profile-item">
+            <label>Username</label>
+            <p>{{ userProfile.username }}</p>
+          </div>
+
+          <div class="profile-item">
+            <label>Email</label>
+            <p>{{ userProfile.email }}</p>
+          </div>
+
+          <div class="profile-item">
+            <label>First Name</label>
+            <p>{{ userProfile.firstName }}</p>
+          </div>
+
+          <div class="profile-item">
+            <label>Last Name</label>
+            <p>{{ userProfile.lastName }}</p>
+          </div>
+        </div>
+      </div>
     </section>
   </main>
 </div>
