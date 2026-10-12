@@ -41,14 +41,12 @@ $spacing-xl: 1rem;
   border: 0.1rem solid #1E2D45;
   background: #0F1520;
   
-  // 💡 OPTIMIZED FOR ZOOM: Stretch to fill the parent layout slot completely
   width: 100%; 
-  max-width: 100%; // Prevents bounding breakout frames
+  max-width: 100%; 
   height: auto;
   min-height: 18rem;
   overflow: hidden;
 
-  // Modern subtle hover feedback to make the dashboard look interactive
   transition: transform 0.2s ease, border-color 0.2s ease;
   &:hover {
     transform: translateY(-4px);
