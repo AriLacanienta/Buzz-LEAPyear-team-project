@@ -1,21 +1,36 @@
 package com.buzzleapyear.trading_api.service;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.buzzleapyear.trading_api.entity.TradeOrderStatus;
-// for manual testing:
-//curl --json '{"side":"BUY","price":"9999.99","accountId":"1","instrumentId":"1","quantity":"999"}' http://localhost:6767/api/v1/tradeorders
-
+@ExtendWith(MockitoExtension.class)
 public class OrderProcesserServiceTests {
-    
+
+    @Mock
+    private OrderProcessor orderProcessor;
+
+    private ProcessOrderService processOrderService;
+
+    @BeforeEach
+    void setUp() {
+        processOrderService = new ProcessOrderService(orderProcessor);
+    }
+
     @Test
-    void sampleTest() {
-        // verify(mockEntityManager, times(2)).persist(any(TradeOrderStatus.class));
-        assertTrue(true);
+    void submitOrderDelegatesToOrderProcessor() {
+        processOrderService.submitOrder(99L);
+
+        verify(orderProcessor).processOrder(99L);
+    }
+
+    @Test
+    void submitOrderThrowsWhenOrderIdIsNull() {
+        assertThrows(IllegalArgumentException.class, () -> processOrderService.submitOrder(null));
     }
 }
