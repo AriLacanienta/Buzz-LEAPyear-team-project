@@ -46,20 +46,21 @@ export class LoginComponent {
     //Call auth service login method
     //This makes HTTP request to backend /api/auth/login
     this.authService.login(email, password).subscribe(
-      // Success response
+      //success response
       (response) => {
+        //storing access and refresh tokens from backend auth response
+        this.authService.setAuthSessionFromResponse(response);
+        
         this.loading = false;
         console.log('Login successful!', response);
-
-        const landingPage = this.authService.hasRole('MANAGER')
-          ? '/admin'
-          : '/dashboard';
-        this.router.navigate([landingPage]);
+        
+        //redirecting to dashboard
+        this.router.navigate(['/dashboard']);
       },
-      // Error response
+      //error response
       (error) => {
         this.loading = false;
-        // Check if it's a technical/security error, show generic message instead
+        //checking if it's a technical/security error, shows generic message instead
         if (error.error?.message?.includes('signing key') || error.error?.message?.includes('JWT')) {
           this.errorMessage = 'Login failed. Please try again.';
         } else {

@@ -32,7 +32,7 @@ services:
     ports:
      - "${POSTGRES_PORT}:5432"
     healthcheck:
-      test: ["CMD", "pg_isready", "-d", "${POSTGRES_DB}", "-U"," ${POSTGRES_USER}"]
+      test: ["CMD", "pg_isready", "-d", "${POSTGRES_DB}", "-U", "${POSTGRES_USER}"]
       interval: 2m
       timeout: 5s
       retries: 3

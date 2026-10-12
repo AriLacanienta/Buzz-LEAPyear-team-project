@@ -2,7 +2,16 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { environment } from '@environments/environment';
-import { AuthResponse } from '../models/auth-response.model';
+
+interface AuthApiResponse {
+  token?: string;
+  accessToken?: string;
+  refreshToken?: string;
+  type?: string;
+  username?: string;
+  email?: string;
+  roles?: string[];
+}
 
 /**
  * AuthService - Handles all authentication logic
@@ -20,6 +29,9 @@ export class AuthService {
 
   // Backend API endpoint for authentication
   private apiUrl = `${environment.apiUrl}/auth`;
+  private readonly accessTokenKey = 'jwt_access_token';
+  private readonly refreshTokenKey = 'jwt_refresh_token';
+  private readonly legacyTokenKey = 'jwt_token';
 
   constructor(private http: HttpClient) { }
 
@@ -41,9 +53,8 @@ export class AuthService {
    *   "email": "john@example.com"
    * }
    */
-  login(email: string, password: string): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/login`, { email, password })
-      .pipe(tap(response => this.storeAuthResponse(response)));
+  login(email: string, password: string): Observable<AuthApiResponse> {
+    return this.http.post(`${this.apiUrl}/login`, { email, password });
   }
 
   /**
@@ -60,15 +71,20 @@ export class AuthService {
    * @param password - User's password
    * @returns Observable<any> - Response with token, username, email
    */
-  register(username: string, email: string, firstName: string, 
-              lastName: string, password: string): Observable<AuthResponse> {
-            return this.http.post<AuthResponse>(`${this.apiUrl}/register`, {
+  register(username: string, email: string, firstName: string,
+           lastName: string, password: string): Observable<AuthApiResponse> {
+    return this.http.post(`${this.apiUrl}/register`, {
       username, email, firstName, lastName, password
             }).pipe(tap(response => this.storeAuthResponse(response)));
   }
 
+  //Exchanging refresh token for a new access/refresh token pair.
+  refreshAccessToken(refreshToken: string): Observable<AuthApiResponse> {
+    return this.http.post<AuthApiResponse>(`${this.apiUrl}/refresh`, { refreshToken });
+  }
+
   /**
-   * Store JWT token in browser's localStorage
+   * Storing JWT token in browser's localStorage
    * 
    * Called after successful login/register
    * Token is persisted even after browser closes
@@ -76,11 +92,32 @@ export class AuthService {
    * @param token - JWT token from backend
    */
   storeToken(token: string): void {
-    localStorage.setItem('jwt_token', token);
+    this.storeTokens(token, this.getRefreshToken());
+  }
+  //storing refresh and access tokens in localStorage
+  storeTokens(accessToken: string, refreshToken: string | null): void {
+    localStorage.setItem(this.accessTokenKey, accessToken);
+    //keeping original key so existing code paths continue to work
+    localStorage.setItem(this.legacyTokenKey, accessToken);
+
+    if (refreshToken) {
+      localStorage.setItem(this.refreshTokenKey, refreshToken);
+    } else {
+      localStorage.removeItem(this.refreshTokenKey);
+    }
   }
 
-  storeAuthResponse(response: AuthResponse): void {
-    this.storeToken(response.token);
+  //Extracting token fields from auth response and persist them
+  setAuthSessionFromResponse(response: AuthApiResponse): void {
+    const accessToken = response.accessToken || response.token;
+    if (!accessToken) {
+      return;
+    }
+    this.storeTokens(accessToken, response.refreshToken || this.getRefreshToken());
+  }
+
+  storeAuthResponse(response: AuthApiResponse): void {
+    this.setAuthSessionFromResponse(response);
     localStorage.setItem('auth_roles', JSON.stringify(response.roles ?? []));
   }
 
@@ -93,7 +130,15 @@ export class AuthService {
    * @returns JWT token string or null
    */
   getToken(): string | null {
-    return localStorage.getItem('jwt_token');
+    return this.getAccessToken();
+  }
+
+  getAccessToken(): string | null {
+    return localStorage.getItem(this.accessTokenKey) || localStorage.getItem(this.legacyTokenKey);
+  }
+
+  getRefreshToken(): string | null {
+    return localStorage.getItem(this.refreshTokenKey);
   }
 
   getRoles(): string[] {
@@ -123,7 +168,7 @@ export class AuthService {
    * @returns true if token exists, false otherwise
    */
   isLoggedIn(): boolean {
-    return this.getToken() !== null;
+    return this.getAccessToken() !== null;
   }
 
   /**
@@ -134,8 +179,9 @@ export class AuthService {
    * After logout, user must login again to access protected routes
    */
   logout(): void {
-    localStorage.removeItem('jwt_token');
-    localStorage.removeItem('auth_roles');
+    localStorage.removeItem(this.accessTokenKey);
+    localStorage.removeItem(this.refreshTokenKey);
+    localStorage.removeItem(this.legacyTokenKey);
   }
 
   /**
@@ -147,7 +193,7 @@ export class AuthService {
    * @returns Observable<any> - Response with valid status and username
    */
   validateToken(): Observable<any> {
-    const token = this.getToken();
+    const token = this.getAccessToken();
     if (!token) {
       throw new Error('No token found');
     }

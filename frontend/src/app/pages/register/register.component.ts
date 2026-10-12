@@ -46,6 +46,7 @@ export class RegisterComponent {
 
     this.authService.register(username, email, firstName, lastName, password).subscribe(
       (response) => {
+        this.authService.setAuthSessionFromResponse(response);
         this.loading = false;
         console.log('Registration successful!', response);
 
