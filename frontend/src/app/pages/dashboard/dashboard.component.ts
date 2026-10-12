@@ -9,6 +9,7 @@ import { MarketInfoCardComponent } from '@app/components/portfolio/market-info-c
 import { RecentOrdersComponent } from '@app/components/trade/recent-orders/recent-orders/recent-orders.component';
 import { CurrentHoldingsComponent } from '@app/components/trade/current-holdings/current-holdings/current-holdings.component';
 import { RecentOrderService } from '../../services/recent-order.service';
+import { AccountService } from '@app/services/account.service';
 import { RecentOrder } from '../../models/recent-order.model';
 
 export interface QuoteResponse {
@@ -31,22 +32,47 @@ export class DashboardComponent implements OnInit, OnDestroy {
   topGainers: QuoteResponse[] = [];
   topLosers: QuoteResponse[] = [];
   isLoading = true;
-  accountId = 1;
+  accountId: number | null = null;
   private refreshSubscription: Subscription | undefined;
   private gainersSubscription: Subscription | undefined;
   private losersSubscription: Subscription | undefined;
   recentOrders: RecentOrder[] = [];
   private orderSubscription: Subscription | undefined;
   
-  constructor(private holdingService: HoldingService, private instrumentService: InstrumentService, private recentOrderService: RecentOrderService) {
+  constructor(
+    private holdingService: HoldingService,
+    private instrumentService: InstrumentService,
+    private recentOrderService: RecentOrderService,
+    private accountService: AccountService
+  ) {
     console.log('DashboardComponent initialized');
   }
 
   ngOnInit(): void {
+    this.accountService.getMyAccount().subscribe({
+      next: (account) => {
+        this.accountId = Number(account.accountId);
+        this.startDataRefresh();
+        this.loadRecentOrders();
+      },
+      error: (error) => {
+        console.error('Error loading current account:', error);
+        this.isLoading = false;
+      }
+    });
+  }
+
+  private startDataRefresh(): void {
+    const accountId = this.accountId;
+    if (accountId === null) {
+      this.isLoading = false;
+      return;
+    }
+
     this.refreshSubscription = interval(5000)
       .pipe(
         startWith(0),
-        switchMap(() => this.holdingService.getHoldingsByAccountId(this.accountId))
+        switchMap(() => this.holdingService.getHoldingsByAccountId(accountId))
       )
       .subscribe({
         next: (response: any) => {
@@ -93,11 +119,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
           console.error('Error loading top losers:', error);
         }
       });
-    this.loadRecentOrders();
   }
 
   private loadRecentOrders(): void {
-    if (this.accountId) {
+    if (this.accountId !== null) {
       this.orderSubscription = this.recentOrderService.getRecentOrdersByAccountId(this.accountId, 20)
         .subscribe({
           next: (orders) => {
