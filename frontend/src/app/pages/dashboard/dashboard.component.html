@@ -56,7 +56,6 @@
       </div>
 
       <div *ngIf="!isLoading && holdings.length > 0" class="holdings-column">
-        <!-- 💡 UPDATE THIS IN YOUR PARENT COMPONENT HTML (e.g. dashboard.component.html) -->
 <div class="holdings-grid">
   <app-portfolio-holding-card 
     *ngFor="let item of holdings; let i = index; trackBy: trackBySymbol" 
