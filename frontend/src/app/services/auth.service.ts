@@ -3,6 +3,15 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '@environments/environment';
 
+interface AuthApiResponse {
+  token?: string;
+  accessToken?: string;
+  refreshToken?: string;
+  type?: string;
+  username?: string;
+  email?: string;
+}
+
 /**
  * AuthService - Handles all authentication logic
  * 
@@ -19,6 +28,9 @@ export class AuthService {
 
   // Backend API endpoint for authentication
   private apiUrl = `${environment.apiUrl}/auth`;
+  private readonly accessTokenKey = 'jwt_access_token';
+  private readonly refreshTokenKey = 'jwt_refresh_token';
+  private readonly legacyTokenKey = 'jwt_token';
 
   constructor(private http: HttpClient) { }
 
@@ -40,7 +52,7 @@ export class AuthService {
    *   "email": "john@example.com"
    * }
    */
-  login(email: string, password: string): Observable<any> {
+  login(email: string, password: string): Observable<AuthApiResponse> {
     return this.http.post(`${this.apiUrl}/login`, { email, password });
   }
 
@@ -58,15 +70,20 @@ export class AuthService {
    * @param password - User's password
    * @returns Observable<any> - Response with token, username, email
    */
-  register(username: string, email: string, firstName: string, 
-           lastName: string, password: string): Observable<any> {
+  register(username: string, email: string, firstName: string,
+           lastName: string, password: string): Observable<AuthApiResponse> {
     return this.http.post(`${this.apiUrl}/register`, {
       username, email, firstName, lastName, password
     });
   }
 
+  //Exchanging refresh token for a new access/refresh token pair.
+  refreshAccessToken(refreshToken: string): Observable<AuthApiResponse> {
+    return this.http.post<AuthApiResponse>(`${this.apiUrl}/refresh`, { refreshToken });
+  }
+
   /**
-   * Store JWT token in browser's localStorage
+   * Storing JWT token in browser's localStorage
    * 
    * Called after successful login/register
    * Token is persisted even after browser closes
@@ -74,7 +91,28 @@ export class AuthService {
    * @param token - JWT token from backend
    */
   storeToken(token: string): void {
-    localStorage.setItem('jwt_token', token);
+    this.storeTokens(token, this.getRefreshToken());
+  }
+  //storing refresh and access tokens in localStorage
+  storeTokens(accessToken: string, refreshToken: string | null): void {
+    localStorage.setItem(this.accessTokenKey, accessToken);
+    //keeping original key so existing code paths continue to work
+    localStorage.setItem(this.legacyTokenKey, accessToken);
+
+    if (refreshToken) {
+      localStorage.setItem(this.refreshTokenKey, refreshToken);
+    } else {
+      localStorage.removeItem(this.refreshTokenKey);
+    }
+  }
+
+  //Extracting token fields from auth response and persist them
+  setAuthSessionFromResponse(response: AuthApiResponse): void {
+    const accessToken = response.accessToken || response.token;
+    if (!accessToken) {
+      return;
+    }
+    this.storeTokens(accessToken, response.refreshToken || this.getRefreshToken());
   }
 
   /**
@@ -86,7 +124,15 @@ export class AuthService {
    * @returns JWT token string or null
    */
   getToken(): string | null {
-    return localStorage.getItem('jwt_token');
+    return this.getAccessToken();
+  }
+
+  getAccessToken(): string | null {
+    return localStorage.getItem(this.accessTokenKey) || localStorage.getItem(this.legacyTokenKey);
+  }
+
+  getRefreshToken(): string | null {
+    return localStorage.getItem(this.refreshTokenKey);
   }
 
   /**
@@ -98,7 +144,7 @@ export class AuthService {
    * @returns true if token exists, false otherwise
    */
   isLoggedIn(): boolean {
-    return this.getToken() !== null;
+    return this.getAccessToken() !== null;
   }
 
   /**
@@ -109,7 +155,9 @@ export class AuthService {
    * After logout, user must login again to access protected routes
    */
   logout(): void {
-    localStorage.removeItem('jwt_token');
+    localStorage.removeItem(this.accessTokenKey);
+    localStorage.removeItem(this.refreshTokenKey);
+    localStorage.removeItem(this.legacyTokenKey);
   }
 
   /**
@@ -121,7 +169,7 @@ export class AuthService {
    * @returns Observable<any> - Response with valid status and username
    */
   validateToken(): Observable<any> {
-    const token = this.getToken();
+    const token = this.getAccessToken();
     if (!token) {
       throw new Error('No token found');
     }

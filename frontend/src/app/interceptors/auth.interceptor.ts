@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, switchMap } from 'rxjs/operators';
 import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
 
@@ -30,7 +30,7 @@ export class AuthInterceptor implements HttpInterceptor {
     
     //Gets JWT token from localStorage
     //authService.getToken() returns the token or null if not logged in
-    const token = this.authService.getToken();
+    const token = this.authService.getAccessToken();
 
     // If token exists, add it to the Authorization header
     if (token) {
@@ -43,18 +43,47 @@ export class AuthInterceptor implements HttpInterceptor {
       });
     }
 
-    //Passes the request to the next interceptor in the chain
+    //passes the request to the next interceptor in the chain
     //allows the request to continue to the server
     return next.handle(req).pipe(
       catchError(error => {
-        //handles 401 unauthorized responses
-        if (error.status === 401) {
-          // Token is invalid/expired, log user out
-          console.warn('Token has expired or is invalid, logging you out');
-          this.authService.logout();
-          this.router.navigate(['/login']);
-    
+        const isRefreshCall = req.url.includes('/auth/refresh');
 
+        //try refresh flow once for non refresh calls
+        if (error.status === 401 && !isRefreshCall) {
+          //access token is expired recovering with refresh token
+          const refreshToken = this.authService.getRefreshToken();
+          if (!refreshToken) {
+            this.authService.logout();
+            this.router.navigate(['/login']);
+            return throwError(() => error);
+          }
+
+          return this.authService.refreshAccessToken(refreshToken).pipe(
+            switchMap((authResponse) => {
+              this.authService.setAuthSessionFromResponse(authResponse);
+              const updatedAccessToken = this.authService.getAccessToken();
+
+              if (!updatedAccessToken) {
+                this.authService.logout();
+                this.router.navigate(['/login']);
+                return throwError(() => error);
+              }
+
+              const retryRequest = req.clone({
+                setHeaders: {
+                  'Authorization': `Bearer ${updatedAccessToken}`
+                }
+              });
+              //retrying the original request once with the new access token
+              return next.handle(retryRequest);
+            }),
+            catchError(refreshError => {
+              this.authService.logout();
+              this.router.navigate(['/login']);
+              return throwError(() => refreshError);
+            })
+          );
         }
         return throwError(() => error);
       })
