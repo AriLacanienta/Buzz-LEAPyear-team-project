@@ -2,6 +2,7 @@ package com.buzzleapyear.trading_api.controller;
 
 import com.buzzleapyear.trading_api.dto.AuthResponse;
 import com.buzzleapyear.trading_api.dto.LoginRequest;
+import com.buzzleapyear.trading_api.dto.RefreshTokenRequest;
 import com.buzzleapyear.trading_api.dto.RegistrationRequest;
 import com.buzzleapyear.trading_api.entity.User;
 import com.buzzleapyear.trading_api.repository.UserRepository;
@@ -20,6 +21,7 @@ import java.util.Optional;
  Endpoints:
  * POST /api/auth/login - Login with email/password, get JWT token
  * POST /api/auth/register - Register new user, get JWT token
+ * POST /api/auth/refresh - Exchange refresh token for new tokens
  * GET /api/auth/validate - Validate JWT token
  */
 @RestController
@@ -75,12 +77,12 @@ public class AuthController {
                         .body(new ErrorResponse("Invalid email or password"));
             }
 
-            // Generating JWT token
-            // The token contains the username and will expire in 24 hours
-            String token = tokenProvider.generateToken(user.getUsername());
+            // Generate short-lived access token and long-lived refresh token
+            String accessToken = tokenProvider.generateAccessToken(user.getUsername());
+            String refreshToken = tokenProvider.generateRefreshToken(user.getUsername());
 
             // Returning token in response
-            return ResponseEntity.ok(new AuthResponse(token, user.getUsername(), user.getEmail()));
+            return ResponseEntity.ok(new AuthResponse(accessToken, refreshToken, user.getUsername(), user.getEmail()));
 
         } catch (Exception e) {
             // If any unexpected error occurs, return 401 Unauthorized
@@ -144,18 +146,55 @@ public class AuthController {
             // Saving user to ourdatabase
             User savedUser = userRepository.save(newUser);
 
-            // Generating JWT token
+            // Generate short-lived access token and long-lived refresh token
             // User is automatically logged in after registration
-            String token = tokenProvider.generateToken(savedUser.getUsername());
+            String accessToken = tokenProvider.generateAccessToken(savedUser.getUsername());
+            String refreshToken = tokenProvider.generateRefreshToken(savedUser.getUsername());
 
             // Returning token with 201 Created status
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(new AuthResponse(token, savedUser.getUsername(), savedUser.getEmail()));
+                    .body(new AuthResponse(accessToken, refreshToken, savedUser.getUsername(), savedUser.getEmail()));
 
         } catch (Exception e) {
             // If any error occurs during registration, return 400 Bad Request
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ErrorResponse("Registration failed: " + e.getMessage()));
+        }
+    }
+    //new refresh endpoint
+    //POST /api/auth/refresh
+    //Exchange a valid refresh token for a new access token
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequest refreshTokenRequest) {
+        try {
+            if (refreshTokenRequest == null || refreshTokenRequest.getRefreshToken() == null
+                    || refreshTokenRequest.getRefreshToken().isBlank()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(new ErrorResponse("Refresh token is required"));
+            }
+
+            String refreshToken = refreshTokenRequest.getRefreshToken();
+            if (!tokenProvider.validateToken(refreshToken)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(new ErrorResponse("Refresh token is invalid or expired"));
+            }
+
+            String username = tokenProvider.getUsernameFromJWT(refreshToken);
+            Optional<User> userOptional = userRepository.findByUsername(username);
+            if (userOptional.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(new ErrorResponse("User not found for refresh token"));
+            }
+
+            User user = userOptional.get();
+            String newAccessToken = tokenProvider.generateAccessToken(user.getUsername());
+            String newRefreshToken = tokenProvider.generateRefreshToken(user.getUsername());
+
+            return ResponseEntity.ok(
+                    new AuthResponse(newAccessToken, newRefreshToken, user.getUsername(), user.getEmail()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new ErrorResponse("Refresh failed: " + e.getMessage()));
         }
     }
 
@@ -183,12 +222,12 @@ public class AuthController {
             }
 
             //Bearer tells the server the token that follows is a JWT token used for authentication
-            String token = bearerToken.substring(7);
+            String accessToken = bearerToken.substring(7);
             
             // token validation
-            if (tokenProvider.validateToken(token)) {
+            if (tokenProvider.validateToken(accessToken)) {
                 // If valid, extract username from token
-                String username = tokenProvider.getUsernameFromJWT(token);
+                String username = tokenProvider.getUsernameFromJWT(accessToken);
                 return ResponseEntity.ok(new ValidationResponse(true, username));
             } else {
                 // If invalid (expired, signature mismatch, etc)
