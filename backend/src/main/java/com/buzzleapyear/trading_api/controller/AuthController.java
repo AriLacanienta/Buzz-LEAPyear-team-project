@@ -2,7 +2,6 @@ package com.buzzleapyear.trading_api.controller;
 
 import com.buzzleapyear.trading_api.dto.AuthResponse;
 import com.buzzleapyear.trading_api.dto.LoginRequest;
-import com.buzzleapyear.trading_api.dto.RefreshTokenRequest;
 import com.buzzleapyear.trading_api.dto.RegistrationRequest;
 import com.buzzleapyear.trading_api.entity.Role;
 import com.buzzleapyear.trading_api.entity.User;
@@ -12,7 +11,10 @@ import com.buzzleapyear.trading_api.repository.UserRepository;
 import com.buzzleapyear.trading_api.security.JwtTokenProvider;
 import com.buzzleapyear.trading_api.repository.AccountRepository;
 import com.buzzleapyear.trading_api.repository.ClientRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +22,7 @@ import com.buzzleapyear.trading_api.entity.Account;
 import com.buzzleapyear.trading_api.entity.Client;
 
 import java.math.BigDecimal;
+import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -36,6 +39,10 @@ import java.util.Optional;
 //how long the browser should cache the preflight response (seconds)
 public class AuthController {
 
+    private static final String REFRESH_COOKIE_NAME = "refresh_token";
+    private static final long REFRESH_TOKEN_MAX_AGE_SECONDS = 7 * 24 * 60 * 60;
+
+    @Autowired
     private UserRepository userRepository;
 
     private ClientRepository clientRepository;
@@ -83,7 +90,7 @@ public class AuthController {
      * }
      */
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request) {
         try {
             // Finding user by email in database
             Optional<User> userOptional = userRepository.findByEmail(loginRequest.getEmail());
@@ -107,8 +114,10 @@ public class AuthController {
             String accessToken = tokenProvider.generateAccessToken(user.getUsername());
             String refreshToken = tokenProvider.generateRefreshToken(user.getUsername());
 
-            // Returning token in response
-            return ResponseEntity.ok(new AuthResponse(accessToken, refreshToken, user.getUsername(), user.getEmail()));
+                //returning access token in body and refresh token in secure HttpOnly cookie
+                return ResponseEntity.ok()
+                    .header(HttpHeaders.SET_COOKIE, buildRefreshCookie(refreshToken, request).toString())
+                    .body(new AuthResponse(accessToken, null, user.getUsername(), user.getEmail()));
 
         } catch (Exception e) {
             // If any unexpected error occurs, return 401 Unauthorized
@@ -140,7 +149,7 @@ public class AuthController {
      * }
      */
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegistrationRequest registrationRequest) {
+    public ResponseEntity<?> register(@RequestBody RegistrationRequest registrationRequest, HttpServletRequest request) {
         try {
             //REGISTERING
             // Check if username already exists
@@ -193,9 +202,10 @@ public class AuthController {
             String accessToken = tokenProvider.generateAccessToken(savedUser.getUsername());
             String refreshToken = tokenProvider.generateRefreshToken(savedUser.getUsername());
 
-            // Returning token with 201 Created status
+                //returning access token in body and refresh token in secure HttpOnly cookie
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(new AuthResponse(accessToken, refreshToken, savedUser.getUsername(), savedUser.getEmail()));
+                    .header(HttpHeaders.SET_COOKIE, buildRefreshCookie(refreshToken, request).toString())
+                    .body(new AuthResponse(accessToken, null, savedUser.getUsername(), savedUser.getEmail()));
 
         } catch (Exception e) {
             // If any error occurs during registration, return 400 Bad Request
@@ -205,17 +215,16 @@ public class AuthController {
     }
     //new refresh endpoint
     //POST /api/auth/refresh
-    //Exchange a valid refresh token for a new access token
+    //Exchange a valid refresh cookie for a new access token
     @PostMapping("/refresh")
-    public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequest refreshTokenRequest) {
+    public ResponseEntity<?> refreshToken(@CookieValue(value = REFRESH_COOKIE_NAME, required = false) String refreshToken,
+                                          HttpServletRequest request) {
         try {
-            if (refreshTokenRequest == null || refreshTokenRequest.getRefreshToken() == null
-                    || refreshTokenRequest.getRefreshToken().isBlank()) {
+            if (refreshToken == null || refreshToken.isBlank()) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .body(new ErrorResponse("Refresh token is required"));
             }
 
-            String refreshToken = refreshTokenRequest.getRefreshToken();
             if (!tokenProvider.validateToken(refreshToken)) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .body(new ErrorResponse("Refresh token is invalid or expired"));
@@ -232,12 +241,50 @@ public class AuthController {
             String newAccessToken = tokenProvider.generateAccessToken(user.getUsername());
             String newRefreshToken = tokenProvider.generateRefreshToken(user.getUsername());
 
-            return ResponseEntity.ok(
-                    new AuthResponse(newAccessToken, newRefreshToken, user.getUsername(), user.getEmail()));
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.SET_COOKIE, buildRefreshCookie(newRefreshToken, request).toString())
+                    .body(new AuthResponse(newAccessToken, null, user.getUsername(), user.getEmail()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(new ErrorResponse("Refresh failed: " + e.getMessage()));
         }
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletRequest request) {
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, clearRefreshCookie(request).toString())
+                .body(new ValidationResponse(true, "Logged out"));
+    }
+
+    private ResponseCookie buildRefreshCookie(String refreshToken, HttpServletRequest request) {
+        boolean secure = isSecureRequest(request);
+        return ResponseCookie.from(REFRESH_COOKIE_NAME, refreshToken)
+                .httpOnly(true)
+                .secure(secure)
+                .sameSite("Strict")
+                .path("/api/v1/auth")
+                .maxAge(REFRESH_TOKEN_MAX_AGE_SECONDS)
+                .build();
+    }
+
+    private ResponseCookie clearRefreshCookie(HttpServletRequest request) {
+        boolean secure = isSecureRequest(request);
+        return ResponseCookie.from(REFRESH_COOKIE_NAME, "")
+                .httpOnly(true)
+                .secure(secure)
+                .sameSite("Strict")
+                .path("/api/v1/auth")
+                .maxAge(0)
+                .build();
+    }
+
+    private boolean isSecureRequest(HttpServletRequest request) {
+        if (request.isSecure()) {
+            return true;
+        }
+        String forwardedProto = request.getHeader("X-Forwarded-Proto");
+        return forwardedProto != null && forwardedProto.equalsIgnoreCase("https");
     }
 
     /**

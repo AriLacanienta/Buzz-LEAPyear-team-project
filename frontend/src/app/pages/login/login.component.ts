@@ -52,7 +52,6 @@ export class LoginComponent {
         this.authService.setAuthSessionFromResponse(response);
         
         this.loading = false;
-        console.log('Login successful!', response);
         
         //redirecting to dashboard
         this.router.navigate(['/dashboard']);

@@ -48,12 +48,7 @@ export class RegisterComponent {
       (response) => {
         this.authService.setAuthSessionFromResponse(response);
         this.loading = false;
-        console.log('Registration successful!', response);
-
-        const landingPage = this.authService.hasRole('MANAGER')
-          ? '/admin'
-          : '/dashboard';
-        this.router.navigate([landingPage]);
+        this.router.navigate(['/dashboard']);
       },
       (error) => {
         this.loading = false;
