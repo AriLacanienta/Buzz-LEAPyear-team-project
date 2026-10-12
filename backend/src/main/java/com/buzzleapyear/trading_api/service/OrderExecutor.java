@@ -18,14 +18,14 @@ import java.util.Optional;
 /**
  * OrderExecutor handles atomic execution of BUY and SELL orders
  * Updates holdings and cash in a single transaction
- * 
+ *
  * @author Ari Lacanienta
  */
 @Service
 public class OrderExecutor {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(OrderExecutor.class);
-    
+
     private final AccountRepository accountRepository;
     private final HoldingRepository holdingRepository;
 
@@ -40,20 +40,22 @@ public class OrderExecutor {
      * - Update quantity and total cost
      * - Deduct from cashReserved
      * - Save all changes in single transaction
-     * 
+     *
      * @param account the account making the purchase
      * @param instrument the instrument being purchased
      * @param order the trade order
      */
     @Transactional
     public void executeBuyOrder(Account account, Instrument instrument, TradeOrder order, BigDecimal acceptedPrice) {
-        logger.info("Executing BUY order ID: {} for {} shares at ${}", 
+        logger.info("Executing BUY order ID: {} for {} shares at ${}",
             order.getId(), order.getQuantity(), order.getPrice());
-        
-        // Get or create holding for this instrument
-        Holding holding = getOrCreateHolding(account, instrument);
 
-        updateCashReserved(account, order, acceptedPrice);
+        Account refreshedAccount = accountRepository.findById(account.getId()).orElse(account);
+
+        // Get or create holding for this instrument
+        Holding holding = getOrCreateHolding(refreshedAccount, instrument);
+
+        updateCashReserved(refreshedAccount, order, acceptedPrice);
 
         // Update holding quantity and total cost
         updateHoldingQuantity(holding, order, instrument);
@@ -62,7 +64,7 @@ public class OrderExecutor {
     private Holding getOrCreateHolding(Account account, Instrument instrument) {
         Optional<Holding> existingHolding = holdingRepository.findByAccountIdAndInstrumentId(
             account.getId(), instrument.getId());
-        
+
         Holding holding = existingHolding.orElseGet(() -> {
             Holding newHolding = new Holding();
             newHolding.setAccount(account);
@@ -78,10 +80,10 @@ public class OrderExecutor {
         BigDecimal orderCost = order.getPrice().multiply(order.getQuantity());
         holding.setQuantity(holding.getQuantity().add(order.getQuantity()));
         holding.setTotalCost(holding.getTotalCost().add(orderCost));
-        
+
         // Save holding (will insert if new, update if existing)
         holdingRepository.save(holding);
-        logger.info("Holding updated: {} - quantity now: {}, total cost: {}", 
+        logger.info("Holding updated: {} - quantity now: {}, total cost: {}",
             instrument.getInstrumentSymbol(), holding.getQuantity(), holding.getTotalCost());
     }
 
@@ -95,7 +97,7 @@ public class OrderExecutor {
         account.setCashAvailable(account.getCashAvailable().subtract(priceDifference));
         account.setCashReserved(account.getCashReserved().subtract(acceptedCost));
         accountRepository.save(account);
-        logger.info("Account cash updated - execution price: ${}. New reserved: ${}", 
+        logger.info("Account cash updated - execution price: ${}. New reserved: ${}",
             executionCost, account.getCashReserved());
     }
 
@@ -107,21 +109,23 @@ public class OrderExecutor {
      * - Add to cashAvailable
      * - Delete Holding if quantity becomes 0
      * - Save all changes in single transaction
-     * 
+     *
      * @param account the account making the sale
      * @param instrument the instrument being sold
      * @param order the trade order
      */
     @Transactional
     public void executeSellOrder(Account account, Instrument instrument, TradeOrder order) {
-        logger.info("Executing SELL order ID: {} for {} shares at ${}", 
+        logger.info("Executing SELL order ID: {} for {} shares at ${}",
             order.getId(), order.getQuantity(), order.getPrice());
-        
+
+        Account refreshedAccount = accountRepository.findById(account.getId()).orElse(account);
+
         // Get holding for this instrument (must exist after validation)
         Holding holding = holdingRepository.findByAccountIdAndInstrumentId(
-            account.getId(), instrument.getId())
+            refreshedAccount.getId(), instrument.getId())
             .orElseThrow(() -> new RuntimeException(
-                "Holding not found for account: " + account.getId() + 
+                "Holding not found for account: " + refreshedAccount.getId() +
                 ", instrument: " + instrument.getInstrumentSymbol()));
 
         // Calculate proportional cost reduction
@@ -136,23 +140,23 @@ public class OrderExecutor {
 
         // If quantity reaches 0, delete the holding; otherwise save
         if (holding.getQuantity().compareTo(BigDecimal.ZERO) <= 0) {
-             if (account.getHoldings() != null) {
-                account.getHoldings().removeIf(h -> h.getId().equals(holding.getId()));
+             if (refreshedAccount.getHoldings() != null) {
+                refreshedAccount.getHoldings().removeIf(h -> h.getId() != null && h.getId().equals(holding.getId()));
             }
             holdingRepository.delete(holding);
             logger.info("Holding deleted: {} (quantity reduced to zero)", instrument.getInstrumentSymbol());
         } else {
             holdingRepository.save(holding);
-            logger.info("Holding updated: {} - quantity now: {}, total cost: {}", 
+            logger.info("Holding updated: {} - quantity now: {}, total cost: {}",
                 instrument.getInstrumentSymbol(), holding.getQuantity(), holding.getTotalCost());
         }
 
         // Add proceeds to cash available
         BigDecimal proceeds = order.getPrice().multiply(order.getQuantity());
-        account.setCashAvailable(account.getCashAvailable().add(proceeds));
-        accountRepository.save(account);
-        logger.info("Account cash updated - available increased by: ${}. New available: ${}", 
-            proceeds, account.getCashAvailable());
+        refreshedAccount.setCashAvailable(refreshedAccount.getCashAvailable().add(proceeds));
+        accountRepository.save(refreshedAccount);
+        logger.info("Account cash updated - available increased by: ${}. New available: ${}",
+            proceeds, refreshedAccount.getCashAvailable());
     }
 }
 
