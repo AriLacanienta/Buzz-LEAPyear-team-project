@@ -112,35 +112,33 @@ export class DashboardComponent implements OnInit, OnDestroy {
       )
       .subscribe({
         next: (response: any) => {
-          console.log('Holdings API Response:', response);
-          console.log('Holdings count:', response?.length || 0);
           this.holdings = (Array.isArray(response) ? response : [])
             .sort((a: any, b: any) => b.totalValue - a.totalValue)
             .slice(0, 5);
-          
+
           // Calculate total portfolio value from ALL holdings, not just top 5
           const allHoldings = Array.isArray(response) ? response : [];
-          
+
           // Calculate new portfolio value
           const newPortfolioValue = Number(
             allHoldings
               .reduce((sum: number, holding: any) => sum + (holding.totalValue || 0), 0)
               .toFixed(2)
           );
-          
+
           // Calculate total cost basis (initial investment)
           this.totalCostBasis = Number(
             allHoldings
               .reduce((sum: number, holding: any) => sum + (holding.totalCost || 0), 0)
               .toFixed(2)
           );
-          
+
           // Calculate all-time change
           this.allTimeChange = Number((newPortfolioValue - this.totalCostBasis).toFixed(2));
-          this.allTimeChangePercent = this.totalCostBasis > 0 
+          this.allTimeChangePercent = this.totalCostBasis > 0
             ? Number(((this.allTimeChange / this.totalCostBasis) * 100).toFixed(2))
             : 0;
-          
+
           // Calculate today's change
           if (this.previousPortfolioValue === null) {
             this.previousPortfolioValue = newPortfolioValue;
@@ -152,12 +150,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
               ? Number(((this.todayChange / this.previousPortfolioValue) * 100).toFixed(2))
               : 0;
           }
-          
+
           this.totalPortfolioValue = newPortfolioValue;
-          
-          console.log('Total Portfolio Value:', this.totalPortfolioValue);
-          console.log('Today Change:', this.todayChange, this.todayChangePercent + '%');
-          console.log('All Time Change:', this.allTimeChange, this.allTimeChangePercent + '%');
+
           this.updatePortfolioChart();
           this.cdr.detectChanges();
           this.isLoading = false;
@@ -220,35 +215,33 @@ trackBySymbol(index: number, item: any): string {
 
   private updatePortfolioChart(): void {
     const portfolioId = 'all-holdings';
-    
+
     if (this.portfolioBalanceHistory.length === 0 || this.currentPortfolioId !== portfolioId) {
       this.currentPortfolioId = portfolioId;
-      
+
       // Initialize with 6 data points like holding cards do
       const randomFactor = 0.004;
       const baseVariations = [-4, -2, -3.5, 1, -1.5, 0];
-      
+
       this.portfolioBalanceHistory = baseVariations.map(variant => {
         const simulatedValue = this.totalPortfolioValue * (1 + (variant * randomFactor));
         return Number(simulatedValue.toFixed(2));
       });
-      
+
       // Force final point to be the real current value
       this.portfolioBalanceHistory[this.portfolioBalanceHistory.length - 1] = this.totalPortfolioValue;
-      console.log('Portfolio chart initialized:', this.portfolioBalanceHistory);
       this.generatePortfolioChartOptions();
     } else {
       // Real time updates - append new value if different
       const lastSavedValue = this.portfolioBalanceHistory[this.portfolioBalanceHistory.length - 1];
       if (this.totalPortfolioValue !== lastSavedValue) {
         this.portfolioBalanceHistory.push(this.totalPortfolioValue);
-        
+
         // Keep last 8 data points like holding cards
         if (this.portfolioBalanceHistory.length > 8) {
           this.portfolioBalanceHistory.shift();
         }
-        
-        console.log('Portfolio value appended:', this.totalPortfolioValue);
+
         this.generatePortfolioChartOptions();
       }
     }
@@ -336,13 +329,6 @@ trackBySymbol(index: number, item: any): string {
       credits: { enabled: false }
     };
 
-    console.log('Portfolio chart options generated:', {
-      dataPoints: this.portfolioBalanceHistory.length,
-      data: this.portfolioBalanceHistory,
-      minBalance,
-      maxBalance
-    });
-    
     // Force change detection after chart options are created
     this.cdr.detectChanges();
   }

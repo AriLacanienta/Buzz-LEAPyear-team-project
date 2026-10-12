@@ -8,16 +8,19 @@ import { environment } from '@environments/environment';
 })
 export class HoldingService {
   private apiUrl = `${environment.apiUrl}/holdings`;
+  //private apiUrl = `${environment.apiUrl}/accounts`;
 
   constructor(private http: HttpClient) {}
 
   getAllHoldings(): Observable<any[]> {
-    const url = `${this.apiUrl}`;
+    //const url = `${this.apiUrl}`;
+    const url = `${this.apiUrl}/holdings`;
     return this.http.get<any[]>(url);
   }
 
   getHoldingsByAccountId(accountId: string | number): Observable<any[]> {
     const url = `${this.apiUrl}/${encodeURIComponent(accountId)}`;
+    //const url = `${this.apiUrl}/${accountId}/holdings`;
     return this.http.get<any[]>(url);
   }
 }
