@@ -48,7 +48,6 @@ export class RegisterComponent {
       (response) => {
         this.authService.setAuthSessionFromResponse(response);
         this.loading = false;
-        console.log('Registration successful!', response);
         this.router.navigate(['/dashboard']);
       },
       (error) => {

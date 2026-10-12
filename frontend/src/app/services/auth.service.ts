@@ -6,7 +6,6 @@ import { environment } from '@environments/environment';
 interface AuthApiResponse {
   token?: string;
   accessToken?: string;
-  refreshToken?: string;
   type?: string;
   username?: string;
   email?: string;
@@ -17,7 +16,7 @@ interface AuthApiResponse {
  * 
  * Responsibilities:
  * - Call backend login/register endpoints
- * - Store/retrieve JWT token from localStorage
+ * -switch to keep access token in memory only
  * - Check if user is logged in
  * - Logout user
  */
@@ -28,9 +27,7 @@ export class AuthService {
 
   // Backend API endpoint for authentication
   private apiUrl = `${environment.apiUrl}/auth`;
-  private readonly accessTokenKey = 'jwt_access_token';
-  private readonly refreshTokenKey = 'jwt_refresh_token';
-  private readonly legacyTokenKey = 'jwt_token';
+  private accessToken: string | null = null;
 
   constructor(private http: HttpClient) { }
 
@@ -53,7 +50,9 @@ export class AuthService {
    * }
    */
   login(email: string, password: string): Observable<AuthApiResponse> {
-    return this.http.post(`${this.apiUrl}/login`, { email, password });
+    return this.http.post<AuthApiResponse>(`${this.apiUrl}/login`, { email, password }, {
+      withCredentials: true
+    });
   }
 
   /**
@@ -72,18 +71,22 @@ export class AuthService {
    */
   register(username: string, email: string, firstName: string,
            lastName: string, password: string): Observable<AuthApiResponse> {
-    return this.http.post(`${this.apiUrl}/register`, {
+    return this.http.post<AuthApiResponse>(`${this.apiUrl}/register`, {
       username, email, firstName, lastName, password
+    }, {
+      withCredentials: true
     });
   }
 
-  //Exchanging refresh token for a new access/refresh token pair.
-  refreshAccessToken(refreshToken: string): Observable<AuthApiResponse> {
-    return this.http.post<AuthApiResponse>(`${this.apiUrl}/refresh`, { refreshToken });
+  //Exchanging refresh cookie for a new access token.
+  refreshAccessToken(): Observable<AuthApiResponse> {
+    return this.http.post<AuthApiResponse>(`${this.apiUrl}/refresh`, {}, {
+      withCredentials: true
+    });
   }
 
   /**
-   * Storing JWT token in browser's localStorage
+  * Store access token in memory for the current tab session
    * 
    * Called after successful login/register
    * Token is persisted even after browser closes
@@ -91,32 +94,20 @@ export class AuthService {
    * @param token - JWT token from backend
    */
   storeToken(token: string): void {
-    this.storeTokens(token, this.getRefreshToken());
-  }
-  //storing refresh and access tokens in localStorage
-  storeTokens(accessToken: string, refreshToken: string | null): void {
-    localStorage.setItem(this.accessTokenKey, accessToken);
-    //keeping original key so existing code paths continue to work
-    localStorage.setItem(this.legacyTokenKey, accessToken);
-
-    if (refreshToken) {
-      localStorage.setItem(this.refreshTokenKey, refreshToken);
-    } else {
-      localStorage.removeItem(this.refreshTokenKey);
-    }
+    this.accessToken = token;
   }
 
-  //Extracting token fields from auth response and persist them
+  //Extracting token fields from auth response and persist them in memory
   setAuthSessionFromResponse(response: AuthApiResponse): void {
     const accessToken = response.accessToken || response.token;
     if (!accessToken) {
       return;
     }
-    this.storeTokens(accessToken, response.refreshToken || this.getRefreshToken());
+    this.storeToken(accessToken);
   }
 
   /**
-   * Retrieve JWT token from localStorage
+  * Retrieve access token from in-memory session state
    * 
    * Called when making authenticated requests
    * Returns null if token doesn't exist (user not logged in)
@@ -128,17 +119,13 @@ export class AuthService {
   }
 
   getAccessToken(): string | null {
-    return localStorage.getItem(this.accessTokenKey) || localStorage.getItem(this.legacyTokenKey);
-  }
-
-  getRefreshToken(): string | null {
-    return localStorage.getItem(this.refreshTokenKey);
+    return this.accessToken;
   }
 
   /**
    * Check if user is currently logged in
    * 
-   * Simply checks if token exists in localStorage
+  * Checks whether an in-memory access token exists
    * Used by AuthGuard to protect routes
    * 
    * @returns true if token exists, false otherwise
@@ -150,14 +137,17 @@ export class AuthService {
   /**
    * Logout user
    * 
-   * Removes JWT token from localStorage
+  * Clears in-memory access token
    * Called when user clicks logout button or session expires
    * After logout, user must login again to access protected routes
    */
   logout(): void {
-    localStorage.removeItem(this.accessTokenKey);
-    localStorage.removeItem(this.refreshTokenKey);
-    localStorage.removeItem(this.legacyTokenKey);
+    this.accessToken = null;
+    this.http.post(`${this.apiUrl}/logout`, {}, { withCredentials: true }).subscribe({
+      error: () => {
+        // Ignore logout API errors; client-side token is already cleared.
+      }
+    });
   }
 
   /**

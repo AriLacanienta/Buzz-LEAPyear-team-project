@@ -8,7 +8,7 @@ import { Router } from '@angular/router';
 /*
 this file automatically adds JWT token to all HTTP requests
 This interceptor runs on EVERY HTTP request made by the app
-It extracts the JWT token from localStorage and adds it to the Authorization header
+It extracts the in-memory JWT token and adds it to the Authorization header
 So instead of manually adding token to each request, it's done automatically
  
  Added functionality to handle 401 Unauthorized responses by
@@ -28,7 +28,7 @@ export class AuthInterceptor implements HttpInterceptor {
    */
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     
-    //Gets JWT token from localStorage
+    //Gets in-memory JWT token
     //authService.getToken() returns the token or null if not logged in
     const token = this.authService.getAccessToken();
 
@@ -51,15 +51,8 @@ export class AuthInterceptor implements HttpInterceptor {
 
         //try refresh flow once for non refresh calls
         if (error.status === 401 && !isRefreshCall) {
-          //access token is expired recovering with refresh token
-          const refreshToken = this.authService.getRefreshToken();
-          if (!refreshToken) {
-            this.authService.logout();
-            this.router.navigate(['/login']);
-            return throwError(() => error);
-          }
-
-          return this.authService.refreshAccessToken(refreshToken).pipe(
+          //access token is expired recovering with refresh cookie
+          return this.authService.refreshAccessToken().pipe(
             switchMap((authResponse) => {
               this.authService.setAuthSessionFromResponse(authResponse);
               const updatedAccessToken = this.authService.getAccessToken();
