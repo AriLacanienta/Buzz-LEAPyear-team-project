@@ -1,6 +1,6 @@
 import { Component, Input, OnInit, OnDestroy, HostListener, SimpleChanges, OnChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { PortfolioHoldingCardComponent } from '@app/components/portfolio/portfolio-holding-card/portfolio-holding-card.component';
+import { PortfolioHoldingCardComponent } from '@app/components/client//portfolio/portfolio-holding-card/portfolio-holding-card.component';
 
 @Component({
   selector: 'app-portfolio-holdings-container',

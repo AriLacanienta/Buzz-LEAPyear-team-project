@@ -1,9 +1,9 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { InstrumentService } from '@app/services/instrument.service';
 import { Subscription } from 'rxjs';
-import { InstrumentsTableComponent } from '@app/components/markets/instruments-table/instruments-table.component';
-import { AssetTypeFilterComponent } from '@app/components/markets/asset-type-filter/asset-type-filter.component';
-import { MarketTabsComponent } from '@app/components/markets/market-tabs/market-tabs.component';
+import { InstrumentsTableComponent } from '@app/components/client//markets/instruments-table/instruments-table.component';
+import { AssetTypeFilterComponent } from '@app/components/client//markets/asset-type-filter/asset-type-filter.component';
+import { MarketTabsComponent } from '@app/components/client//markets/market-tabs/market-tabs.component';
 import { CommonModule } from '@angular/common';
 
 @Component({

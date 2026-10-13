@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
-import { AccountService } from '../../services/account.service';
-import { MarketStatusService } from '../../services/market-status.service';
-import { AuthService } from '../../services/auth.service';
+import { AccountService } from '../../../services/account.service';
+import { MarketStatusService } from '../../../services/market-status.service';
+import { AuthService } from '../../../services/auth.service';
 import { Router } from '@angular/router';
 import { map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
