@@ -52,7 +52,6 @@ public class Role {
     public enum RoleName {
         CLIENT,
         ANALYST,
-        OPERATIONS,
-        COMPLIANCE
+        MANAGER
     }
 }
