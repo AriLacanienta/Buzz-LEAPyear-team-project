@@ -9,6 +9,7 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:${POSTGRES_PORT}/${POSTGRES_DB}
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
     ports:
       - "${HOST_APP_PORT}:6767"
     healthcheck:
@@ -31,7 +32,7 @@ services:
     ports:
      - "${POSTGRES_PORT}:5432"
     healthcheck:
-      test: ["CMD", "pg_isready", "-d", "${POSTGRES_DB}", "-U"," ${POSTGRES_USER}"]
+      test: ["CMD", "pg_isready", "-d", "${POSTGRES_DB}", "-U", "${POSTGRES_USER}"]
       interval: 2m
       timeout: 5s
       retries: 3

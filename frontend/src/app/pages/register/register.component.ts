@@ -46,9 +46,8 @@ export class RegisterComponent {
 
     this.authService.register(username, email, firstName, lastName, password).subscribe(
       (response) => {
-        this.authService.storeToken(response.token);
+        this.authService.setAuthSessionFromResponse(response);
         this.loading = false;
-        console.log('Registration successful!', response);
         this.router.navigate(['/dashboard']);
       },
       (error) => {

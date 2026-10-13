@@ -4,84 +4,93 @@
   align-items: center;
   min-height: 100vh;
   background-color: #0F1520;
-  padding: 20px;
+  padding: 1.25rem;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .register-card {
-  background: #1E2D45;
-  padding: 40px;
-  border-radius: 8px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
   width: 100%;
-  max-width: 400px;
-  border: 1px solid #3B82F6;
+  max-width: 300px;
+  border: none;
 
   h1 {
     text-align: center;
-    margin-bottom: 30px;
-    color: #3B82F6;
-    font-size: 28px;
+    margin-bottom: 2rem;
+    color: #FFFFFF;
+    font-size: 1.5rem;
     font-weight: 600;
   }
 
   form {
     .form-group {
-      margin-bottom: 20px;
+      margin-bottom: 1.5rem;
 
       label {
         display: block;
-        margin-bottom: 8px;
-        font-weight: 500;
-        color: #9aa1ad;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #62748E;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
       }
 
       .form-control {
         width: 100%;
-        padding: 10px 12px;
-        border: 1px solid #3B82F6;
-        border-radius: 5px;
-        font-size: 14px;
-        background-color: #0F1520;
-        color: #9aa1ad;
-        transition: border-color 0.3s;
+        padding: 0.75rem 1rem;
+        border: 1px solid #2a3f5f;
+        border-radius: 0.5rem;
+        font-size: 0.95rem;
+        background-color: #1E2D45;
+        color: #e5e7eb;
+        transition: all 0.3s ease;
 
         &:focus {
           outline: none;
           border-color: #3B82F6;
-          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+          background-color: #1E2D45;
+        }
+
+        &::placeholder {
+          color: #62748E;
         }
 
         &.is-invalid {
-          border-color: #dc3545;
+          border-color: #f87171;
         }
       }
 
       .error-text {
-        color: #dc3545;
-        font-size: 12px;
-        margin-top: 5px;
+        color: #f87171;
+        font-size: 0.75rem;
+        margin-top: 0.375rem;
       }
     }
 
     .error-alert {
-      background-color: #1E2D45;
-      color: #dc3545;
-      padding: 12px;
-      border-radius: 5px;
-      margin-bottom: 20px;
-      border: 1px solid #dc3545;
+      background-color: #5f1e1e;
+      color: #f87171;
+      padding: 1rem 1.25rem;
+      border-radius: 0.5rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid #f87171;
+      font-size: 0.875rem;
     }
 
     .btn {
       width: 100%;
-      padding: 12px;
+      padding: 0.75rem 1.25rem;
       border: none;
-      border-radius: 5px;
-      font-size: 16px;
+      border-radius: 0.5rem;
+      font-size: 0.95rem;
       font-weight: 600;
       cursor: pointer;
-      transition: background-color 0.3s;
+      transition: all 0.3s ease;
 
       &.btn-primary {
         background-color: #3B82F6;
@@ -89,11 +98,13 @@
 
         &:hover:not(:disabled) {
           background-color: #2563eb;
+          transform: translateY(-2px);
         }
 
         &:disabled {
-          background-color: #555;
+          background-color: #4B5563;
           cursor: not-allowed;
+          transform: none;
         }
       }
     }
@@ -101,9 +112,9 @@
 
   .login-link {
     text-align: center;
-    margin-top: 20px;
-    color: #9aa1ad;
-    font-size: 14px;
+    margin-top: 1.5rem;
+    color: #62748E;
+    font-size: 0.875rem;
 
     .link {
       color: #3B82F6;

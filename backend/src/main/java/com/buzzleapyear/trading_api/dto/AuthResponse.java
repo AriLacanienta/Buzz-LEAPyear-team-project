@@ -2,16 +2,26 @@ package com.buzzleapyear.trading_api.dto;
 
 public class AuthResponse {
     private String token;
+    private String refreshToken;
+    private String accessToken;
     private String type = "Bearer";
     private String username;
     private String email;
 
     public AuthResponse() {}
 
-    public AuthResponse(String token, String username, String email) {
-        this.token = token;
+    public AuthResponse(String accessToken, String refreshToken, String username, String email) {
+        this.accessToken = accessToken;
+        this.refreshToken = refreshToken;
+        this.token = accessToken;
         this.username = username;
         this.email = email;
+    }
+    public String getAccessToken() {
+        return accessToken;
+    }
+    public String getRefreshToken() {
+        return refreshToken;
     }
 
     public String getToken() {
