@@ -7,6 +7,7 @@ import { of } from 'rxjs';
 export const authGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService)
   const router = inject(Router);
+  const requiredRoles = route.data?.['roles'] as string[] | undefined;
 
   // First check if token exists locally
   if (!authService.isLoggedIn()) {
@@ -20,14 +21,17 @@ export const authGuard: CanActivateFn = (route, state) => {
     map(response => {
       // Token is valid
       console.log('Token validated successfully');
-      return true;
+      if (!requiredRoles?.length || requiredRoles.some(role => authService.hasRole(role))) {
+        return true;
+      }
+
+      return router.createUrlTree(['/dashboard']);
     }),
     catchError(error => {
       // Token validation failed (likely 401 Unauthorized)
       console.warn('Token validation failed, logging out', error);
       authService.logout();
-      router.navigate(['/login']);
-      return of(false);
+      return of(router.createUrlTree(['/login']));
     })
   );
 };
