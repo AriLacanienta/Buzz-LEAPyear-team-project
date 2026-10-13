@@ -1,7 +1,10 @@
 package com.buzzleapyear.trading_api.config;
 
+<<<<<<< HEAD
 import java.util.Arrays;
 import org.springframework.http.HttpStatus;
+=======
+>>>>>>> e36882a (clean up imports)
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,9 +16,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.buzzleapyear.trading_api.security.JwtAuthenticationFilter;
 
@@ -40,7 +40,7 @@ public class SecurityConfig {
                 (request, response, authException) -> response.sendError(HttpStatus.UNAUTHORIZED.value())
             ))
             .authorizeHttpRequests(authorize -> authorize
-                // PUBLIC 
+                // PUBLIC
                 .requestMatchers(HttpMethod.POST, "/api/v1/auth/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/auth/validate").authenticated()
 
@@ -51,6 +51,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/holdings/**").authenticated()
                 .requestMatchers("/api/v1/instruments/**", "/api/v1/quote/**").authenticated()
                 
+
                 // RESTRICTED (RBAC)
                 .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/v1/test").hasRole("ADMIN")
@@ -59,17 +60,16 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/analyst/**").authenticated()
                 .requestMatchers("/api/v1/compliance/**").hasAnyRole("ADMIN", "COMPLIANCE")
                 .requestMatchers("/api/v1/client/**").hasAnyRole("ADMIN","CLIENT","ANALYST")
-                
+
                 // HEALTHCHECK (internal only - docker-compose, kubernetes, etc.)
                 .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
                 .requestMatchers("/actuator/**").denyAll()
-                
+
                 // ALL paths
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-        
+
         return http.build();
     }
 }
-    
