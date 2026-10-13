@@ -3,17 +3,17 @@
     <section class="markets-content">
       <app-market-tabs
         [markets]="markets"
-        [selectedMarket]="selectedMarket"
+        [selectedMarket]="selectedMarket()"
         (marketChange)="onMarketChange($event)">
       </app-market-tabs>
       <div class="instruments-table">
         <app-instruments-table
-          [instruments]="instruments"
-          [selectedMarket]="selectedMarket"
+          [instruments]="instruments()"
+          [selectedMarket]="selectedMarket()"
           [displayedColumns]="displayedColumns">
           <div table-header>
             <app-asset-type-filter 
-              [selectedAssetType]="selectedAssetType"
+              [selectedAssetType]="selectedAssetType()"
               [assetTypes]="assetTypes"
               (assetTypeChange)="onAssetTypeChange($event)">
             </app-asset-type-filter>

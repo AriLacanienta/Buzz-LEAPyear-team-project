@@ -17,7 +17,7 @@ import { Observable } from 'rxjs';
   styleUrls: ['./navbar.component.scss']
 })
 export class NavbarComponent {
-  accountName$ = this.accountService.accountName$;
+  accountName = this.accountService.accountName;
 
   isMarketOpen$: Observable<boolean> = this.marketStatusService.isMarketOpen();
   formattedDate$: Observable<string> = this.marketStatusService.getFormattedDate();

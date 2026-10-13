@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal } from '@angular/core';
 import { InstrumentService } from '@app/services/instrument.service';
 import { Subscription } from 'rxjs';
 import { InstrumentsTableComponent } from '@app/components/client//markets/instruments-table/instruments-table.component';
@@ -14,10 +14,10 @@ import { CommonModule } from '@angular/common';
   standalone: true
 })
 export class MarketsComponent implements OnInit, OnDestroy {
-  instruments: any[] = [];
+  instruments = signal<any[]>([]);
   displayedColumns: string[] = ['instrumentSymbol', 'instrumentName', 'currentPrice', 'changePercent', 'volume', 'marketCap'];
-  selectedMarket: string = 'US';
-  selectedAssetType: string = 'EQUITY';
+  selectedMarket = signal('US');
+  selectedAssetType = signal('EQUITY');
   markets: string[] = ['US', 'UK', 'India'];
   assetTypes: string[] = ['EQUITY', 'BOND', 'CRYPTO', 'ETF'];
   private refreshSubscription: Subscription | null = null;
@@ -46,22 +46,22 @@ export class MarketsComponent implements OnInit, OnDestroy {
 
   loadInstruments(): void {
     console.log('Loading instruments with:', {
-      assetType: this.selectedAssetType,
-      market: this.selectedMarket,
+      assetType: this.selectedAssetType(),
+      market: this.selectedMarket(),
       page: 0,
       size: 100
     });
     
     this.instrumentService.getInstruments(
-      this.selectedAssetType,
-      this.selectedMarket,
+      this.selectedAssetType(),
+      this.selectedMarket(),
       0,
       100
     ).subscribe(
       (response: any) => {
         console.log('Received response:', response);
-        this.instruments = response.content || [];
-        console.log('Instruments count:', this.instruments.length);
+        this.instruments.set(response.content || []);
+        console.log('Instruments count:', this.instruments().length);
       },
       (error) => {
         console.error('Error loading instruments:', error);
@@ -70,13 +70,13 @@ export class MarketsComponent implements OnInit, OnDestroy {
   }
 
   onMarketChange(market: string): void {
-    this.selectedMarket = market;
+    this.selectedMarket.set(market);
     this.loadInstruments();
     this.startAutoRefresh();
   }
 
   onAssetTypeChange(assetType: string): void {
-    this.selectedAssetType = assetType;
+    this.selectedAssetType.set(assetType);
     this.loadInstruments();
     this.startAutoRefresh();
   }

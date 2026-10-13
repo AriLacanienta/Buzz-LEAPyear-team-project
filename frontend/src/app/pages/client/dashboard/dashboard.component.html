@@ -3,8 +3,8 @@
     <section class="portfolio-section">
       <app-portfolio-holdings-container
         [title]="'Portfolio Holdings'"
-        [holdings]="holdings"
-        [isLoading]="isLoading">
+        [holdings]="holdings()"
+        [isLoading]="isLoading()">
       </app-portfolio-holdings-container>
     </section>
     <section class="market-section">
@@ -16,12 +16,12 @@
         <app-market-info-card 
           title="TOP GAINERS"
           content="Best performing stocks today"
-          [data]="topGainers">
+          [data]="topGainers()">
         </app-market-info-card>
         <app-market-info-card 
           title="TOP LOSERS"
           content="Worst performing stocks today"
-          [data]="topLosers">
+          [data]="topLosers()">
         </app-market-info-card>
       </div>
       <section class="trade-content">

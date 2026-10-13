@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Injectable, signal } from '@angular/core';
+import { Observable } from 'rxjs';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { BalanceResponse } from '@app/models/balance-response.model';
@@ -11,8 +11,8 @@ import { RecentTradeOrderResponse, SpringPage } from '@app/models/recent-trade-o
 })
 export class AccountService {
   private apiUrl = `${environment.apiUrl}/accounts`;
-  private accountNameSubject = new BehaviorSubject<string>('');
-  accountName$ = this.accountNameSubject.asObservable();
+  private accountNameState = signal('');
+  accountName = this.accountNameState.asReadonly();
 
   constructor(private http: HttpClient) {}
 
@@ -20,12 +20,12 @@ export class AccountService {
       return this.http.get<CurrentAccountResponse>(`${this.apiUrl}/me`);
   }
 
-  setAccountName(name: string) {
-    this.accountNameSubject.next(name);
+  setAccountName(name: string): void {
+    this.accountNameState.set(name);
   }
 
-  getAccountName() {
-    return this.accountNameSubject.value;
+  getAccountName(): string {
+    return this.accountNameState();
   }
 
   getAccountBalance(id: string): Observable<BalanceResponse> {
