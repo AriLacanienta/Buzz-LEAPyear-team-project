@@ -36,6 +36,9 @@ public class User {
     
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    @Column(name = "token_version", nullable = false)
+    private long tokenVersion = 0;
     
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Client> clients;
@@ -87,6 +90,9 @@ public class User {
     
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+
+    public long getTokenVersion() { return tokenVersion; }
+    public void revokeAccessTokens() { tokenVersion++; }
     
     public List<Client> getClients() { return clients; }
     public void setClients(List<Client> clients) { this.clients = clients; }

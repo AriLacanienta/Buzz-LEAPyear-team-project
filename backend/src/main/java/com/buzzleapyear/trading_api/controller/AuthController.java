@@ -93,7 +93,8 @@ public class AuthController {
             }
 
             // Generate short-lived access token and long-lived refresh token
-            String accessToken = tokenProvider.generateAccessToken(user.getUsername());
+                String accessToken = tokenProvider.generateAccessToken(
+                    user.getUsername(), user.getTokenVersion());
             String refreshToken = createRefreshSession(user.getUsername());
 
                 //returning access token in body and refresh token in secure HttpOnly cookie
@@ -165,7 +166,8 @@ public class AuthController {
 
             // Generate short-lived access token and long-lived refresh token
             // User is automatically logged in after registration
-            String accessToken = tokenProvider.generateAccessToken(savedUser.getUsername());
+                String accessToken = tokenProvider.generateAccessToken(
+                    savedUser.getUsername(), savedUser.getTokenVersion());
             String refreshToken = createRefreshSession(savedUser.getUsername());
 
                 //returning access token in body and refresh token in secure HttpOnly cookie
@@ -214,7 +216,8 @@ public class AuthController {
             User user = userOptional.get();
             session.setRevokedAt(LocalDateTime.now());
             refreshSessionRepository.save(session);
-            String newAccessToken = tokenProvider.generateAccessToken(user.getUsername());
+            String newAccessToken = tokenProvider.generateAccessToken(
+                    user.getUsername(), user.getTokenVersion());
             String newRefreshToken = createRefreshSession(user.getUsername());
 
             return ResponseEntity.ok()
@@ -230,6 +233,18 @@ public class AuthController {
     public ResponseEntity<?> logout(
             @CookieValue(value = REFRESH_COOKIE_NAME, required = false) String refreshToken,
             HttpServletRequest request) {
+        String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
+        if (authorization != null && authorization.startsWith("Bearer ")) {
+            String accessToken = authorization.substring("Bearer ".length());
+            if (tokenProvider.validateToken(accessToken)) {
+                userRepository.findByUsername(tokenProvider.getUsernameFromJWT(accessToken))
+                        .ifPresent(user -> {
+                            user.revokeAccessTokens();
+                            userRepository.save(user);
+                        });
+            }
+        }
+
         if (refreshToken != null && !refreshToken.isBlank()) {
             refreshSessionRepository.findByTokenHash(hashToken(refreshToken)).ifPresent(session -> {
                 session.setRevokedAt(LocalDateTime.now());
