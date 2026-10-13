@@ -7,13 +7,13 @@ import { CommonModule } from '@angular/common';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 
 import { AppComponent } from './app.component';
-import { DashboardComponent } from './pages/dashboard/dashboard.component';
-import { TradeComponent } from './pages/trade/trade.component';
-import { MarketsComponent } from './pages/markets/markets.component';
+import { DashboardComponent } from './pages/client/dashboard/dashboard.component';
+import { TradeComponent } from './pages/client/trade/trade.component';
+import { MarketsComponent } from './pages/client/markets/markets.component';
 import { LoginComponent } from './pages/login/login.component';
 import { RegisterComponent } from './pages/register/register.component';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
-import { authGuard } from './auth.guard';
+import { authGuard } from './guards/auth.guard';
 import { AccountComponent } from './pages/account/account.component';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { MatTableModule } from '@angular/material/table';

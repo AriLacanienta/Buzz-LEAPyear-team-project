@@ -8,9 +8,9 @@ import { PortfolioHoldingsContainerComponent } from '@app/components/portfolio/p
 import { MarketInfoCardComponent } from '@app/components/portfolio/market-info-card/market-info-card.component';
 import { RecentOrdersComponent } from '@app/components/trade/recent-orders/recent-orders/recent-orders.component';
 import { CurrentHoldingsComponent } from '@app/components/trade/current-holdings/current-holdings/current-holdings.component';
-import { RecentOrderService } from '../../services/recent-order.service';
+import { RecentOrderService } from '../../../services/recent-order.service';
 import { AccountService } from '@app/services/account.service';
-import { RecentOrder } from '../../models/recent-order.model';
+import { RecentOrder } from '../../../models/recent-order.model';
 
 export interface QuoteResponse {
   symbol: string;

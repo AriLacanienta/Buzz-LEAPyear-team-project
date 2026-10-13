@@ -162,7 +162,7 @@ public class AuthController {
 
             Account account = new Account();
             account.setClient(client);
-            account.setAccountName(savedUser.getUsername());
+            account.setAccountName(savedUser.getFirstName());
             account.setCashAvailable(new BigDecimal("10000.00"));
             accountRepository.save(account);
 

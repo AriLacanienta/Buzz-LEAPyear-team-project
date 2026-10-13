@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
-import { authGuard } from './auth.guard';
-import { adminGuard } from './admin.guard';
+import { authGuard } from './guards/auth.guard';
+import { adminGuard } from './guards/admin.guard';
 import { ManagerLayoutComponent } from './pages/manager/manager-layout.component';
 import { ManagerDashboardComponent } from './pages/manager/manager-dashboard/manager-dashboard.component';
 import { ManagerDisputesComponent } from './pages/manager/manager-disputes/manager-disputes.component';
