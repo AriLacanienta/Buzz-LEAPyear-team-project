@@ -5,6 +5,7 @@ public class AuthResponse {
     private String type = "Bearer";
     private String username;
     private String email;
+    private String role;
 
     public AuthResponse() {}
 
@@ -12,6 +13,11 @@ public class AuthResponse {
         this.token = token;
         this.username = username;
         this.email = email;
+    }
+
+    public AuthResponse(String token, String username, String email, String role) {
+        this(token, username, email);
+        this.role = role;
     }
 
     public String getToken() {
@@ -44,5 +50,13 @@ public class AuthResponse {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 }

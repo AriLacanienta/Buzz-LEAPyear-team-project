@@ -53,6 +53,7 @@ public class SecurityConfig {
                 
                 // RESTRICTED (RBAC)
                 .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/v1/manager/**").hasRole("ADMIN")
                 .requestMatchers("/api/v1/test").hasRole("ADMIN")
                 .requestMatchers("/api/v1/analyst/**").hasAnyRole("ADMIN", "ANALYST")
                 .requestMatchers("/api/v1/compliance/**").hasAnyRole("ADMIN", "COMPLIANCE")

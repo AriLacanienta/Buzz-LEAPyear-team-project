@@ -77,6 +77,18 @@ export class AuthService {
     localStorage.setItem('jwt_token', token);
   }
 
+  storeRole(role: string): void {
+    localStorage.setItem('user_role', role.toUpperCase());
+  }
+
+  getRole(): string | null {
+    return localStorage.getItem('user_role');
+  }
+
+  isAdmin(): boolean {
+    return this.getRole() === 'ADMIN';
+  }
+
   /**
    * Retrieve JWT token from localStorage
    * 
@@ -110,6 +122,7 @@ export class AuthService {
    */
   logout(): void {
     localStorage.removeItem('jwt_token');
+    localStorage.removeItem('user_role');
   }
 
   /**

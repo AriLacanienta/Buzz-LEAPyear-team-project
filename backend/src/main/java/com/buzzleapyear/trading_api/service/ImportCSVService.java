@@ -19,6 +19,7 @@ import com.buzzleapyear.trading_api.entity.Client;
 import com.buzzleapyear.trading_api.entity.Holding;
 import com.buzzleapyear.trading_api.entity.Instrument;
 import com.buzzleapyear.trading_api.entity.Instrument.AssetType;
+import com.buzzleapyear.trading_api.entity.Operation;
 import com.buzzleapyear.trading_api.entity.TradeOrderStatus.OrderStatus;
 import com.buzzleapyear.trading_api.entity.TradeOrderStatus;
 import com.buzzleapyear.trading_api.entity.Quote;
@@ -185,6 +186,67 @@ public class ImportCSVService {
         } catch (IOException e) {
             System.err.println("Error reading CSV file: " + e.getMessage());
             e.printStackTrace();
+        }
+    }
+
+    @Transactional
+    public void importFromOperationsCSV(InputStream csvInputStream) throws IOException {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(csvInputStream))) {
+            String line;
+            boolean isFirstLine = true;
+
+            while ((line = br.readLine()) != null) {
+                if (isFirstLine) {
+                    isFirstLine = false;
+                    continue;
+                }
+                if (line.isBlank()) {
+                    continue;
+                }
+
+                String[] values = line.split(",", -1);
+                if (values.length != 6) {
+                    throw new IllegalArgumentException("Operations CSV rows require 6 columns");
+                }
+
+                String username = values[0].trim();
+                String email = values[1].trim();
+                String firstName = values[2].trim();
+                String lastName = values[3].trim();
+                String passwordHash = values[4].trim();
+                String operationName = values[5].trim();
+
+                User user = em.createQuery(
+                        "select u from User u where u.username = :username", User.class)
+                        .setParameter("username", username)
+                        .getResultStream()
+                        .findFirst()
+                        .orElseGet(() -> {
+                            User newUser = new User();
+                            newUser.setUsername(username);
+                            newUser.setEmail(email);
+                            newUser.setFirstName(firstName);
+                            newUser.setLastName(lastName);
+                            newUser.setPasswordHash(passwordHash);
+                            newUser.setCreatedAt(LocalDateTime.now());
+                            newUser.setUpdatedAt(LocalDateTime.now());
+                            em.persist(newUser);
+                            return newUser;
+                        });
+
+                boolean operationExists = !em.createQuery(
+                        "select o from Operation o where o.operationName = :operationName", Operation.class)
+                        .setParameter("operationName", operationName)
+                        .getResultList()
+                        .isEmpty();
+
+                if (!operationExists) {
+                    Operation operation = new Operation();
+                    operation.setOperationName(operationName);
+                    operation.setUser(user);
+                    em.persist(operation);
+                }
+            }
         }
     }
 

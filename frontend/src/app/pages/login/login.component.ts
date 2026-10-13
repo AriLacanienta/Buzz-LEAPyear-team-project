@@ -50,12 +50,12 @@ export class LoginComponent {
       (response) => {
         // Step 3: Store token in localStorage
         this.authService.storeToken(response.token);
+        this.authService.storeRole(response.role || 'CLIENT');
         
         this.loading = false;
         console.log('Login successful!', response);
         
-        //Redirect to dashboard
-        this.router.navigate(['/dashboard']);
+        this.router.navigate([response.role === 'ADMIN' ? '/manager' : '/dashboard']);
       },
       // Error response
       (error) => {

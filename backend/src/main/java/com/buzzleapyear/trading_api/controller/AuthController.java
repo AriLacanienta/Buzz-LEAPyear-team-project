@@ -91,7 +91,7 @@ public class AuthController {
             String token = tokenProvider.generateToken(user.getUsername());
 
             // Returning token in response
-            return ResponseEntity.ok(new AuthResponse(token, user.getUsername(), user.getEmail()));
+            return ResponseEntity.ok(new AuthResponse(token, user.getUsername(), user.getEmail(), getRole(user)));
 
         } catch (Exception e) {
             // If any unexpected error occurs, return 401 Unauthorized
@@ -172,7 +172,7 @@ public class AuthController {
 
             // Returning token with 201 Created status
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(new AuthResponse(token, savedUser.getUsername(), savedUser.getEmail()));
+                    .body(new AuthResponse(token, savedUser.getUsername(), savedUser.getEmail(), getRole(savedUser)));
 
         } catch (Exception e) {
             // If any error occurs during registration, return 400 Bad Request
@@ -223,6 +223,13 @@ public class AuthController {
                     .body(new ValidationResponse(false, "Token validation failed"));
         }
     }
+
+    private String getRole(User user) {
+        return user.getOperations() != null && !user.getOperations().isEmpty()
+                ? "ADMIN"
+                : "CLIENT";
+    }
+
     //returning error messages
     public static class ErrorResponse {
         private String message;

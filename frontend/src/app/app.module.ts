@@ -19,6 +19,10 @@ import { NavbarComponent } from './components/navbar/navbar.component';
 import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { PortfolioHoldingCardComponent } from './components/portfolio/portfolio-holding-card/portfolio-holding-card.component';
+import { ManagerDashboardComponent } from './pages/manager/manager-dashboard/manager-dashboard.component';
+import { ManagerDisputesComponent } from './pages/manager/manager-disputes/manager-disputes.component';
+import { ManagerTradeLogComponent } from './pages/manager/manager-trade-log/manager-trade-log.component';
+import { managerRoutes } from './manager.routes';
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -28,6 +32,7 @@ const routes: Routes = [
   { path: 'portfolio', component: DashboardComponent, canActivate: [authGuard] },
   { path: 'trade', component: TradeComponent, canActivate: [authGuard] },
   { path: 'markets', component: MarketsComponent, canActivate: [authGuard]},
+  ...managerRoutes,
   { path: '', redirectTo: '/login', pathMatch: 'full' }
 ];
 
@@ -50,7 +55,10 @@ const routes: Routes = [
     MatIconModule,
     PortfolioHoldingCardComponent,
     MarketsComponent,
-    DashboardComponent
+    DashboardComponent,
+    ManagerDashboardComponent,
+    ManagerDisputesComponent,
+    ManagerTradeLogComponent
   ],
   providers: [
     // Register HTTP interceptor to add JWT token to all requests

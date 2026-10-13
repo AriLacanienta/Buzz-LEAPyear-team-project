@@ -24,6 +24,7 @@ public class DatabaseSeeder implements CommandLineRunner {
         try {
             importCSVService.importFromInstrumentsCSV(new ClassPathResource("instruments.csv").getInputStream());
             importCSVService.importFromTradesCSV(new ClassPathResource("trades.csv").getInputStream());
+            importCSVService.importFromOperationsCSV(new ClassPathResource("operations.csv").getInputStream());
             importCSVService.importFromQuotesCSV(new ClassPathResource("quotes.csv").getInputStream());
             
             // Reinitialize quotes after CSV import completes

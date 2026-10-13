@@ -78,18 +78,23 @@ header {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  width: 1.6rem;
+  height: 1.6rem;
 
   mat-icon {
     position: relative;
     z-index: 1;
-    size: 1rem;
+    font-size: 0.9rem;
+    width: 0.9rem;
+    height: 0.8rem;
+    line-height: 0.9rem;
   }
 }
 
 .rocket-square {
   position: absolute;
-  width: 1.75rem;
-  height: 1.75rem;
+  width: 1.4rem;
+  height: 1.4rem;
   background-color: rgba($color-rocket-dark, 0.2);
   z-index: 0;
   border-radius: $border-radius-sm;
@@ -171,26 +176,6 @@ header {
   align-items: center;
   font-size: $font-size-sm;
 }
-
-.logout-btn {
-    padding: $padding-sm $padding-md;
-    background-color: transparent;
-    color: $color-text;
-    border: $border-width-md solid $border-dark;
-    border-radius: $border-radius-md;
-    font-weight: $font-weight-normal;
-    cursor: pointer;
-    font-size: $font-size-sm;
-
-    &:hover {
-      color: $border-dark;
-    }
-
-    &:active {
-      border-color: $color-white;
-      background-color: $bg-dark;
-    }
-  }
 
 .market-text {
   display: flex;

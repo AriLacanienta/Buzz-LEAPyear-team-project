@@ -4,10 +4,12 @@ import com.buzzleapyear.trading_api.entity.User;
 import com.buzzleapyear.trading_api.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,6 +25,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     //load user by username for authentication
     @Override
+    @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<User> user = userRepository.findByUsername(username);
         //check if user exists in the database
@@ -32,12 +35,9 @@ public class CustomUserDetailsService implements UserDetailsService {
         }
 
         User appUser = user.get();
-        //create a collection to hold the user's authorities (roles/permissions)
-        //check if this is a feautre we want maybe for admin users
-        //for now, we are not assigning any specific roles or authorities to the user
-        //initialize the authorities collection as an empty list
-        //todo: need to add roles like ROLE_USER, ROLE_ADMIN, etc
         Collection<GrantedAuthority> authorities = new ArrayList<>();
+        boolean isAdmin = appUser.getOperations() != null && !appUser.getOperations().isEmpty();
+        authorities.add(new SimpleGrantedAuthority(isAdmin ? "ROLE_ADMIN" : "ROLE_CLIENT"));
 
         //return a UserDetails object containing the username, hashed password, and authorities
         return org.springframework.security.core.userdetails.User.builder()
