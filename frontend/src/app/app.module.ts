@@ -18,6 +18,7 @@ import { AccountComponent } from './pages/account/account.component';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { MatTableModule } from '@angular/material/table';
 import { PortfolioHoldingCardComponent } from './components/portfolio-holding-card/portfolio-holding-card.component';
+import { AdminComponent } from './pages/admin/admin.component';
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -27,6 +28,7 @@ const routes: Routes = [
   { path: 'portfolio', component: DashboardComponent, canActivate: [authGuard] },
   { path: 'trade', component: TradeComponent, canActivate: [authGuard] },
   { path: 'markets', component: MarketsComponent, canActivate: [authGuard]},
+  { path: 'admin', component: AdminComponent, canActivate: [authGuard], data: { roles: ['MANAGER'] } },
   { path: '', redirectTo: '/login', pathMatch: 'full' }
 ];
 
@@ -38,7 +40,8 @@ const routes: Routes = [
     LoginComponent,
     RegisterComponent,
     AccountComponent,
-    NavbarComponent
+    NavbarComponent,
+    AdminComponent
   ],
   imports: [
     BrowserModule,
