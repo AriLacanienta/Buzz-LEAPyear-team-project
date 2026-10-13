@@ -10,15 +10,15 @@ VALUES
     ('C007', 'Grace', 'Lindqvist', 'C007@trading.demo', '$2a$10$QEG13Tgr8.fgIP4n1.CxVeEoUhKYjWF7S2HK4mwhWh9V0zz80GUzi'),
     ('C008', 'Hassan', 'Malik', 'C008@trading.demo', '$2a$10$QEG13Tgr8.fgIP4n1.CxVeEoUhKYjWF7S2HK4mwhWh9V0zz80GUzi'),
     ('C009', 'Isla', 'Fraser', 'C009@trading.demo', '$2a$10$QEG13Tgr8.fgIP4n1.CxVeEoUhKYjWF7S2HK4mwhWh9V0zz80GUzi'),
-    ('C010', 'Jamal', 'Ferris', 'C010@trading.demo', '$2a$10$QEG13Tgr8.fgIP4n1.CxVeEoUhKYjWF7S2HK4mwhWh9V0zz80GUzi')
+    ('C010', 'Jamal', 'Ferris', 'C010@trading.demo', '$2a$10$QEG13Tgr8.fgIP4n1.CxVeEoUhKYjWF7S2HK4mwhWh9V0zz80GUzi'),
+    ('C011', 'Admin', 'User', 'admin@trading.demo', '$2a$10$QEG13Tgr8.fgIP4n1.CxVeEoUhKYjWF7S2HK4mwhWh9V0zz80GUzi')
 ON CONFLICT (username) DO NOTHING;
 
 INSERT INTO roles (role_name, description)
 VALUES
     ('CLIENT', 'Client role - users who manage their own portfolios and trade'),
     ('ANALYST', 'Analyst role - users who analyze market data and create recommendations'),
-    ('OPERATIONS', 'Operations role - users who manage operational processes and workflows'),
-    ('COMPLIANCE', 'Compliance role - users who oversee regulatory compliance and audit trails')
+    ('MANAGER', 'Manager role - users who administrate user accounts and audits'),
 ON CONFLICT (role_name) DO NOTHING;
 
 INSERT INTO user_roles (user_id, role_id, assigned_by)
@@ -33,6 +33,11 @@ WHERE u.username LIKE 'C%'
                 AND ur.role_id = r.role_id
     );
 
+INSERT INTO user_roles (user_id, role_id, assigned_by)
+SELECT u.user_id, r.role_id, 'flyway-v2'
+FROM users u
+JOIN roles r ON r.role_name = 'MANAGER'
+
 INSERT INTO clients (user_id)
 SELECT user_id
 FROM users
@@ -40,7 +45,7 @@ WHERE username LIKE 'C%'
   AND NOT EXISTS (SELECT 1 FROM clients c WHERE c.user_id = users.user_id);
 
 INSERT INTO accounts (account_name, client_id, risk_profile, cash_available, cash_reserved)
-SELECT u.username || '_Account', c.clients_id, 'MODERATE', 10000.00, 0.00
+SELECT u.username || '_Account', c.clients_id, 'MODERATE', 00.00, 0.00
 FROM users u
 JOIN clients c ON c.user_id = u.user_id
 WHERE u.username LIKE 'C%'
