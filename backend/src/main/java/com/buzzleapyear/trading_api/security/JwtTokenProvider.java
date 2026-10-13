@@ -37,9 +37,13 @@ public class JwtTokenProvider {
     //@param username The username to put in the token
     //@return JWT access token as a string
     public String generateAccessToken(String username) {
+        return generateAccessToken(username, 0);
+    }
+
+    public String generateAccessToken(String username, long tokenVersion) {
         //15 minutes in milliseconds
         long accessTokenExpiration = 900000;
-        return createToken(username, accessTokenExpiration);
+        return createToken(username, accessTokenExpiration, tokenVersion);
     }
 
     /**
@@ -60,16 +64,31 @@ public class JwtTokenProvider {
      * @return JWT token as a string
      */
     private String createToken(String username, long expirationMs) {
+        return createToken(username, expirationMs, 0);
+    }
+
+    private String createToken(String username, long expirationMs, long tokenVersion) {
         SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes());
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + expirationMs);
 
         return Jwts.builder()
                 .setSubject(username)
+            .claim("tokenVersion", tokenVersion)
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
                 .signWith(key, SignatureAlgorithm.HS512)
                 .compact();
+    }
+
+    public long getTokenVersionFromJWT(String token) {
+        SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes());
+        Object version = Jwts.parser()
+                .setSigningKey(key)
+                .parseClaimsJws(token)
+                .getBody()
+                .get("tokenVersion");
+        return version instanceof Number ? ((Number) version).longValue() : 0;
     }
 
     /**
