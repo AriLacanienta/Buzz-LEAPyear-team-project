@@ -1,4 +1,4 @@
--- Demo users use the same bcrypt hash as the CSV importer.
+-- Demo users use the same bcrypt hash password
 INSERT INTO users (username, user_first_name, user_last_name, email, password_hash)
 VALUES
     ('C001', 'Alice', 'Chen', 'C001@trading.demo', '$2a$10$QEG13Tgr8.fgIP4n1.CxVeEoUhKYjWF7S2HK4mwhWh9V0zz80GUzi'),
@@ -11,14 +11,15 @@ VALUES
     ('C008', 'Hassan', 'Malik', 'C008@trading.demo', '$2a$10$QEG13Tgr8.fgIP4n1.CxVeEoUhKYjWF7S2HK4mwhWh9V0zz80GUzi'),
     ('C009', 'Isla', 'Fraser', 'C009@trading.demo', '$2a$10$QEG13Tgr8.fgIP4n1.CxVeEoUhKYjWF7S2HK4mwhWh9V0zz80GUzi'),
     ('C010', 'Jamal', 'Ferris', 'C010@trading.demo', '$2a$10$QEG13Tgr8.fgIP4n1.CxVeEoUhKYjWF7S2HK4mwhWh9V0zz80GUzi'),
-    ('C011', 'Admin', 'User', 'admin@trading.demo', '$2a$10$QEG13Tgr8.fgIP4n1.CxVeEoUhKYjWF7S2HK4mwhWh9V0zz80GUzi')
+    ('M001', 'Admin', 'User', 'admin@trading.demo', '$2a$10$QEG13Tgr8.fgIP4n1.CxVeEoUhKYjWF7S2HK4mwhWh9V0zz80GUzi'),
+    ('A001', 'Analyst', 'User', 'analyst@trading.demo', '$2a$10$QEG13Tgr8.fgIP4n1.CxVeEoUhKYjWF7S2HK4mwhWh9V0zz80GUzi')
 ON CONFLICT (username) DO NOTHING;
 
 INSERT INTO roles (role_name, description)
 VALUES
     ('CLIENT', 'Client role - users who manage their own portfolios and trade'),
     ('ANALYST', 'Analyst role - users who analyze market data and create recommendations'),
-    ('MANAGER', 'Manager role - users who administrate user accounts and audits'),
+    ('MANAGER', 'Manager role - users who administrate user accounts and audits')
 ON CONFLICT (role_name) DO NOTHING;
 
 INSERT INTO user_roles (user_id, role_id, assigned_by)
@@ -37,6 +38,25 @@ INSERT INTO user_roles (user_id, role_id, assigned_by)
 SELECT u.user_id, r.role_id, 'flyway-v2'
 FROM users u
 JOIN roles r ON r.role_name = 'MANAGER'
+WHERE u.username LIKE 'M%'
+    AND NOT EXISTS (
+            SELECT 1
+            FROM user_roles ur
+            WHERE ur.user_id = u.user_id
+                AND ur.role_id = r.role_id
+    );
+
+INSERT INTO user_roles (user_id, role_id, assigned_by)
+SELECT u.user_id, r.role_id, 'flyway-v2'
+FROM users u
+JOIN roles r ON r.role_name = 'ANALYST'
+WHERE u.username LIKE 'A%'
+    AND NOT EXISTS (
+            SELECT 1
+            FROM user_roles ur
+            WHERE ur.user_id = u.user_id
+                AND ur.role_id = r.role_id
+    );
 
 INSERT INTO clients (user_id)
 SELECT user_id
