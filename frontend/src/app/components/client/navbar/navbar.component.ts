@@ -1,4 +1,7 @@
+import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
+import { MatIconModule } from '@angular/material/icon';
+import { RouterModule } from '@angular/router';
 import { AccountService } from '../../../services/account.service';
 import { MarketStatusService } from '../../../services/market-status.service';
 import { AuthService } from '../../../services/auth.service';
@@ -8,9 +11,10 @@ import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-navbar',
+  standalone: true,
+  imports: [CommonModule, MatIconModule, RouterModule],
   templateUrl: './navbar.component.html',
-  styleUrls: ['./navbar.component.scss'],
-
+  styleUrls: ['./navbar.component.scss']
 })
 export class NavbarComponent {
   accountName$ = this.accountService.accountName$;

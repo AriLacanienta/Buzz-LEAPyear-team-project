@@ -1,29 +1,12 @@
 import { Component } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
+import { RouterOutlet } from '@angular/router';
+import { NavbarComponent } from '../../components/manager/navbar/navbar.component';
 
 @Component({
   selector: 'app-manager-layout',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive, RouterOutlet],
-  template: `
-    <header>
-      <nav>
-        <strong>Admin Workspace</strong>
-        <a routerLink="/manager" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Dashboard</a>
-        <a routerLink="/manager/trade-log" routerLinkActive="active">Trade Log</a>
-        <a routerLink="/manager/disputes" routerLinkActive="active">Disputes</a>
-        <button type="button" (click)="logout()">Logout</button>
-      </nav>
-    </header>
-    <router-outlet></router-outlet>
-  `
+  imports: [NavbarComponent, RouterOutlet],
+  templateUrl: './manager-layout.component.html',
+  styleUrls: ['./manager-layout.component.scss']
 })
-export class ManagerLayoutComponent {
-  constructor(private authService: AuthService) {}
-
-  logout(): void {
-    this.authService.logout();
-    window.location.href = '/login';
-  }
-}
+export class ManagerLayoutComponent {}
