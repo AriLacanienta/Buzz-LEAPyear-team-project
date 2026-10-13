@@ -23,6 +23,7 @@ import { PortfolioHoldingCardComponent } from './components/portfolio/portfolio-
 import { HoldingService } from './services/holding.service';
 import { HighchartsChartModule } from 'highcharts-angular';
 import { AnalystDashboardComponent } from './pages/analyst-dashboard/analyst-dashboard.component';
+import { AdminComponent } from './pages/admin/admin.component';
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -33,6 +34,8 @@ const routes: Routes = [
   { path: 'trade', component: TradeComponent, canActivate: [authGuard] },
   { path: 'markets', component: MarketsComponent, canActivate: [authGuard] },
   { path: 'analyst', component: AnalystDashboardComponent, canActivate: [authGuard] },
+  { path: 'markets', component: MarketsComponent, canActivate: [authGuard]},
+  { path: 'admin', component: AdminComponent, canActivate: [authGuard], data: { roles: ['MANAGER'] } },
   { path: '', redirectTo: '/login', pathMatch: 'full' }
 ];
 
@@ -42,7 +45,8 @@ const routes: Routes = [
     LoginComponent,
     RegisterComponent,
     AccountComponent,
-    NavbarComponent
+    NavbarComponent,
+    AdminComponent
   ],
   imports: [
     BrowserModule,
