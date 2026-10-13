@@ -13,9 +13,7 @@ import { Observable } from 'rxjs';
 
 })
 export class NavbarComponent {
-  accountName$ = this.accountService.accountName$.pipe(
-    map(name => name.split(' ')[0])
-  );
+  accountName$ = this.accountService.accountName$;
 
   isMarketOpen$: Observable<boolean> = this.marketStatusService.isMarketOpen();
   formattedDate$: Observable<string> = this.marketStatusService.getFormattedDate();
