@@ -37,12 +37,12 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/v1/auth/validate").permitAll()
 
                 // RESTRICTED (RBAC)
-                .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
-                .requestMatchers("/api/v1/test").hasRole("ADMIN")
-                .requestMatchers("/api/v1/analyst/**").hasAnyRole("ADMIN", "ANALYST")
-                .requestMatchers("/api/v1/compliance/**").hasAnyRole("ADMIN", "COMPLIANCE")
+                .requestMatchers("/api/v1/admin/**").hasRole("MANAGER")
+                .requestMatchers("/api/v1/test").hasRole("MANAGER")
+                .requestMatchers("/api/v1/analyst/**").hasAnyRole("MANAGER", "ANALYST")
+                .requestMatchers("/api/v1/compliance/**").hasRole("MANAGER")
                 .requestMatchers("/api/v1/instruments/**", "/api/v1/quote/**").authenticated()
-                .requestMatchers("/api/v1/client/**").hasAnyRole("ADMIN","CLIENT","ANALYST")
+                .requestMatchers("/api/v1/client/**").hasAnyRole("MANAGER", "CLIENT", "ANALYST")
 
                 // HEALTHCHECK (internal only - docker-compose, kubernetes, etc.)
                 .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()

@@ -3,7 +3,10 @@ package com.buzzleapyear.trading_api.controller;
 import com.buzzleapyear.trading_api.dto.AuthResponse;
 import com.buzzleapyear.trading_api.dto.LoginRequest;
 import com.buzzleapyear.trading_api.dto.RegistrationRequest;
+import com.buzzleapyear.trading_api.entity.Role;
 import com.buzzleapyear.trading_api.entity.User;
+import com.buzzleapyear.trading_api.entity.UserRole;
+import com.buzzleapyear.trading_api.repository.RoleRepository;
 import com.buzzleapyear.trading_api.repository.UserRepository;
 import com.buzzleapyear.trading_api.security.JwtTokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +16,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * This Authentication Controller handles login, registration, and token validation
@@ -31,21 +36,24 @@ public class AuthController {
     private UserRepository userRepository;
 
     @Autowired
+    private RoleRepository roleRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
     private JwtTokenProvider tokenProvider;
 /**
      * POST /api/auth/login
-     * 
+     *
      * Login endpoint - Authenticate user with email and password
-     * 
+     *
      * Request body:
      * {
      *   "email": "john@example.com",
      *   "password": "pass123"
      * }
-     * 
+     *
      * Response (200 OK):
      * {
      *   "token": "eyJ...",
@@ -59,7 +67,7 @@ public class AuthController {
         try {
             // Finding user by email in database
             Optional<User> userOptional = userRepository.findByEmail(loginRequest.getEmail());
-            
+
             // Checking if user exists
             if (userOptional.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -80,7 +88,12 @@ public class AuthController {
             String token = tokenProvider.generateToken(user.getUsername());
 
             // Returning token in response
-            return ResponseEntity.ok(new AuthResponse(token, user.getUsername(), user.getEmail()));
+                return ResponseEntity.ok(new AuthResponse(
+                    token,
+                    user.getUsername(),
+                    user.getEmail(),
+                    getRoleNames(user)
+                ));
 
         } catch (Exception e) {
             // If any unexpected error occurs, return 401 Unauthorized
@@ -91,9 +104,9 @@ public class AuthController {
 
     /**
      * POST /api/auth/register
-     * 
+     *
      * Registration endpoint - Create new user account
-     * 
+     *
      * Request body:
      * {
      *   "username": "johndoe",
@@ -102,7 +115,7 @@ public class AuthController {
      *   "lastName": "Doe",
      *   "password": "pass123"
      * }
-     * 
+     *
      * Response (201 Created):
      * {
      *   "token": "eyJ...",
@@ -133,13 +146,17 @@ public class AuthController {
             newUser.setEmail(registrationRequest.getEmail());
             newUser.setFirstName(registrationRequest.getFirstName());
             newUser.setLastName(registrationRequest.getLastName());
-            
+
             // IMPORTANT!!!!!!! we hash the password before it is saved to our database
             // We are not storing raw passwords in our database. We are using passwordEncoder.encode()
             newUser.setPasswordHash(passwordEncoder.encode(registrationRequest.getPassword()));
-            
+
             newUser.setCreatedAt(LocalDateTime.now());
             newUser.setUpdatedAt(LocalDateTime.now());
+
+                Role clientRole = roleRepository.findByRoleName(Role.RoleName.CLIENT)
+                    .orElseThrow(() -> new IllegalStateException("CLIENT role is not configured"));
+                newUser.getUserRoles().add(new UserRole(newUser, clientRole, "registration"));
 
             // Saving user to ourdatabase
             User savedUser = userRepository.save(newUser);
@@ -150,7 +167,12 @@ public class AuthController {
 
             // Returning token with 201 Created status
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(new AuthResponse(token, savedUser.getUsername(), savedUser.getEmail()));
+                    .body(new AuthResponse(
+                        token,
+                        savedUser.getUsername(),
+                        savedUser.getEmail(),
+                        getRoleNames(savedUser)
+                    ));
 
         } catch (Exception e) {
             // If any error occurs during registration, return 400 Bad Request
@@ -161,12 +183,12 @@ public class AuthController {
 
     /**
      * GET /api/auth/validate
-     * 
+     *
      * Token validation endpoint Check if JWT token is valid
-     * 
+     *
      * Request header:
      * Authorization: Bearer eyJ...
-     * 
+     *
      * Response (200 OK):
      * {
      *   "valid": true,
@@ -184,7 +206,7 @@ public class AuthController {
 
             //Bearer tells the server the token that follows is a JWT token used for authentication
             String token = bearerToken.substring(7);
-            
+
             // token validation
             if (tokenProvider.validateToken(token)) {
                 // If valid, extract username from token
@@ -201,6 +223,13 @@ public class AuthController {
                     .body(new ValidationResponse(false, "Token validation failed"));
         }
     }
+
+    private List<String> getRoleNames(User user) {
+        return user.getUserRoles().stream()
+                .map(userRole -> userRole.getRole().getRoleName().name())
+                .collect(Collectors.toList());
+    }
+
     //returning error messages
     public static class ErrorResponse {
         private String message;
