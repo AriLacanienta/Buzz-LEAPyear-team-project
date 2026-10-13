@@ -1,3 +1,4 @@
+--MARK: User Details
 -- Demo users use the same bcrypt hash password
 INSERT INTO users (username, user_first_name, user_last_name, email, password_hash)
 VALUES
@@ -71,6 +72,7 @@ JOIN clients c ON c.user_id = u.user_id
 WHERE u.username LIKE 'C%'
   AND NOT EXISTS (SELECT 1 FROM accounts a WHERE a.client_id = c.clients_id);
 
+--MARK: Instruments
 INSERT INTO instruments (instrument_name, instrument_symbol, asset_type, currency_code)
 VALUES
     ('Apple Inc.', 'AAPL', 'EQUITY', 'USD'),
@@ -118,6 +120,7 @@ VALUES
     ('VUSA', 'VUSA', 'ETF', 'GBP')
 ON CONFLICT (instrument_symbol) DO NOTHING;
 
+--MARK: Quotes
 INSERT INTO quotes (instrument_id, price, high_price_of_day, low_price_of_day,
                     open_price_of_day, previous_close_price_of_day, change_amount,
                     change_percent, volume, market_cap, timestamp)
@@ -189,6 +192,7 @@ JOIN (
 ) i ON i.source_instrument_id = quote_data.instrument_id
 ON CONFLICT DO NOTHING;
 
+--MARK: Trade Orders
 DO $$
 DECLARE
     trade RECORD;
