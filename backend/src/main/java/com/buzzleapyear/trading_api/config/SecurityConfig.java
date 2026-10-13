@@ -53,6 +53,7 @@ public class SecurityConfig {
                 
 
                 // RESTRICTED (RBAC)
+<<<<<<< HEAD
                 .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/v1/test").hasRole("ADMIN")
                 // The analyst dashboard is currently available to authenticated users
@@ -60,6 +61,14 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/analyst/**").authenticated()
                 .requestMatchers("/api/v1/compliance/**").hasAnyRole("ADMIN", "COMPLIANCE")
                 .requestMatchers("/api/v1/client/**").hasAnyRole("ADMIN","CLIENT","ANALYST")
+=======
+                .requestMatchers("/api/v1/admin/**").hasRole("MANAGER")
+                .requestMatchers("/api/v1/test").hasRole("MANAGER")
+                .requestMatchers("/api/v1/analyst/**").hasAnyRole("MANAGER", "ANALYST")
+                .requestMatchers("/api/v1/compliance/**").hasRole("MANAGER")
+                .requestMatchers("/api/v1/instruments/**", "/api/v1/quote/**").authenticated()
+                .requestMatchers("/api/v1/client/**").hasAnyRole("MANAGER", "CLIENT", "ANALYST")
+>>>>>>> 15b55d4 (update security configuration)
 
                 // HEALTHCHECK (internal only - docker-compose, kubernetes, etc.)
                 .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
