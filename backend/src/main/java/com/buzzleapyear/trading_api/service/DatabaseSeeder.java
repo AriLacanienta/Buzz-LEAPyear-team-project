@@ -2,13 +2,15 @@ package com.buzzleapyear.trading_api.service;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Component
+@Profile("legacy-seeder")
 public class DatabaseSeeder implements CommandLineRunner {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(DatabaseSeeder.class);
     private final ImportCSVService importCSVService;
     private final QuoteService quoteService;
@@ -25,10 +27,10 @@ public class DatabaseSeeder implements CommandLineRunner {
             importCSVService.importFromInstrumentsCSV(new ClassPathResource("instruments.csv").getInputStream());
             importCSVService.importFromTradesCSV(new ClassPathResource("trades.csv").getInputStream());
             importCSVService.importFromQuotesCSV(new ClassPathResource("quotes.csv").getInputStream());
-            
+
             // Reinitialize quotes after CSV import completes
             quoteService.reinitializeQuotes();
-            
+
             logger.info("✓ Database seeding completed successfully!");
         } catch (Exception e) {
             logger.error("✗ Database seeding failed", e);
