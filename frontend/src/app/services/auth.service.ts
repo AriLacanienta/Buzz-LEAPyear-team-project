@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { environment } from '@environments/environment';
+import { AuthResponse } from '../models/auth-response.model';
 
 /**
  * AuthService - Handles all authentication logic
@@ -40,8 +41,9 @@ export class AuthService {
    *   "email": "john@example.com"
    * }
    */
-  login(email: string, password: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/login`, { email, password });
+  login(email: string, password: string): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/login`, { email, password })
+      .pipe(tap(response => this.storeAuthResponse(response)));
   }
 
   /**
@@ -59,10 +61,10 @@ export class AuthService {
    * @returns Observable<any> - Response with token, username, email
    */
   register(username: string, email: string, firstName: string, 
-           lastName: string, password: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/register`, {
+              lastName: string, password: string): Observable<AuthResponse> {
+            return this.http.post<AuthResponse>(`${this.apiUrl}/register`, {
       username, email, firstName, lastName, password
-    });
+            }).pipe(tap(response => this.storeAuthResponse(response)));
   }
 
   /**
@@ -77,6 +79,11 @@ export class AuthService {
     localStorage.setItem('jwt_token', token);
   }
 
+  storeAuthResponse(response: AuthResponse): void {
+    this.storeToken(response.token);
+    localStorage.setItem('auth_roles', JSON.stringify(response.roles ?? []));
+  }
+
   /**
    * Retrieve JWT token from localStorage
    * 
@@ -87,6 +94,24 @@ export class AuthService {
    */
   getToken(): string | null {
     return localStorage.getItem('jwt_token');
+  }
+
+  getRoles(): string[] {
+    const storedRoles = localStorage.getItem('auth_roles');
+    if (!storedRoles) {
+      return [];
+    }
+
+    try {
+      const roles = JSON.parse(storedRoles);
+      return Array.isArray(roles) ? roles : [];
+    } catch {
+      return [];
+    }
+  }
+
+  hasRole(role: string): boolean {
+    return this.getRoles().includes(role);
   }
 
   /**
@@ -110,6 +135,7 @@ export class AuthService {
    */
   logout(): void {
     localStorage.removeItem('jwt_token');
+    localStorage.removeItem('auth_roles');
   }
 
   /**
