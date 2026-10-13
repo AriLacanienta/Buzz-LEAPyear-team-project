@@ -7,6 +7,8 @@ import com.buzzleapyear.trading_api.entity.Role;
 import com.buzzleapyear.trading_api.entity.User;
 import com.buzzleapyear.trading_api.entity.UserRole;
 import com.buzzleapyear.trading_api.repository.RoleRepository;
+import com.buzzleapyear.trading_api.entity.RefreshSession;
+import com.buzzleapyear.trading_api.repository.RefreshSessionRepository;
 import com.buzzleapyear.trading_api.repository.UserRepository;
 import com.buzzleapyear.trading_api.security.JwtTokenProvider;
 import com.buzzleapyear.trading_api.repository.AccountRepository;
@@ -23,7 +25,11 @@ import com.buzzleapyear.trading_api.entity.Client;
 
 import java.math.BigDecimal;
 import jakarta.servlet.http.HttpServletRequest;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
+import java.util.Base64;
 import java.util.Optional;
 
 /**
@@ -41,6 +47,7 @@ public class AuthController {
 
     private static final String REFRESH_COOKIE_NAME = "refresh_token";
     private static final long REFRESH_TOKEN_MAX_AGE_SECONDS = 7 * 24 * 60 * 60;
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     @Autowired
     private UserRepository userRepository;
@@ -51,6 +58,10 @@ public class AuthController {
 
     private RoleRepository roleRepository;
 
+    @Autowired
+    private RefreshSessionRepository refreshSessionRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     private JwtTokenProvider tokenProvider;
@@ -112,7 +123,7 @@ public class AuthController {
 
             // Generate short-lived access token and long-lived refresh token
             String accessToken = tokenProvider.generateAccessToken(user.getUsername());
-            String refreshToken = tokenProvider.generateRefreshToken(user.getUsername());
+            String refreshToken = createRefreshSession(user.getUsername());
 
                 //returning access token in body and refresh token in secure HttpOnly cookie
                 return ResponseEntity.ok()
@@ -200,7 +211,7 @@ public class AuthController {
             // Generate short-lived access token and long-lived refresh token
             // User is automatically logged in after registration
             String accessToken = tokenProvider.generateAccessToken(savedUser.getUsername());
-            String refreshToken = tokenProvider.generateRefreshToken(savedUser.getUsername());
+            String refreshToken = createRefreshSession(savedUser.getUsername());
 
                 //returning access token in body and refresh token in secure HttpOnly cookie
             return ResponseEntity.status(HttpStatus.CREATED)
@@ -225,12 +236,20 @@ public class AuthController {
                         .body(new ErrorResponse("Refresh token is required"));
             }
 
-            if (!tokenProvider.validateToken(refreshToken)) {
+                Optional<RefreshSession> sessionOptional = refreshSessionRepository
+                    .findByTokenHash(hashToken(refreshToken));
+                if (sessionOptional.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body(new ErrorResponse("Refresh token is invalid or expired"));
-            }
+                    .body(new ErrorResponse("Refresh token is invalid or revoked"));
+                }
 
-            String username = tokenProvider.getUsernameFromJWT(refreshToken);
+                RefreshSession session = sessionOptional.get();
+                if (session.getRevokedAt() != null || !session.getExpiresAt().isAfter(LocalDateTime.now())) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new ErrorResponse("Refresh token is expired or revoked"));
+                }
+
+            String username = session.getUsername();
             Optional<User> userOptional = userRepository.findByUsername(username);
             if (userOptional.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -238,8 +257,10 @@ public class AuthController {
             }
 
             User user = userOptional.get();
+            session.setRevokedAt(LocalDateTime.now());
+            refreshSessionRepository.save(session);
             String newAccessToken = tokenProvider.generateAccessToken(user.getUsername());
-            String newRefreshToken = tokenProvider.generateRefreshToken(user.getUsername());
+            String newRefreshToken = createRefreshSession(user.getUsername());
 
             return ResponseEntity.ok()
                     .header(HttpHeaders.SET_COOKIE, buildRefreshCookie(newRefreshToken, request).toString())
@@ -251,7 +272,15 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(HttpServletRequest request) {
+    public ResponseEntity<?> logout(
+            @CookieValue(value = REFRESH_COOKIE_NAME, required = false) String refreshToken,
+            HttpServletRequest request) {
+        if (refreshToken != null && !refreshToken.isBlank()) {
+            refreshSessionRepository.findByTokenHash(hashToken(refreshToken)).ifPresent(session -> {
+                session.setRevokedAt(LocalDateTime.now());
+                refreshSessionRepository.save(session);
+            });
+        }
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, clearRefreshCookie(request).toString())
                 .body(new ValidationResponse(true, "Logged out"));
@@ -266,6 +295,33 @@ public class AuthController {
                 .path("/api/v1/auth")
                 .maxAge(REFRESH_TOKEN_MAX_AGE_SECONDS)
                 .build();
+    }
+
+    private String createRefreshSession(String username) {
+        byte[] tokenBytes = new byte[32];
+        SECURE_RANDOM.nextBytes(tokenBytes);
+        String rawToken = Base64.getUrlEncoder().withoutPadding().encodeToString(tokenBytes);
+
+        RefreshSession session = new RefreshSession();
+        session.setTokenHash(hashToken(rawToken));
+        session.setUsername(username);
+        session.setExpiresAt(LocalDateTime.now().plusSeconds(REFRESH_TOKEN_MAX_AGE_SECONDS));
+        refreshSessionRepository.save(session);
+        return rawToken;
+    }
+
+    private String hashToken(String token) {
+        try {
+            byte[] digest = MessageDigest.getInstance("SHA-256")
+                    .digest(token.getBytes(StandardCharsets.UTF_8));
+            StringBuilder hex = new StringBuilder(digest.length * 2);
+            for (byte value : digest) {
+                hex.append(String.format("%02x", value));
+            }
+            return hex.toString();
+        } catch (Exception exception) {
+            throw new IllegalStateException("Unable to hash refresh token", exception);
+        }
     }
 
     private ResponseCookie clearRefreshCookie(HttpServletRequest request) {
