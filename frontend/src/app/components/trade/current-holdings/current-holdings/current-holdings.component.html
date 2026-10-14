@@ -1,19 +1,30 @@
 <div class="current-holdings-container">
     <div class="current-holdings-header">
-        <h3>Current Holdings</h3>
+        <h3>Positions</h3>
     </div>
     <div class="current-holdings-body">
-        <table>
+        <table *ngIf="currentHoldings.length > 0; else noHoldings">
             <thead>
                 <tr>
-                    <th>Ticker</th>
+                    <th>Instrument</th>
                     <th>Shares</th>
                     <th>Price</th>
                     <th>Value</th>
-                    <th>Action</th>
                 </tr>
             </thead>
-            <tbody></tbody>
+            <tbody>
+                <tr *ngFor="let holding of currentHoldings">
+                    <td class="ticker">{{ holding.instrumentSymbol }}</td>
+                    <td class="quantity">{{ holding.quantity }}</td>
+                    <td class="price">{{ holding.currentPrice | currency: 'USD': 'symbol': '1.2-2' }}</td>
+                    <td class="value">{{ holding.totalValue | currency: 'USD': 'symbol': '1.2-2' }}</td>
+                </tr>
+            </tbody>
         </table>
     </div>
+    <ng-template #noHoldings>
+        <div class="no-holdings">
+            <p>No holdings yet. Buy your first shares to see them here.</p>
+        </div>
+    </ng-template>
 </div>

@@ -1,24 +1,26 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '@environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class HoldingService {
-  private apiUrl = 'http://localhost:6767/api/v1/accounts';
+  private apiUrl = `${environment.apiUrl}/holdings`;
+  //private apiUrl = `${environment.apiUrl}/accounts`;
 
   constructor(private http: HttpClient) {}
 
   getAllHoldings(): Observable<any[]> {
+    //const url = `${this.apiUrl}`;
     const url = `${this.apiUrl}/holdings`;
-    console.log('Calling all holdings endpoint:', url);
     return this.http.get<any[]>(url);
   }
 
   getHoldingsByAccountId(accountId: string | number): Observable<any[]> {
-    const url = `${this.apiUrl}/${accountId}/holdings`;
-    console.log('Calling holdings endpoint:', url);
+    const url = `${this.apiUrl}/${encodeURIComponent(accountId)}`;
+    //const url = `${this.apiUrl}/${accountId}/holdings`;
     return this.http.get<any[]>(url);
   }
 }

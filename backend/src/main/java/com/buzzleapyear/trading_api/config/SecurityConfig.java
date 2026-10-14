@@ -1,7 +1,7 @@
 package com.buzzleapyear.trading_api.config;
 
 import java.util.Arrays;
-
+import org.springframework.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,17 +36,26 @@ public class SecurityConfig {
         http.cors(cors -> cors.disable())
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .exceptionHandling(exceptions -> exceptions.authenticationEntryPoint(
+                (request, response, authException) -> response.sendError(HttpStatus.UNAUTHORIZED.value())
+            ))
             .authorizeHttpRequests(authorize -> authorize
                 // PUBLIC 
                 .requestMatchers(HttpMethod.POST, "/api/v1/auth/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/v1/auth/validate").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/auth/validate").authenticated()
+
+                .requestMatchers("/error").permitAll()
+
+                // AUTHENTICATED ENDPOINTS
+                .requestMatchers("/api/v1/accounts/**").authenticated()
+                .requestMatchers("/api/v1/holdings/**").authenticated()
+                .requestMatchers("/api/v1/instruments/**", "/api/v1/quote/**").authenticated()
                 
                 // RESTRICTED (RBAC)
                 .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/v1/test").hasRole("ADMIN")
                 .requestMatchers("/api/v1/analyst/**").hasAnyRole("ADMIN", "ANALYST")
                 .requestMatchers("/api/v1/compliance/**").hasAnyRole("ADMIN", "COMPLIANCE")
-                .requestMatchers("/api/v1/instruments/**", "/api/v1/quote/**").authenticated()
                 .requestMatchers("/api/v1/client/**").hasAnyRole("ADMIN","CLIENT","ANALYST")
                 
                 // HEALTHCHECK (internal only - docker-compose, kubernetes, etc.)
