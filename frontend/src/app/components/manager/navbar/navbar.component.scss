@@ -3,8 +3,8 @@ $border-dark: #1E2D45;
 $color-text: #9aa1ad;
 $bg-dark: #0F1520;
 $color-white: #ffffff;
-$color-success: #10B981;
-$color-error: #EF4444;
+$color-success: #00D492;
+$color-error: #FB2C36;
 $color-rocket: #3B82F6;
 $color-rocket-dark: #51A2FF;
 $text-color: #62748E;
@@ -150,6 +150,9 @@ header {
   }
 
   .tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
     padding: $padding-sm 1rem;
     text-decoration: none;
     color: $color-text;
@@ -170,6 +173,23 @@ header {
       color: $color-white;
     }
   }
+}
+
+.dispute-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding: 0 0.25rem;
+  box-sizing: border-box;
+  border-radius: 50%;
+  background-color: $color-error;
+  color: $color-white;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1;
+  animation: pulse 2s ease-in-out infinite;
 }
 
 .navbar-right {
@@ -227,20 +247,29 @@ header {
 
   &.open {
     background-color: $color-success;
-    animation: blink 2s infinite;
+    animation: pulse 2s ease-in-out infinite;
   }
 
   &.closed {
     background-color: $color-error;
   }
+
+  &.dispute {
+    background-color: $color-error;
+    animation: pulse 2s ease-in-out infinite;
+  }
 }
 
-@keyframes blink {
-  0%, 50% {
+@keyframes pulse {
+  0%, 100% {
     opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba($color-error, 0);
   }
-  51%, 100% {
-    opacity: 0.3;
+  50% {
+    opacity: 0.35;
+    transform: scale(1.08);
+    box-shadow: 0 0 0 0.25rem rgba($color-error, 0.18);
   }
 }
 
@@ -253,17 +282,34 @@ header {
 }
 
 .navbar-bottom-divider {
-  width: 100%;
+  position: relative;
+  display: flex;
   background-color: $bg-dark;
   padding: 0.5rem 1rem;
   margin-bottom: 2rem;
   border-bottom: $border-width solid $border-dark;
+  font-family: 'DM Mono', monospace;
 }
 
 .navbar-bottom-divider-content {
   display: block;
-  max-width: 85%;
+  width: 85%;
+  box-sizing: border-box;
   margin: 0 auto;
+  text-align: left;
   color: $text-color;
-  font-family: 'DM Mono', monospace;
+}
+
+.navbar-bottom-right {
+  position: absolute;
+  right: 7.5%;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  min-width: 0;
+  flex: 0 1 auto;
+  flex-wrap: wrap;
+  color: $color-error;
 }

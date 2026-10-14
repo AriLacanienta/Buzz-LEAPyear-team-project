@@ -26,6 +26,12 @@ export class NavbarComponent {
     }))
   );
 
+  disputeStatusDisplay$ = this.isMarketOpen$.pipe(
+    map(isDisputeOpen => ({
+      class: isDisputeOpen ? 'dispute' : ''
+    }))
+  );
+
   constructor(
     private marketStatusService: MarketStatusService,
     private authService: AuthService,
@@ -47,6 +53,8 @@ export class NavbarComponent {
       return 'FULL TRADE AUDIT LOG - ALL ORDERS';
     } else if (route.includes('/manager/disputes')) {
       return 'DISPUTE QUEUE - REQUIRES MANAGER REVIEW';
+    } else if (route.includes('/manager/clients')) {
+      return 'CLIENT LOOKUP - DISPUTE RESOLUTION CENTER';
     } else {
       return 'DAILY OPERATIONS SUMMARY';
     }

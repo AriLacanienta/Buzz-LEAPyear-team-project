@@ -17,7 +17,11 @@
       </a>
       <a routerLink="/manager" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="tab">Overview</a>
       <a routerLink="/manager/trade-log" routerLinkActive="active" class="tab">Trade Log</a>
-      <a routerLink="/manager/disputes" routerLinkActive="active" class="tab">Disputes</a>
+      <a routerLink="/manager/clients" routerLinkActive="active" class="tab">Clients</a>
+      <a routerLink="/manager/disputes" routerLinkActive="active" class="tab disputes-tab">
+        <span>Disputes</span>
+        <span class="dispute-badge" [class.dispute]="(disputeStatusDisplay$ | async)?.class === 'dispute'">2</span>
+      </a>
     </nav>
 
     <div class="navbar-right">
@@ -41,4 +45,8 @@
   <span class="navbar-bottom-divider-content">
     {{ getPageDescription() }}
   </span>
+  <div class="navbar-bottom-right">
+    <span class="status-dot" [class.dispute]="(disputeStatusDisplay$ | async)?.class === 'dispute'"></span>
+    2 critical disputes require attention
+  </div>
 </div>
