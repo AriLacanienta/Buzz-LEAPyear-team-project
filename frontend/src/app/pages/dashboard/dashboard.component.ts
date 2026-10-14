@@ -64,6 +64,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   // Portfolio balance chart tracking
   Highcharts: typeof Highcharts = Highcharts;
   portfolioChartOptions: Highcharts.Options = {};
+  updateFlag = false;
   private portfolioBalanceHistory: number[] = [];
   totalPortfolioValue: number = 0;
   private currentPortfolioId: string = 'all-holdings';
@@ -79,6 +80,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
  
 
   ngOnInit(): void {
+    this.portfolioChartOptions = {
+      chart: { type: 'areaspline', backgroundColor: 'transparent', height: 300 },
+      series: [{ type: 'areaspline', data: [] }],
+      credits: { enabled: false }
+    };
+
     this.accountService.getMyAccount().subscribe({
       next: (account) => {
         this.accountId = Number(account.accountId);
@@ -98,13 +105,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
       this.isLoading = false;
       return;
     }
-    // Initialize empty chart options immediately
-    this.portfolioChartOptions = {
-      chart: { type: 'areaspline', backgroundColor: 'transparent', height: 300 },
-      series: [{ type: 'areaspline' as any, data: [] }],
-      credits: { enabled: false }
-    };
-
     this.refreshSubscription = interval(5000)
       .pipe(
         startWith(0),
@@ -114,7 +114,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         next: (response: any) => {
           this.holdings = (Array.isArray(response) ? response : [])
             .sort((a: any, b: any) => b.totalValue - a.totalValue)
-            .slice(0, 5);
+            .slice(0, 10);
 
           // Calculate total portfolio value from ALL holdings, not just top 5
           const allHoldings = Array.isArray(response) ? response : [];
@@ -328,6 +328,8 @@ trackBySymbol(index: number, item: any): string {
       }],
       credits: { enabled: false }
     };
+
+    this.updateFlag = true;
 
     // Force change detection after chart options are created
     this.cdr.detectChanges();

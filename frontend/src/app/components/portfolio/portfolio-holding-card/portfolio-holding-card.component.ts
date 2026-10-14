@@ -18,6 +18,7 @@ export class PortfolioHoldingCardComponent implements OnDestroy, OnChanges {
 
   Highcharts: typeof Highcharts = Highcharts;
   chartOptions: Highcharts.Options = {};
+  updateFlag = false;
   
   // Color palette for visual differentiation across multiple cards in portfolio
   private colors = ['#6366F1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
@@ -33,11 +34,11 @@ export class PortfolioHoldingCardComponent implements OnDestroy, OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['holding']) {
-      const currentPrice = this.holding?.currentPrice || 0;
+      const currentValue = this.holding?.totalValue || 0;
       const targetSymbol = this.holding?.instrumentSymbol || '';
 
-      if (currentPrice > 0 && targetSymbol) {
-        const parsedPrice = Number(currentPrice.toFixed(2));
+      if (currentValue > 0 && targetSymbol) {
+        const parsedValue = Number(currentValue.toFixed(2));
 
         if (this.priceHistory.length === 0 || this.currentSymbol !== targetSymbol) {
           this.currentSymbol = targetSymbol;
@@ -46,16 +47,16 @@ export class PortfolioHoldingCardComponent implements OnDestroy, OnChanges {
           const baseVariations = [-4, -2, -3.5, 1, -1.5, 0];
 
           this.priceHistory = baseVariations.map(variant => {
-            const simulatedValue = parsedPrice * (1 + (variant * randomFactor));
+            const simulatedValue = parsedValue * (1 + (variant * randomFactor));
             return Number(simulatedValue.toFixed(2));
           });
 
-          this.priceHistory[this.priceHistory.length - 1] = parsedPrice;
+          this.priceHistory[this.priceHistory.length - 1] = parsedValue;
           this.generateChartOptions();
         } else {
           const lastSavedPrice = this.priceHistory[this.priceHistory.length - 1];
-          if (parsedPrice !== lastSavedPrice) {
-            this.priceHistory.push(parsedPrice);
+          if (parsedValue !== lastSavedPrice) {
+            this.priceHistory.push(parsedValue);
 
             if (this.priceHistory.length > 8) {
               this.priceHistory.shift();
@@ -157,6 +158,8 @@ export class PortfolioHoldingCardComponent implements OnDestroy, OnChanges {
       }],
       credits: { enabled: false }
     };
+
+    this.updateFlag = !this.updateFlag;
   }
 
   formatPrice(price: number): string {

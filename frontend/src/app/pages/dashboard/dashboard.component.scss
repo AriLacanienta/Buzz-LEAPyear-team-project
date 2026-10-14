@@ -18,11 +18,11 @@ main {
 
   .portfolio-label {
     margin: 0 0 0.5rem 0;
-    font-size: 0.75rem;
+    font-size: 1rem;
     font-weight: 500;
     color: #62748E;
     text-transform: uppercase;
-    letter-spacing: 0.15em;
+    letter-spacing: 0.14em;
   }
 
   h2 {
@@ -33,46 +33,45 @@ main {
   }
 
   .total-balance {
-    margin-bottom: 1.5rem;
     display: flex;
-    flex-direction: column;
+    align-items: baseline;
     gap: 0.75rem;
+    margin-bottom: 0;
 
     .value {
-      font-size: 2rem;
-      font-weight: 700;
-      color: #fafafc;
-      letter-spacing: -0.02em;
+      font-family: 'DM Mono', monospace;
+      font-size: 2.25rem;
+      font-weight: 500;
+      color: #ffffff;
+      letter-spacing: 0;
     }
 
-    .portfolio-stats {
-      display: flex;
-      flex-direction: column;
-      gap: 0.175rem;
-
-      .stat {
-        font-size: 0.875rem;
-        font-weight: 500;
-
-        &.today-change {
-          &.negative {
-            color: #ef4444;
-          }
-          &.positive {
-            color: #10b981;
-          }
-        }
-
-        &.all-time-change {
-          &.negative {
-            color: #ef4444;
-          }
-          &.positive {
-            color: #10b981;
-          }
-        }
-      }
+    .today-change {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.875rem;
+      font-weight: 500;
     }
+  }
+
+  .portfolio-stats {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 0.5rem;
+
+    .all-time-change {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+  }
+
+  .positive {
+    color: #10b981;
+  }
+
+  .negative {
+    color: #ef4444;
   }
 
   .chart-wrapper {

@@ -33,6 +33,10 @@ export class PortfolioHoldingsContainerComponent implements OnInit, OnDestroy, O
 
   ngOnDestroy() {}
 
+  trackBySymbol(index: number, holding: any): string {
+    return holding?.instrumentSymbol || String(index);
+  }
+
   private calculateVisibleHoldings() {
     const availableWidth = window.innerWidth * 0.85;
     const cardWidth = 216;
@@ -41,7 +45,7 @@ export class PortfolioHoldingsContainerComponent implements OnInit, OnDestroy, O
     
     const maxCards = Math.floor(availableWidth / cardWithGap);
     
-    const cappedMaxCards = Math.min(maxCards, 6);
+    const cappedMaxCards = Math.min(maxCards, 11);
     const visibleCount = Math.max(cappedMaxCards, 1);
     
     this.visibleHoldings = this.holdings.slice(0, visibleCount);

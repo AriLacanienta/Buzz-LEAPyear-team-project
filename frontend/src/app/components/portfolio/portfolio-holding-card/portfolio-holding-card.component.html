@@ -1,4 +1,4 @@
-<mat-card class="holding-card" *ngIf="index < 6">
+<mat-card class="holding-card" *ngIf="index < 11">
   <mat-card-content>
     <div class="card-header">
       <div class="symbol-info">
@@ -14,7 +14,9 @@
     <div class="chart-container">
       <highcharts-chart 
         [Highcharts]="Highcharts"
-        [options]="chartOptions">
+        [options]="chartOptions"
+        [oneToOne]="true"
+        [(update)]="updateFlag">
       </highcharts-chart>
     </div>
 
