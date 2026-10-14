@@ -40,4 +40,15 @@ export class NavbarComponent {
   getAppNameColor(word: string): string {
     return word.toLowerCase() === 'buzz' ? 'white' : '#3B82F6';
   }
+
+  getPageDescription(): string {
+    const route = this.router.url;
+    if (route.includes('/manager/trade-log')) {
+      return 'FULL TRADE AUDIT LOG - ALL ORDERS';
+    } else if (route.includes('/manager/disputes')) {
+      return 'DISPUTE QUEUE - REQUIRES MANAGER REVIEW';
+    } else {
+      return 'DAILY OPERATIONS SUMMARY';
+    }
+  }
 }

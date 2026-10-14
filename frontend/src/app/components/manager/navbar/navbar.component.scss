@@ -7,6 +7,7 @@ $color-success: #10B981;
 $color-error: #EF4444;
 $color-rocket: #3B82F6;
 $color-rocket-dark: #51A2FF;
+$text-color: #62748E;
 
 // Spacing Variables
 $padding-xs: 0.25rem;
@@ -18,7 +19,7 @@ $spacing-xs: 0.25rem;
 $spacing-sm: 0.5rem;
 $spacing-md: 1rem;
 $spacing-lg: 1.5rem;
-$spacing-xl: 1.25rem;
+$spacing-xl: 1.75rem;
 
 // Size Variables
 $max-width: 95%;
@@ -39,8 +40,8 @@ header {
   justify-content: space-between;
   padding: $padding-lg $padding-xl;
   border-bottom: $border-width solid $border-dark;
-  margin-bottom: $spacing-lg;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
 
   h1 {
     margin: 0;
@@ -58,6 +59,8 @@ header {
   display: flex;
   align-items: center;
   width: 100%;
+  min-width: 0;
+  flex-wrap: wrap;
   max-width: $max-width;
   margin: 0 auto;
 }
@@ -112,7 +115,9 @@ header {
   gap: clamp(0.025rem, 0.1vw, 0.1rem);
   align-items: center;
   padding-left: $spacing-sm;
-  flex: auto;
+  flex: 1 1 auto;
+  min-width: 0;
+  flex-wrap: wrap;
 
   .account-tab {
     display: flex;
@@ -137,6 +142,10 @@ header {
     .account-name {
       font-weight: $font-weight-normal;
       color: $color-white;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
   }
 
@@ -168,7 +177,33 @@ header {
   display: flex;
   align-items: center;
   gap: $spacing-md;
+  min-width: 0;
+  flex: 0 1 auto;
+  flex-wrap: wrap;
 }
+
+.logout-btn {
+    padding: 0.3rem 1rem;
+    background-color: transparent;
+    color: #9aa1ad;
+    border: 1px solid #1E2D45;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    margin-right: 0.5rem;
+
+    &:hover {
+      background-color: #0F1520;
+      color: #ffffff;
+    }
+
+    &:active {
+      border-color: #ffffff;
+      background-color: #1E2D45;
+    }
+  }
 
 .market-info {
   display: flex;
@@ -181,6 +216,7 @@ header {
   display: flex;
   align-items: center;
   gap: $spacing-xs;
+  min-width: 0;
 }
 
 .status-dot {
@@ -211,4 +247,23 @@ header {
 .navbar-date {
   color: $color-text;
   font-weight: $font-weight-normal;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.navbar-bottom-divider {
+  width: 100%;
+  background-color: $bg-dark;
+  padding: 0.5rem 1rem;
+  margin-bottom: 2rem;
+  border-bottom: $border-width solid $border-dark;
+}
+
+.navbar-bottom-divider-content {
+  display: block;
+  max-width: 85%;
+  margin: 0 auto;
+  color: $text-color;
+  font-family: 'DM Mono', monospace;
 }
