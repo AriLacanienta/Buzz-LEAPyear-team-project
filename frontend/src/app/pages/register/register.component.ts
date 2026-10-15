@@ -47,7 +47,6 @@ export class RegisterComponent {
     this.authService.register(username, email, firstName, lastName, password).subscribe(
       (response) => {
         this.loading = false;
-        console.log('Registration successful!', response);
 
         const landingPage = this.authService.hasRole('MANAGER')
           ? '/admin'

@@ -7,11 +7,15 @@ import com.buzzleapyear.trading_api.entity.Role;
 import com.buzzleapyear.trading_api.entity.User;
 import com.buzzleapyear.trading_api.entity.UserRole;
 import com.buzzleapyear.trading_api.repository.RoleRepository;
+import com.buzzleapyear.trading_api.entity.RefreshSession;
+import com.buzzleapyear.trading_api.repository.RefreshSessionRepository;
 import com.buzzleapyear.trading_api.repository.UserRepository;
 import com.buzzleapyear.trading_api.security.JwtTokenProvider;
 import com.buzzleapyear.trading_api.repository.AccountRepository;
 import com.buzzleapyear.trading_api.repository.ClientRepository;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -19,8 +23,14 @@ import com.buzzleapyear.trading_api.entity.Account;
 import com.buzzleapyear.trading_api.entity.Client;
 
 import java.math.BigDecimal;
+import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.servlet.http.HttpServletRequest;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Base64;
 import java.util.Optional;
 
 /**
@@ -28,6 +38,7 @@ import java.util.Optional;
  Endpoints:
  * POST /api/auth/login - Login with email/password, get JWT token
  * POST /api/auth/register - Register new user, get JWT token
+ * POST /api/auth/refresh - Exchange refresh token for new tokens
  * GET /api/auth/validate - Validate JWT token
  */
 @RestController
@@ -35,7 +46,14 @@ import java.util.Optional;
 //how long the browser should cache the preflight response (seconds)
 public class AuthController {
 
+    private static final String REFRESH_COOKIE_NAME = "refresh_token";
+    private static final long REFRESH_TOKEN_MAX_AGE_SECONDS = 7 * 24 * 60 * 60;
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+
     private UserRepository userRepository;
+
+    @Autowired
+    private RefreshSessionRepository refreshSessionRepository;
 
     private ClientRepository clientRepository;
 
@@ -82,7 +100,7 @@ public class AuthController {
      * }
      */
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request) {
         try {
             // Finding user by email in database
             Optional<User> userOptional = userRepository.findByEmail(loginRequest.getEmail());
@@ -102,13 +120,16 @@ public class AuthController {
                         .body(new ErrorResponse("Invalid email or password"));
             }
 
-            // Generating JWT token
-            // The token contains the username and will expire in 24 hours
-            String token = tokenProvider.generateToken(user.getUsername());
+            // Generate short-lived access token and long-lived refresh token
+                String accessToken = tokenProvider.generateAccessToken(
+                    user.getUsername(), user.getTokenVersion());
+            String refreshToken = createRefreshSession(user.getUsername());
 
-            // Returning token in response
-                return ResponseEntity.ok(new AuthResponse(
-                    token,
+                //returning access token in body and refresh token in secure HttpOnly cookie
+                    return ResponseEntity.ok()
+                    .header(HttpHeaders.SET_COOKIE, buildRefreshCookie(refreshToken, request).toString())
+                    .body(new AuthResponse(
+                    accessToken, null,
                     user.getUsername(),
                     user.getEmail(),
                     getRoleNames(user)
@@ -144,7 +165,7 @@ public class AuthController {
      * }
      */
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegistrationRequest registrationRequest) {
+    public ResponseEntity<?> register(@RequestBody RegistrationRequest registrationRequest, HttpServletRequest request) {
         try {
             //REGISTERING
             // Check if username already exists
@@ -191,14 +212,17 @@ public class AuthController {
             account.setCashAvailable(new BigDecimal("10000.00"));
             accountRepository.save(account);
 
-            // Generating JWT token
+            // Generate short-lived access token and long-lived refresh token
             // User is automatically logged in after registration
-            String token = tokenProvider.generateToken(savedUser.getUsername());
+                String accessToken = tokenProvider.generateAccessToken(
+                    savedUser.getUsername(), savedUser.getTokenVersion());
+            String refreshToken = createRefreshSession(savedUser.getUsername());
 
-            // Returning token with 201 Created status
+                //returning access token in body and refresh token in secure HttpOnly cookie
             return ResponseEntity.status(HttpStatus.CREATED)
+                    .header(HttpHeaders.SET_COOKIE, buildRefreshCookie(refreshToken, request).toString())
                     .body(new AuthResponse(
-                        token,
+                        accessToken, null,
                         savedUser.getUsername(),
                         savedUser.getEmail(),
                         getRoleNames(savedUser)
@@ -209,6 +233,137 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ErrorResponse("Registration failed: " + e.getMessage()));
         }
+    }
+    //new refresh endpoint
+    //POST /api/auth/refresh
+    //Exchange a valid refresh cookie for a new access token
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refreshToken(@CookieValue(value = REFRESH_COOKIE_NAME, required = false) String refreshToken,
+                                          HttpServletRequest request) {
+        try {
+            if (refreshToken == null || refreshToken.isBlank()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(new ErrorResponse("Refresh token is required"));
+            }
+
+                Optional<RefreshSession> sessionOptional = refreshSessionRepository
+                    .findByTokenHash(hashToken(refreshToken));
+                if (sessionOptional.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new ErrorResponse("Refresh token is invalid or revoked"));
+                }
+
+                RefreshSession session = sessionOptional.get();
+                if (session.getRevokedAt() != null || !session.getExpiresAt().isAfter(LocalDateTime.now())) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new ErrorResponse("Refresh token is expired or revoked"));
+                }
+
+            String username = session.getUsername();
+            Optional<User> userOptional = userRepository.findByUsername(username);
+            if (userOptional.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(new ErrorResponse("User not found for refresh token"));
+            }
+
+            User user = userOptional.get();
+            session.setRevokedAt(LocalDateTime.now());
+            refreshSessionRepository.save(session);
+            String newAccessToken = tokenProvider.generateAccessToken(
+                    user.getUsername(), user.getTokenVersion());
+            String newRefreshToken = createRefreshSession(user.getUsername());
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.SET_COOKIE, buildRefreshCookie(newRefreshToken, request).toString())
+                    .body(new AuthResponse(newAccessToken, null, user.getUsername(), user.getEmail()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new ErrorResponse("Refresh failed: " + e.getMessage()));
+        }
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(
+            @CookieValue(value = REFRESH_COOKIE_NAME, required = false) String refreshToken,
+            HttpServletRequest request) {
+        String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
+        if (authorization != null && authorization.startsWith("Bearer ")) {
+            String accessToken = authorization.substring("Bearer ".length());
+            if (tokenProvider.validateToken(accessToken)) {
+                userRepository.findByUsername(tokenProvider.getUsernameFromJWT(accessToken))
+                        .ifPresent(user -> {
+                            user.revokeAccessTokens();
+                            userRepository.save(user);
+                        });
+            }
+        }
+
+        if (refreshToken != null && !refreshToken.isBlank()) {
+            refreshSessionRepository.findByTokenHash(hashToken(refreshToken)).ifPresent(session -> {
+                session.setRevokedAt(LocalDateTime.now());
+                refreshSessionRepository.save(session);
+            });
+        }
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, clearRefreshCookie(request).toString())
+                .body(new ValidationResponse(true, "Logged out"));
+    }
+
+    private ResponseCookie buildRefreshCookie(String refreshToken, HttpServletRequest request) {
+        boolean secure = isSecureRequest(request);
+        return ResponseCookie.from(REFRESH_COOKIE_NAME, refreshToken)
+                .httpOnly(true)
+                .secure(secure)
+                .sameSite("Strict")
+                .path("/api/v1/auth")
+                .maxAge(REFRESH_TOKEN_MAX_AGE_SECONDS)
+                .build();
+    }
+
+    private String createRefreshSession(String username) {
+        byte[] tokenBytes = new byte[32];
+        SECURE_RANDOM.nextBytes(tokenBytes);
+        String rawToken = Base64.getUrlEncoder().withoutPadding().encodeToString(tokenBytes);
+
+        RefreshSession session = new RefreshSession();
+        session.setTokenHash(hashToken(rawToken));
+        session.setUsername(username);
+        session.setExpiresAt(LocalDateTime.now().plusSeconds(REFRESH_TOKEN_MAX_AGE_SECONDS));
+        refreshSessionRepository.save(session);
+        return rawToken;
+    }
+
+    private String hashToken(String token) {
+        try {
+            byte[] digest = MessageDigest.getInstance("SHA-256")
+                    .digest(token.getBytes(StandardCharsets.UTF_8));
+            StringBuilder hex = new StringBuilder(digest.length * 2);
+            for (byte value : digest) {
+                hex.append(String.format("%02x", value));
+            }
+            return hex.toString();
+        } catch (Exception exception) {
+            throw new IllegalStateException("Unable to hash refresh token", exception);
+        }
+    }
+
+    private ResponseCookie clearRefreshCookie(HttpServletRequest request) {
+        boolean secure = isSecureRequest(request);
+        return ResponseCookie.from(REFRESH_COOKIE_NAME, "")
+                .httpOnly(true)
+                .secure(secure)
+                .sameSite("Strict")
+                .path("/api/v1/auth")
+                .maxAge(0)
+                .build();
+    }
+
+    private boolean isSecureRequest(HttpServletRequest request) {
+        if (request.isSecure()) {
+            return true;
+        }
+        String forwardedProto = request.getHeader("X-Forwarded-Proto");
+        return forwardedProto != null && forwardedProto.equalsIgnoreCase("https");
     }
 
     /**
@@ -235,12 +390,12 @@ public class AuthController {
             }
 
             //Bearer tells the server the token that follows is a JWT token used for authentication
-            String token = bearerToken.substring(7);
-
+            String accessToken = bearerToken.substring(7);
+            
             // token validation
-            if (tokenProvider.validateToken(token)) {
+            if (tokenProvider.validateToken(accessToken)) {
                 // If valid, extract username from token
-                String username = tokenProvider.getUsernameFromJWT(token);
+                String username = tokenProvider.getUsernameFromJWT(accessToken);
                 return ResponseEntity.ok(new ValidationResponse(true, username));
             } else {
                 // If invalid (expired, signature mismatch, etc)

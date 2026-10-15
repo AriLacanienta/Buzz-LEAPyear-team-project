@@ -5,6 +5,8 @@ import java.util.List;
 
 public class AuthResponse {
     private String token;
+    private String refreshToken;
+    private String accessToken;
     private String type = "Bearer";
     private String username;
     private String email;
@@ -12,14 +14,31 @@ public class AuthResponse {
 
     public AuthResponse() {}
 
-    public AuthResponse(String token, String username, String email) {
-        this.token = token;
+    public AuthResponse(String accessToken, String refreshToken, String username, String email) {
+        this.accessToken = accessToken;
+        this.refreshToken = refreshToken;
+        this.token = accessToken;
         this.username = username;
         this.email = email;
     }
 
+    public AuthResponse(String accessToken, String refreshToken, String username,
+                        String email, List<String> roles) {
+        this(accessToken, refreshToken, username, email);
+        this.roles = roles;
+    }
+    public String getAccessToken() {
+        return accessToken;
+    }
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+
     public AuthResponse(String token, String username, String email, List<String> roles) {
-        this(token, username, email);
+        this.token = token;
+        this.accessToken = token;
+        this.username = username;
+        this.email = email;
         this.roles = roles;
     }
 
