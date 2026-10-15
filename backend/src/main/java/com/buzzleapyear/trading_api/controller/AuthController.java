@@ -32,7 +32,6 @@ import java.util.Optional;
 //how long the browser should cache the preflight response (seconds)
 public class AuthController {
 
-    @Autowired
     private UserRepository userRepository;
 
     @Autowired
@@ -40,12 +39,23 @@ public class AuthController {
 
     @Autowired
     private AccountRepository accountRepository;
+    private RoleRepository roleRepository;
 
-    @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @Autowired
     private JwtTokenProvider tokenProvider;
+
+    public AuthController(
+        UserRepository userRepository,
+        RoleRepository roleRepository,
+        PasswordEncoder passwordEncoder,
+        JwtTokenProvider tokenProvider
+    ) {
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.tokenProvider = tokenProvider;
+    }
 /**
      * POST /api/auth/login
      * 
@@ -223,6 +233,13 @@ public class AuthController {
                     .body(new ValidationResponse(false, "Token validation failed"));
         }
     }
+
+    private List<String> getRoleNames(User user) {
+        return user.getUserRoles().stream()
+                .map(userRole -> userRole.getRole().getRoleName().name())
+                .toList();
+    }
+
     //returning error messages
     public static class ErrorResponse {
         private String message;
