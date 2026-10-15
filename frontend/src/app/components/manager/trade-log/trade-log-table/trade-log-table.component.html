@@ -1,0 +1,59 @@
+<div class="trade-log">
+  <h2>Trade Log</h2>
+
+  <p *ngIf="loading">Loading trades...</p>
+  <p *ngIf="error">Unable to load trades.</p>
+
+  <div class="table-wrapper" *ngIf="!loading && !error">
+    <table *ngIf="trades.length > 0; else emptyState">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Client</th>
+          <th>Instrument</th>
+          <th>Side</th>
+          <th>Quantity</th>
+          <th>Price</th>
+          <th>Value</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let trade of trades; trackBy: trackByTradeId">
+          <td>{{ trade.tradeDate | date:'MMM d, yyyy HH:mm' }}</td>
+          <td>
+            {{ trade.clientName }}
+            <small>{{ trade.clientEmail }}</small>
+          </td>
+          <td>{{ trade.instrumentSymbol }}</td>
+          <td>{{ trade.side }}</td>
+          <td>{{ trade.quantity }}</td>
+          <td>{{ trade.price | currency:trade.currency }}</td>
+          <td>{{ trade.value | currency:trade.currency }}</td>
+          <td [title]="trade.statusReason ?? ''">
+            {{ trade.status ?? 'UNKNOWN' }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <ng-template #emptyState>
+      <p>No trades found.</p>
+    </ng-template>
+  </div>
+
+  <div class="pagination" *ngIf="totalElements > 0">
+    <button (click)="previousPage()" [disabled]="pageIndex === 0">
+      Previous
+    </button>
+
+    <span>Page {{ pageIndex + 1 }} of {{ totalPages }}</span>
+
+    <button
+      (click)="nextPage()"
+      [disabled]="pageIndex + 1 >= totalPages">
+      Next
+    </button>
+  </div>
+</div>
