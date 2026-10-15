@@ -25,6 +25,8 @@ import com.buzzleapyear.trading_api.dto.RegistrationRequest;
 import com.buzzleapyear.trading_api.entity.Role;
 import com.buzzleapyear.trading_api.entity.User;
 import com.buzzleapyear.trading_api.entity.UserRole;
+import com.buzzleapyear.trading_api.repository.AccountRepository;
+import com.buzzleapyear.trading_api.repository.ClientRepository;
 import com.buzzleapyear.trading_api.repository.RoleRepository;
 import com.buzzleapyear.trading_api.repository.AccountRepository;
 import com.buzzleapyear.trading_api.repository.ClientRepository;
@@ -33,6 +35,12 @@ import com.buzzleapyear.trading_api.repository.UserRepository;
 
 @ExtendWith(MockitoExtension.class)
 class AuthRoleTests {
+
+    @Mock
+    private AccountRepository accountRepository;
+
+    @Mock
+    private ClientRepository clientRepository;
 
     @Mock
     private UserRepository userRepository;

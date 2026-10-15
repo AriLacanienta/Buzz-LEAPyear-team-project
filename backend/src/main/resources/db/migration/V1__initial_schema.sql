@@ -132,7 +132,7 @@ CREATE TABLE trade_orders (
 CREATE TABLE trade_order_status (
     status_id BIGSERIAL PRIMARY KEY,
     trade_order_id BIGINT NOT NULL,
-    status VARCHAR(50) NOT NULL CHECK (status IN ('SUBMITTED', 'VALIDATED', 'FILLED', 'REJECTED')),
+    status VARCHAR(50) NOT NULL CHECK (status IN ('SUBMITTED', 'ACCEPTED', 'FILLED', 'REJECTED')),
     time_updated TIMESTAMP NOT NULL,
     reason_text VARCHAR(500),
     CONSTRAINT fk_trade_order_status_trade_order_id FOREIGN KEY (trade_order_id) REFERENCES trade_orders(trade_order_id) ON DELETE CASCADE

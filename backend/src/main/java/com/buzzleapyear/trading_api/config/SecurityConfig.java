@@ -35,7 +35,8 @@ public class SecurityConfig {
         JwtAuthenticationFilter jwtAuthenticationFilter
     ) {
         http.cors(cors -> cors.disable())
-            // .csrf(csrf -> csrf.disable())
+            // Using stateless JWTs
+            .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .exceptionHandling(exceptions -> exceptions.authenticationEntryPoint(
                 (request, response, authException) -> response.sendError(HttpStatus.UNAUTHORIZED.value())
@@ -47,7 +48,6 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/v1/auth/**").permitAll()
 
                 // RESTRICTED (RBAC)
-
                 .requestMatchers("/api/v1/accounts/**").authenticated()
                 .requestMatchers("/api/v1/holdings/**").authenticated()
                 .requestMatchers("/api/v1/instruments/**").authenticated()
