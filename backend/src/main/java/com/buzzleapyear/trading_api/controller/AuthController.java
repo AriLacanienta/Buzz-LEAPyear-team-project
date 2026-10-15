@@ -9,7 +9,6 @@ import com.buzzleapyear.trading_api.entity.UserRole;
 import com.buzzleapyear.trading_api.repository.RoleRepository;
 import com.buzzleapyear.trading_api.repository.UserRepository;
 import com.buzzleapyear.trading_api.security.JwtTokenProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * This Authentication Controller handles login, registration, and token validation
@@ -32,17 +30,25 @@ import java.util.stream.Collectors;
 //how long the browser should cache the preflight response (seconds)
 public class AuthController {
 
-    @Autowired
     private UserRepository userRepository;
 
-    @Autowired
     private RoleRepository roleRepository;
 
-    @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @Autowired
     private JwtTokenProvider tokenProvider;
+
+    public AuthController(
+        UserRepository userRepository,
+        RoleRepository roleRepository,
+        PasswordEncoder passwordEncoder,
+        JwtTokenProvider tokenProvider
+    ) {
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.tokenProvider = tokenProvider;
+    }
 /**
      * POST /api/auth/login
      *
@@ -227,7 +233,7 @@ public class AuthController {
     private List<String> getRoleNames(User user) {
         return user.getUserRoles().stream()
                 .map(userRole -> userRole.getRole().getRoleName().name())
-                .collect(Collectors.toList());
+                .toList();
     }
 
     //returning error messages

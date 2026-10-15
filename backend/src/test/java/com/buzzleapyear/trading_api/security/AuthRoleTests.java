@@ -1,14 +1,13 @@
 package com.buzzleapyear.trading_api.security;
 
-import com.buzzleapyear.trading_api.controller.AuthController;
-import com.buzzleapyear.trading_api.dto.AuthResponse;
-import com.buzzleapyear.trading_api.dto.RegistrationRequest;
-import com.buzzleapyear.trading_api.entity.Role;
-import com.buzzleapyear.trading_api.entity.User;
-import com.buzzleapyear.trading_api.entity.UserRole;
-import com.buzzleapyear.trading_api.repository.RoleRepository;
-import com.buzzleapyear.trading_api.repository.UserRepository;
-import io.jsonwebtoken.Claims;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
+import java.util.List;
+import java.util.Optional;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -18,13 +17,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import com.buzzleapyear.trading_api.controller.AuthController;
+import com.buzzleapyear.trading_api.dto.AuthResponse;
+import com.buzzleapyear.trading_api.dto.RegistrationRequest;
+import com.buzzleapyear.trading_api.entity.Role;
+import com.buzzleapyear.trading_api.entity.User;
+import com.buzzleapyear.trading_api.entity.UserRole;
+import com.buzzleapyear.trading_api.repository.RoleRepository;
+import com.buzzleapyear.trading_api.repository.UserRepository;
 
 @ExtendWith(MockitoExtension.class)
 class AuthRoleTests {

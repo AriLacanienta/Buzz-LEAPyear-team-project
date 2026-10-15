@@ -8,10 +8,11 @@ import lombok.Setter;
 /**
  * UserResponseDto
  */
-@Getter 
-@Setter 
+@Getter
+@Setter
 public class UserResponseDto {
 
+    private Long id;
     private String username;
     private String firstName;
     private String lastName;
@@ -21,17 +22,29 @@ public class UserResponseDto {
     public UserResponseDto(){}
 
     public UserResponseDto(
-            String username, 
-            String firstName, 
-            String lastName, 
-            String email, 
+            Long id,
+            String username,
+            String firstName,
+            String lastName,
+            String email,
             List<String> roles
         ) {
+        this.id = id;
         this.username = username;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.roles = roles;
+    }
+
+    public UserResponseDto(
+            String username,
+            String firstName,
+            String lastName,
+            String email,
+            List<String> roles
+    ) {
+        this(null, username, firstName, lastName, email, roles);
     }
 
 }

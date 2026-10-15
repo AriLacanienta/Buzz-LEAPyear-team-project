@@ -1,6 +1,5 @@
 package com.buzzleapyear.trading_api.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -18,8 +17,9 @@ import com.buzzleapyear.trading_api.security.JwtAuthenticationFilter;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    @Autowired
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
+    private static final String ROLE_ANALYST = "ANALYST";
+    private static final String ROLE_CLIENT = "CLIENT";
+    private static final String ROLE_MANAGER = "MANAGER";
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -27,22 +27,27 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(
+        HttpSecurity http,
+        JwtAuthenticationFilter jwtAuthenticationFilter
+    ) {
         http.cors(cors -> cors.disable())
-            .csrf(csrf -> csrf.disable())
+            // .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authorize -> authorize
                 // PUBLIC
-                .requestMatchers(HttpMethod.POST, "/api/v1/auth/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/auth/validate").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/v1/auth/**").permitAll()
 
                 // RESTRICTED (RBAC)
-                .requestMatchers("/api/v1/admin/**").hasRole("MANAGER")
-                .requestMatchers("/api/v1/test").hasRole("MANAGER")
-                .requestMatchers("/api/v1/analyst/**").hasAnyRole("MANAGER", "ANALYST")
-                .requestMatchers("/api/v1/compliance/**").hasRole("MANAGER")
+                .requestMatchers("/api/v1/admin/**").hasRole(ROLE_MANAGER)
+                .requestMatchers("/api/v1/analyst/**").hasAnyRole(ROLE_MANAGER, ROLE_ANALYST)
+                .requestMatchers("/api/v1/client/**").hasAnyRole(ROLE_MANAGER, ROLE_CLIENT, ROLE_ANALYST)
+                .requestMatchers("/api/v1/compliance/**").hasRole(ROLE_MANAGER)
                 .requestMatchers("/api/v1/instruments/**", "/api/v1/quote/**").authenticated()
-                .requestMatchers("/api/v1/client/**").hasAnyRole("MANAGER", "CLIENT", "ANALYST")
+                .requestMatchers("/api/v1/test").hasRole(ROLE_MANAGER)
+                .requestMatchers("/api/v1/user/allUsers").hasRole(ROLE_MANAGER)
+                .requestMatchers("/api/v1/user/**").authenticated()
 
                 // HEALTHCHECK (internal only - docker-compose, kubernetes, etc.)
                 .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
