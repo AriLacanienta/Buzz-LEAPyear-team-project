@@ -48,16 +48,32 @@ $color-secondary-text: #62748E;
     padding: clamp(0.65rem, 2.5vw, 1rem);
     border-bottom: 0.1rem solid $border-dark;
 
-    h1 {
-      margin: 0;
-      font-size: clamp(0.8rem, 1.5vw, 1.75rem);
-      line-height: 1;
+    .header-accent {
+      width: 0.375rem;
+      height: 1rem;
+      border-radius: 0.25rem;
+      flex-shrink: 0;
+
+      &.top-gainers {
+        background-color: $color-green;
+      }
+
+      &.top-losers {
+        background-color: $color-red;
+      }
+
+      &.watchlist {
+        background-color: $color-blue;
+      }
     }
 
-    h2 {
+    .card-title {
       margin: 0;
-      font-size: clamp(0.8rem, 1.35vw, 1.75rem);
+      font-size: clamp(0.72rem, 1.1vw, 0.9rem);
+      font-weight: $font-weight-semibold;
       color: $color-white;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
     }
   }
 
