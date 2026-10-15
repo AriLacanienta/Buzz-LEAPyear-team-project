@@ -24,6 +24,7 @@ import { HoldingService } from './services/holding.service';
 import { HighchartsChartModule } from 'highcharts-angular';
 import { AnalystDashboardComponent } from './pages/analyst-dashboard/analyst-dashboard.component';
 import { AdminComponent } from './pages/admin/admin.component';
+import { FundsComponent } from './components/trade/funds/funds.component';
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -61,6 +62,7 @@ const routes: Routes = [
     MarketsComponent,
     DashboardComponent,
     AnalystDashboardComponent,
+    FundsComponent,
     HighchartsChartModule
   ],
   providers: [

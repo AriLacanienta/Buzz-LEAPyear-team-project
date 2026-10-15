@@ -13,17 +13,20 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import com.buzzleapyear.trading_api.dto.AccountValueResponseDto;
+import com.buzzleapyear.trading_api.dto.FundsRequestDto;
 import com.buzzleapyear.trading_api.dto.HoldingResponseDto;
 import com.buzzleapyear.trading_api.repository.AccountRepository;
 import java.util.Optional;
 import com.buzzleapyear.trading_api.entity.Account;
 import java.math.BigDecimal;
+import java.util.Locale;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Page;
 import com.buzzleapyear.trading_api.entity.TradeOrder;
 
 @Service
 public class AccountService {
+    private static final BigDecimal MAX_FUNDS_AMOUNT = new BigDecimal("1000000.00");
     private final AccountRepository accountRepository;
     private final HoldingService holdingService;
     private final UserRepository userRepository;
@@ -95,6 +98,34 @@ public class AccountService {
             account.getCashReserved(),
             totalPortfolioValue
         ));
+    }
+
+    @Transactional
+    public void updateFunds(Long accountId, FundsRequestDto request, String username) {
+        if (request == null || request.amount() == null || request.amount().signum() <= 0 || request.amount().scale() > 2) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Amount must be greater than zero");
+        }
+        if (request.amount().compareTo(MAX_FUNDS_AMOUNT) > 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Amount cannot exceed 1000000");
+        }
+
+        Account account = findAccountByIdForUser(accountId, username)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Account not found"));
+        BigDecimal amount = request.amount();
+        String action = request.action() == null ? "" : request.action().toUpperCase(Locale.ROOT);
+
+        if ("ADD".equals(action)) {
+            account.setCashAvailable(account.getCashAvailable().add(amount));
+        } else if ("WITHDRAW".equals(action)) {
+            if (account.getCashAvailable().compareTo(amount) < 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Insufficient available cash");
+            }
+            account.setCashAvailable(account.getCashAvailable().subtract(amount));
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Action must be ADD or WITHDRAW");
+        }
+
+        accountRepository.save(account);
     }
 
     @Transactional(readOnly = true)
