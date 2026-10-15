@@ -163,7 +163,7 @@ public class AuthController {
             Account account = new Account();
             account.setClient(client);
             account.setAccountName(savedUser.getUsername());
-            account.setCashAvailable(new BigDecimal("10000.00"));
+            account.setCashAvailable(BigDecimal.ZERO);
             accountRepository.save(account);
 
             // Generating JWT token
