@@ -300,6 +300,108 @@ $shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
   }
 }
 
+.confirmation-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background-color: rgba(3, 7, 18, 0.72);
+}
+
+.confirmation-dialog {
+  width: min(100%, 24rem);
+  padding: 1.25rem;
+  background-color: $bg-dark;
+  border: 1px solid $border-dark;
+  border-radius: $radius-xl;
+  color: $text-light;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
+
+  h2 {
+    margin: 0;
+    color: $color-white;
+    font-size: 1rem;
+    font-weight: $font-weight-semibold;
+  }
+}
+
+.confirmation-message {
+  margin: 0.5rem 0 1rem;
+  color: $color-slate-300;
+  font-size: $text-xs;
+}
+
+.confirmation-summary {
+  display: grid;
+  gap: 0.625rem;
+  padding: 0.875rem;
+  background-color: #141c2e;
+  border: 1px solid $border-dark;
+  border-radius: $radius-lg;
+  font-size: $text-xs;
+
+  div {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  span {
+    color: $color-slate-500;
+  }
+
+  strong {
+    color: $color-white;
+    font-weight: $font-weight-semibold;
+    text-align: right;
+  }
+}
+
+.confirmation-actions {
+  display: flex;
+  gap: 0.625rem;
+  margin-top: 1rem;
+
+  button {
+    flex: 1;
+    padding: 0.625rem 0.75rem;
+    border: none;
+    border-radius: $radius-lg;
+    color: $color-white;
+    font-family: Inter, sans-serif;
+    font-size: $text-xs;
+    font-weight: $font-weight-semibold;
+    cursor: pointer;
+  }
+}
+
+.cancel-btn {
+  background-color: #1e2d45;
+
+  &:hover {
+    background-color: #2b3d59;
+  }
+}
+
+.confirm-btn {
+  background-color: $color-emerald;
+
+  &:hover {
+    background-color: #059669;
+  }
+
+  &.sell {
+    background-color: $color-red;
+
+    &:hover {
+      background-color: #dc2626;
+    }
+  }
+}
+
 .error-container {
   display: flex;
   align-items: center;

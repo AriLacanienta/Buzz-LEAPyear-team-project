@@ -77,6 +77,39 @@
     </div>
 
     <button class="place-order-btn" [class.sell]="!isBuy" [disabled]="isSubmitting || isNotHeld || isInsufficientCash || successMessage" (click)="onPlaceOrder()">
-        {{ isSubmitting ? 'Submitting...' : (isBuy ? 'Review & Submit Buy' : 'Review & Submit Sell') }}
+        {{ isSubmitting ? 'Submitting...' : (isBuy ? 'BUY' : 'SELL') }}
     </button>
+</div>
+
+<div *ngIf="isConfirmationOpen" class="confirmation-backdrop" (click)="cancelConfirmation()">
+    <section class="confirmation-dialog" role="dialog" aria-modal="true" aria-labelledby="confirmation-title" (click)="$event.stopPropagation()">
+        <h2 id="confirmation-title">Confirm Order</h2>
+        <p class="confirmation-message">Are you sure you want to place this order?</p>
+
+        <div class="confirmation-summary">
+            <div>
+                <span>Action</span>
+                <strong>{{ isBuy ? 'Buy' : 'Sell' }}</strong>
+            </div>
+            <div>
+                <span>Instrument</span>
+                <strong>{{ selectedResult?.instrumentSymbol }}</strong>
+            </div>
+            <div>
+                <span>Price x quantity</span>
+                <strong>{{ indicativePrice != null ? (indicativePrice | currency) : '--' }} x {{ quantity }}</strong>
+            </div>
+            <div>
+                <span>Estimated total</span>
+                <strong>{{ estimatedTotal != null ? (estimatedTotal | currency) : '--' }}</strong>
+            </div>
+        </div>
+
+        <div class="confirmation-actions">
+            <button type="button" class="cancel-btn" (click)="cancelConfirmation()">Cancel</button>
+            <button type="button" class="confirm-btn" [class.sell]="!isBuy" (click)="confirmOrder()">
+                Confirm {{ isBuy ? 'Buy' : 'Sell' }}
+            </button>
+        </div>
+    </section>
 </div>
