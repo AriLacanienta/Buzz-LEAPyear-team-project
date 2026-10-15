@@ -1,0 +1,54 @@
+$bg-darker: #141c2e;
+$border-dark: #1e2d45;
+$color-slate-500: #62748e;
+$color-white: #ffffff;
+$color-primary-dark: #0066cc;
+$radius-sm: 0.5rem;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+$font-weight-normal: 400;
+$text-sm: 0.85rem;
+$text-xs: 0.7rem;
+$spacing-xs: 0.5rem;
+$spacing-md: 1rem;
+$spacing-xs-half: 0.25rem;
+
+.market-tab {
+  padding: $spacing-xs 1.5rem;
+  gap: $spacing-xs;
+  background-color: $bg-darker;
+  border: 0.0625rem;
+  color: $color-slate-500;
+  border-radius: $radius-sm;
+  cursor: pointer;
+  font-size: $text-sm;
+  font-weight: $font-weight-semibold;
+
+  &:hover {
+    color: $color-white;
+  }
+
+  &.active {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: $color-primary-dark;
+    color: $color-white;
+    border-bottom-color: $border-dark;
+    font-weight: $font-weight-bold;
+  }
+}
+
+.currency-code {
+  font-size: $text-xs;
+  color: $color-primary-dark;
+  font-weight: $font-weight-normal;
+  margin-left: $spacing-xs-half;
+}
+
+.market-tabs-label {
+  padding: $spacing-xs;
+}
+
+.market-tabs {
+  display: flex;
+  gap: $spacing-xs;
+}

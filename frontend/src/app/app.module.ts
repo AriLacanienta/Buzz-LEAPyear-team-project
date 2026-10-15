@@ -17,7 +17,11 @@ import { authGuard } from './auth.guard';
 import { AccountComponent } from './pages/account/account.component';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { MatTableModule } from '@angular/material/table';
-import { PortfolioHoldingCardComponent } from './components/portfolio-holding-card/portfolio-holding-card.component';
+import { MatIconModule } from '@angular/material/icon';
+import { PortfolioHoldingCardComponent } from './components/portfolio/portfolio-holding-card/portfolio-holding-card.component';
+//import { PortfolioHoldingCardComponent } from './components/portfolio-holding-card/portfolio-holding-card.component';
+import { HoldingService } from './services/holding.service';
+import { HighchartsChartModule } from 'highcharts-angular';
 import { AdminComponent } from './pages/admin/admin.component';
 
 const routes: Routes = [
@@ -27,7 +31,7 @@ const routes: Routes = [
   { path: 'account', component: AccountComponent, canActivate: [authGuard] },
   { path: 'portfolio', component: DashboardComponent, canActivate: [authGuard] },
   { path: 'trade', component: TradeComponent, canActivate: [authGuard] },
-  { path: 'markets', component: MarketsComponent, canActivate: [authGuard]},
+  { path: 'markets', component: MarketsComponent, canActivate: [authGuard] },
   { path: 'admin', component: AdminComponent, canActivate: [authGuard], data: { roles: ['MANAGER'] } },
   { path: '', redirectTo: '/login', pathMatch: 'full' }
 ];
@@ -35,8 +39,6 @@ const routes: Routes = [
 @NgModule({
   declarations: [
     AppComponent,
-    DashboardComponent,
-    MarketsComponent,
     LoginComponent,
     RegisterComponent,
     AccountComponent,
@@ -51,9 +53,14 @@ const routes: Routes = [
     HttpClientModule,
     RouterModule.forRoot(routes),
     MatTableModule,
-    PortfolioHoldingCardComponent
+    MatIconModule,
+    PortfolioHoldingCardComponent,
+    MarketsComponent,
+    DashboardComponent,
+    HighchartsChartModule
   ],
   providers: [
+    { provide: HoldingService, useClass: HoldingService },
     // Register HTTP interceptor to add JWT token to all requests
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }
   ],

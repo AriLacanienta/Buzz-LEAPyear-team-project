@@ -1,26 +1,144 @@
+$spacing-md: 1rem;
+$spacing-xl: 1.875rem;
+$spacing-lg: 1.25rem;
+$max-width: 85%;
+
 main {
-  padding: 1.875rem 1.25rem;
-  max-width: 75%;
+  padding: clamp(0.875rem, 4vw, $spacing-xl) clamp(0.875rem, 3vw, $spacing-lg);
+  max-width: $max-width;
   margin: 0 auto;
 }
 
-.portfolio-section {
-  margin-bottom: 2.5rem;
+.portfolio-chart-section {
+  margin-bottom: 3rem;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  border: 0.1rem solid #1E2D45;
+  background: #0F1520;
+
+  .portfolio-label {
+    margin: 0 0 0.5rem 0;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #62748E;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+  }
 
   h2 {
+    margin: 0 0 1.5rem 0;
     font-size: 1.5rem;
-    font-weight: 600;
-    margin-bottom: 0.25rem;
-    color: #FFFFFF;
+    font-weight: 700;
+    color: #f1f5f9;
+  }
+
+  .total-balance {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin-bottom: 0;
+
+    .value {
+      font-family: 'DM Mono', monospace;
+      font-size: 2.25rem;
+      font-weight: 500;
+      color: #ffffff;
+      letter-spacing: 0;
+    }
+
+    .today-change {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+  }
+
+  .portfolio-stats {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 0.5rem;
+
+    .all-time-change {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+  }
+
+  .positive {
+    color: #10b981;
+  }
+
+  .negative {
+    color: #ef4444;
+  }
+
+  .chart-wrapper {
+    width: 100%;
+    height: 300px;
+  }
+
+  highcharts-chart {
+    width: 100%;
+    height: 300px;
+    display: block;
+    
+    ::ng-deep {
+      .highcharts-container {
+        width: 100% !important;
+        height: 100% !important;
+      }
+      
+      svg {
+        width: 100% !important;
+        height: 100% !important;
+      }
+    }
   }
 }
 
-.loading-state,
-.empty-state {
-  padding: 2.5rem 1.25rem;
-  text-align: center;
-  border-radius: 0.5rem;
-  color: #FFFFFF;
+.portfolio-section {
+  margin-bottom: clamp(0.65rem, 1.5vw, $spacing-md);
+}
+
+.market-section {
+  margin-bottom: clamp(0.65rem, 1.5vw, $spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.65rem, 1.5vw, $spacing-md);
+  width: 100%;
+
+  .cards-container {
+    display: flex;
+    flex-direction: row;
+    gap: clamp(0.65rem, 1.5vw, $spacing-md);
+    width: 100%;
+
+    app-market-info-card {
+      flex: 1 1 0;
+      min-width: 0;
+    }
+  }
+}
+
+.trade-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.trade-content h2 {
+  color: #e8eaf0;
+  font-size: 1.875rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.trade-content p {
+  color: #e8eaf0;
+  font-size: 1rem;
+  margin: 0;
 }
 
 .holdings-column {
@@ -29,4 +147,11 @@ main {
   gap: 1.25rem;
   flex-wrap: wrap;
   max-width: 100%;
+}
+.holdings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(13.5rem, 1fr));
+  gap: 1.25rem;
+  width: 100%;
+  margin-top: 1.5rem;
 }

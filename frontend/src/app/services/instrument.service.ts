@@ -8,6 +8,7 @@ export interface QuoteResponse {
   symbol: string;
   price: number;
   changePercent: number;
+  name: string;
 }
 
 @Injectable({
@@ -35,5 +36,40 @@ export class InstrumentService {
       url += `&market=${market}`;
     }
     return this.http.get<any>(url);
+  }
+
+  getTopGainers(limit: number = 6): Observable<QuoteResponse[]> {
+    return this.getInstruments('EQUITY', null, 0, 100).pipe(
+      map((response: any) => {
+        const instruments = response.content || [];
+        return instruments
+          .sort((a: any, b: any) => (b.changePercent || 0) - (a.changePercent || 0))
+          .slice(0, limit)
+          .map((instrument: any) => ({
+            symbol: instrument.instrumentSymbol,
+            price: instrument.currentPrice,
+            changePercent: instrument.changePercent,
+            name: instrument.instrumentName
+          }));
+      })
+    );
+  }
+
+  getTopLosers(limit: number = 6): Observable<QuoteResponse[]> {
+    return this.getInstruments('EQUITY', null, 0, 100).pipe(
+      map((response: any) => {
+        const instruments = response.content || [];
+        return instruments
+          .filter((a: any) => (a.changePercent || 0) < 0)
+          .sort((a: any, b: any) => (a.changePercent || 0) - (b.changePercent || 0))
+          .slice(0, limit)
+          .map((instrument: any) => ({
+            symbol: instrument.instrumentSymbol,
+            price: instrument.currentPrice,
+            changePercent: instrument.changePercent,
+            name: instrument.instrumentName
+          }));
+      })
+    );
   }
 }

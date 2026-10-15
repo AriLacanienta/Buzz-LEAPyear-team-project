@@ -19,6 +19,9 @@ export class AccountComponent implements OnInit {
   constructor(private accountService: AccountService) { }
 
   ngOnInit() {
-    this.accountService.setAccountName(this.accountInfo.name);
+    this.accountService.getMyAccount().subscribe(account => {
+      this.accountInfo.name = account.accountName;
+      this.accountService.setAccountName(account.accountName);
+    });
   }
 }

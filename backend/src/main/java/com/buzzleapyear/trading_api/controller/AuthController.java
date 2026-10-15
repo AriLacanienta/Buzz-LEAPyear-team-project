@@ -9,11 +9,16 @@ import com.buzzleapyear.trading_api.entity.UserRole;
 import com.buzzleapyear.trading_api.repository.RoleRepository;
 import com.buzzleapyear.trading_api.repository.UserRepository;
 import com.buzzleapyear.trading_api.security.JwtTokenProvider;
+import com.buzzleapyear.trading_api.repository.AccountRepository;
+import com.buzzleapyear.trading_api.repository.ClientRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import com.buzzleapyear.trading_api.entity.Account;
+import com.buzzleapyear.trading_api.entity.Client;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -32,6 +37,10 @@ public class AuthController {
 
     private UserRepository userRepository;
 
+    private ClientRepository clientRepository;
+
+    private AccountRepository accountRepository;
+
     private RoleRepository roleRepository;
 
     private PasswordEncoder passwordEncoder;
@@ -39,11 +48,15 @@ public class AuthController {
     private JwtTokenProvider tokenProvider;
 
     public AuthController(
+        AccountRepository accountRepository,
+        ClientRepository clientRepository,
         UserRepository userRepository,
         RoleRepository roleRepository,
         PasswordEncoder passwordEncoder,
         JwtTokenProvider tokenProvider
     ) {
+        this.accountRepository = accountRepository;
+        this.clientRepository = clientRepository;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
@@ -166,6 +179,17 @@ public class AuthController {
 
             // Saving user to ourdatabase
             User savedUser = userRepository.save(newUser);
+
+            // Create a client and an account
+            Client client = new Client();
+            client.setUser(savedUser);
+            clientRepository.save(client);
+
+            Account account = new Account();
+            account.setClient(client);
+            account.setAccountName(savedUser.getUsername());
+            account.setCashAvailable(new BigDecimal("10000.00"));
+            accountRepository.save(account);
 
             // Generating JWT token
             // User is automatically logged in after registration

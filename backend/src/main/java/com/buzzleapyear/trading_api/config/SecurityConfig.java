@@ -1,5 +1,8 @@
 package com.buzzleapyear.trading_api.config;
 
+import java.util.Arrays;
+import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -34,12 +37,22 @@ public class SecurityConfig {
         http.cors(cors -> cors.disable())
             // .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .exceptionHandling(exceptions -> exceptions.authenticationEntryPoint(
+                (request, response, authException) -> response.sendError(HttpStatus.UNAUTHORIZED.value())
+            ))
             .authorizeHttpRequests(authorize -> authorize
                 // PUBLIC
-                .requestMatchers(HttpMethod.GET, "/api/v1/auth/validate").permitAll()
+                .requestMatchers("/error").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/auth/validate").authenticated()
                 .requestMatchers(HttpMethod.POST, "/api/v1/auth/**").permitAll()
 
                 // RESTRICTED (RBAC)
+
+                .requestMatchers("/api/v1/accounts/**").authenticated()
+                .requestMatchers("/api/v1/holdings/**").authenticated()
+                .requestMatchers("/api/v1/instruments/**").authenticated()
+                .requestMatchers("/api/v1/quote/**").authenticated()
+
                 .requestMatchers("/api/v1/admin/**").hasRole(ROLE_MANAGER)
                 .requestMatchers("/api/v1/analyst/**").hasAnyRole(ROLE_MANAGER, ROLE_ANALYST)
                 .requestMatchers("/api/v1/client/**").hasAnyRole(ROLE_MANAGER, ROLE_CLIENT, ROLE_ANALYST)

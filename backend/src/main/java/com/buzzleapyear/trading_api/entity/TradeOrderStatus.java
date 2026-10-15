@@ -43,6 +43,6 @@ public class TradeOrderStatus {
     public void setReasonText(String reasonText) { this.reasonText = reasonText; }
     
     public enum OrderStatus {
-        SUBMITTED, VALIDATED, FILLED, REJECTED
+        SUBMITTED, ACCEPTED, VALIDATED, FILLED, REJECTED
     }
 }
