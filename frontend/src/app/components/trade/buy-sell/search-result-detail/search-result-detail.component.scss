@@ -1,0 +1,123 @@
+// Variables
+$spacing-sm: 0.25rem;
+$radius-xl: 1rem;
+$radius-full: 9999px;
+$border-dark: #1e2d45;
+$color-slate-600: #475569;
+$color-slate-500: #64748b;
+$color-white: #ffffff;
+$color-emerald-400: #34d399;
+$color-emerald-500: #10b981;
+$color-blue-400: #60a5fa;
+$color-blue-500: #3b82f6;
+$text-xs: 0.75rem;
+$text-sm: 0.875rem;
+$text-lg: 1.125rem;
+$bg-dark: #141c2e;
+
+.result-detail,
+.result-container {
+  box-sizing: border-box;
+  min-height: 6rem;
+}
+
+.result-detail {
+  border: 1px dashed $border-dark;
+  border-radius: $radius-xl;
+  padding: 0.5rem;
+  margin-bottom: 1rem;
+  text-align: center;
+  font-size: $text-xs;
+  color: $color-slate-600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.result-container {
+  background-color: $bg-dark;
+  border: 1px solid $border-dark;
+  border-radius: $radius-xl;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.result-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.result-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.result-symbol {
+  font-family: monospace;
+  font-size: $text-sm;
+  font-weight: 600;
+  color: $color-white;
+}
+
+.result-name {
+  font-size: 10px;
+  color: $color-slate-500;
+}
+
+.result-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.125rem;
+}
+
+.result-price {
+  font-family: monospace;
+  font-size: $text-lg;
+  font-weight: 500;
+  color: $color-white;
+}
+
+.result-change {
+  font-family: monospace;
+  font-size: $text-xs;
+  color: $color-emerald-400;
+
+  &.negative {
+    color: #ef4444; // red for negative
+  }
+}
+
+.result-tags {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.tag {
+  font-size: 9px;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  padding-top: 0.125rem;
+  padding-bottom: 0.125rem;
+  border-radius: $radius-full;
+  font-weight: 500;
+  border: 1px solid;
+
+  &.tradable {
+    background-color: rgba($color-emerald-500, 0.1);
+    color: $color-emerald-400;
+    border-color: rgba($color-emerald-500, 0.2);
+  }
+
+  &.stocks {
+    background-color: rgba($color-blue-500, 0.1);
+    color: $color-blue-400;
+    border-color: rgba($color-blue-500, 0.2);
+    text-transform: capitalize;
+  }
+}

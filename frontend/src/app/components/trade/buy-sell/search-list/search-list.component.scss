@@ -1,0 +1,27 @@
+// Variables
+$radius-xl: 0.75rem;
+$text-xs: 0.75rem;
+
+.search-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 0.25rem;
+  background-color: #141c2e;
+  border: 1px solid #1e2d45;
+  border-radius: $radius-xl;
+  overflow: hidden;
+  z-index: 20;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  max-height: 14rem;
+  overflow-y: auto;
+
+  /* Hide scrollbar while keeping functionality */
+  &::-webkit-scrollbar {
+    width: 0;
+    background: transparent;
+  }
+
+  scrollbar-width: none;
+}

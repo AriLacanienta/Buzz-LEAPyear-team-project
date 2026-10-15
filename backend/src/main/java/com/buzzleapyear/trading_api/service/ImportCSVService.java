@@ -19,6 +19,8 @@ import com.buzzleapyear.trading_api.entity.Client;
 import com.buzzleapyear.trading_api.entity.Holding;
 import com.buzzleapyear.trading_api.entity.Instrument;
 import com.buzzleapyear.trading_api.entity.Instrument.AssetType;
+import com.buzzleapyear.trading_api.entity.TradeOrderStatus.OrderStatus;
+import com.buzzleapyear.trading_api.entity.TradeOrderStatus;
 import com.buzzleapyear.trading_api.entity.Quote;
 import com.buzzleapyear.trading_api.entity.TradeOrder;
 import com.buzzleapyear.trading_api.entity.TradeOrder.OrderSide;
@@ -33,12 +35,12 @@ import jakarta.transaction.Transactional;
 @Service
 public class ImportCSVService {
 
-    @PersistenceContext 
+    @PersistenceContext
     private EntityManager em;
-    
+
     private final InstrumentRepository instrumentRepository;
     private final HoldingRepository holdingRepository;
-    
+
     public ImportCSVService(
             InstrumentRepository instrumentRepository,
             HoldingRepository holdingRepository) {
@@ -47,7 +49,7 @@ public class ImportCSVService {
     }
 
     @Transactional
-    public void importFromTradesCSV(InputStream csvInputStream) throws IOException {        
+    public void importFromTradesCSV(InputStream csvInputStream) throws IOException {
         // Cache to track already-created users and clients to avoid duplicates
         Map<String, User> userCache = new HashMap<>();
         Map<String, Client> clientCache = new HashMap<>();
@@ -57,7 +59,7 @@ public class ImportCSVService {
         try (BufferedReader br = new BufferedReader(new InputStreamReader(csvInputStream))) {
             String line;
             boolean isFirstLine = true;
-            
+
             while ((line = br.readLine()) != null) {
                 // Skip header line
                 if (isFirstLine) {
@@ -67,10 +69,10 @@ public class ImportCSVService {
                 // Skip blank lines
                 if (line.isBlank())
                     continue;
-                
+
                 LineValues values = parseLine(line);
                 try {
-                
+
 
                     // Step 1: Create or retrieve User (generates user_id)
                     User user = userCache.get(values.client_name);
@@ -79,9 +81,9 @@ public class ImportCSVService {
                         String[] nameParts = values.client_name.split(" ", 2);
                         user.setFirstName(nameParts[0]);
                         user.setLastName(nameParts.length > 1 ? nameParts[1] : nameParts[0]);
-                        user.setUsername(values.client_id + "_" + System.currentTimeMillis());
-                        user.setEmail(values.client_id + "@trading.local");
-                        user.setPasswordHash("hashed_password");
+                        user.setUsername(values.client_id);
+                        user.setEmail(values.client_id + "@trading.demo");
+                        user.setPasswordHash("$2a$10$QEG13Tgr8.fgIP4n1.CxVeEoUhKYjWF7S2HK4mwhWh9V0zz80GUzi");
                         user.setCreatedAt(LocalDateTime.now());
                         user.setUpdatedAt(LocalDateTime.now());
                         em.persist(user);
@@ -105,7 +107,7 @@ public class ImportCSVService {
                     if (instrument == null) {
                         // Check database for existing instrument
                         instrument = instrumentRepository.findByInstrumentSymbol(values.instrument).orElse(null);
-                        
+
                         // Only create if doesn't exist in database
                         if (instrument == null) {
                             instrument = new Instrument();
@@ -124,8 +126,9 @@ public class ImportCSVService {
                     Account account = accountCache.get(accountKey);
                     if (account == null){
                         account = new Account();
-                        account.setAccountName(values.client_id + "_Account");
                         account.setClient(client); // Set the Client relationship
+                        account.setAccountName(values.client_id + "_Account");
+                        account.setCashAvailable(new BigDecimal(10_000.00));
                         em.persist(account);
                         em.flush();
                         accountCache.put(accountKey, account);
@@ -143,6 +146,13 @@ public class ImportCSVService {
                     em.persist(tradeOrder);
                     em.flush();
 
+                    // Step 6: Create TradeOrderStatus (depends on tradeOrder)
+                    TradeOrderStatus status = new TradeOrderStatus();
+                    status.setTradeOrder(tradeOrder); // Set TradeOrder relationship
+                    status.setTimeUpdated(values.trade_date);
+                    status.setStatus(OrderStatus.FILLED);
+                    em.persist(status);
+                    em.flush();
                     // Step 6: update Holdings
                     Holding holding = holdingRepository.findByAccountIdAndInstrumentId(account.getId(), instrument.getId()).orElse(null);
                     if (holding == null){
@@ -156,7 +166,7 @@ public class ImportCSVService {
                     }
                     if (values.side == OrderSide.BUY){
                         holding.setQuantity(holding.getQuantity().add(BigDecimal.valueOf(values.quantity)));
-                    } 
+                    }
                     // SELL
                     else {
                         holding.setQuantity(holding.getQuantity().subtract(BigDecimal.valueOf(values.quantity)));
@@ -166,7 +176,7 @@ public class ImportCSVService {
                         }
                     }
                     em.persist(holding);
-                    
+
                 } catch (Exception e) {
                     System.err.println("Error persisting row: " + e.getMessage());
                     e.printStackTrace();
@@ -186,7 +196,7 @@ public class ImportCSVService {
         try (BufferedReader br = new BufferedReader(new InputStreamReader(csvInputStream))) {
             String line;
             boolean isFirstLine = true;
-            
+
             while ((line = br.readLine()) != null) {
                 // Skip header line
                 if (isFirstLine) {
@@ -196,17 +206,17 @@ public class ImportCSVService {
                 // Skip blank lines
                 if (line.isBlank())
                     continue;
-                
+
                 try {
                     InstrumentLineValues values = parseInstrumentLine(line);
-                    
+
                     // Create or retrieve Instrument by symbol
                     Instrument instrument = instrumentCache.get(values.instrument_symbol);
                     if (instrument == null) {
                         // Check database for existing instrument
                         instrument = instrumentRepository.findByInstrumentSymbol(values.instrument_symbol)
                             .orElse(null);
-                        
+
                         if (instrument == null) {
                             // Only create if doesn't exist in database
                             instrument = new Instrument();
@@ -235,7 +245,7 @@ public class ImportCSVService {
         try (BufferedReader br = new BufferedReader(new InputStreamReader(csvInputStream))) {
             String line;
             boolean isFirstLine = true;
-            
+
             while ((line = br.readLine()) != null) {
                 // Skip header line
                 if (isFirstLine) {
@@ -245,17 +255,17 @@ public class ImportCSVService {
                 // Skip blank lines
                 if (line.isBlank())
                     continue;
-                
+
                 try {
                     QuoteLineValues values = parseQuoteLine(line);
-                    
+
                     // Fetch the Instrument by ID
                     Instrument instrument = em.find(Instrument.class, values.instrument_id);
                     if (instrument == null) {
                         System.err.println("Instrument with ID " + values.instrument_id + " not found. Skipping quote.");
                         continue;
                     }
-                    
+
                     // Create Quote
                     Quote quote = new Quote();
                     quote.setInstrument(instrument); // Set Instrument relationship
@@ -271,7 +281,7 @@ public class ImportCSVService {
                     quote.setTimestamp(values.timestamp);
                     em.persist(quote);
                     em.flush();
-                    
+
                 } catch (Exception e) {
                     System.err.println("Error persisting quote row: " + e.getMessage());
                     e.printStackTrace();
@@ -297,7 +307,7 @@ public class ImportCSVService {
         public String currency;
         public double value;
 
-        public LineValues(String trade_id, LocalDateTime trade_date, String client_id, String client_name, 
+        public LineValues(String trade_id, LocalDateTime trade_date, String client_id, String client_name,
             String advisor, String instrument, AssetType asset_class, String side, double quantity,
              double price, String currency, double value) {
 
@@ -363,7 +373,7 @@ public class ImportCSVService {
     protected InstrumentLineValues parseInstrumentLine(String csvLine) throws IllegalArgumentException {
         try {
             String[] values = csvLine.split(",");
-            
+
             if (values.length < 4) {
                 throw new IllegalArgumentException("Instrument CSV line must have at least 4 columns");
             }
@@ -425,8 +435,8 @@ public class ImportCSVService {
             if (volume < 0)
                 throw new IllegalArgumentException("volume cannot be negative");
 
-            return new QuoteLineValues(instrument_id, price, high_price_of_day, low_price_of_day, 
-                open_price_of_day, previous_close_price_of_day, change_amount, change_percent, 
+            return new QuoteLineValues(instrument_id, price, high_price_of_day, low_price_of_day,
+                open_price_of_day, previous_close_price_of_day, change_amount, change_percent,
                 volume, market_cap, timestamp);
         } catch (Exception e) {
             throw new IllegalArgumentException("Failed to parse quote CSV line: \'" + csvLine + "\' " + e.getMessage(), e);
@@ -439,7 +449,7 @@ public class ImportCSVService {
         public AssetType asset_type;
         public String currency_code;
 
-        public InstrumentLineValues(String instrument_name, String instrument_symbol, 
+        public InstrumentLineValues(String instrument_name, String instrument_symbol,
             AssetType asset_type, String currency_code) {
             this.instrument_name = instrument_name;
             this.instrument_symbol = instrument_symbol;
@@ -461,9 +471,9 @@ public class ImportCSVService {
         public long market_cap;
         public LocalDateTime timestamp;
 
-        public QuoteLineValues(Long instrument_id, BigDecimal price, BigDecimal high_price_of_day, 
+        public QuoteLineValues(Long instrument_id, BigDecimal price, BigDecimal high_price_of_day,
             BigDecimal low_price_of_day, BigDecimal open_price_of_day, BigDecimal previous_close_price_of_day,
-            BigDecimal change_amount, BigDecimal change_percent, long volume, long market_cap, 
+            BigDecimal change_amount, BigDecimal change_percent, long volume, long market_cap,
             LocalDateTime timestamp) {
             this.instrument_id = instrument_id;
             this.price = price;

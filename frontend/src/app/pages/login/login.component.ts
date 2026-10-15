@@ -48,13 +48,12 @@ export class LoginComponent {
     this.authService.login(email, password).subscribe(
       //success response
       (response) => {
-        //storing access and refresh tokens from backend auth response
-        this.authService.setAuthSessionFromResponse(response);
-        
         this.loading = false;
-        
-        //redirecting to dashboard
-        this.router.navigate(['/dashboard']);
+
+        const landingPage = this.authService.hasRole('MANAGER')
+          ? '/admin'
+          : '/dashboard';
+        this.router.navigate([landingPage]);
       },
       //error response
       (error) => {

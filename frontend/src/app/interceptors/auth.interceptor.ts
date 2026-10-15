@@ -54,7 +54,7 @@ export class AuthInterceptor implements HttpInterceptor {
           //access token is expired recovering with refresh cookie
           return this.authService.refreshAccessToken().pipe(
             switchMap((authResponse) => {
-              this.authService.setAuthSessionFromResponse(authResponse);
+              this.authService.storeAuthResponse(authResponse);
               const updatedAccessToken = this.authService.getAccessToken();
 
               if (!updatedAccessToken) {

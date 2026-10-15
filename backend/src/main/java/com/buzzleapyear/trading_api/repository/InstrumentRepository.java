@@ -13,5 +13,6 @@ public interface InstrumentRepository extends JpaRepository<Instrument, Long> {
 
     List<Instrument> findByAssetTypeOrderByInstrumentSymbolAsc(AssetType assetType);
 
+    List<Instrument> findByInstrumentNameContainingIgnoreCaseOrInstrumentSymbolContainingIgnoreCase(String name, String symbol);
     List<Instrument> findByAssetTypeAndCurrencyCodeOrderByInstrumentSymbolAsc(AssetType assetType, String currencyCode);
 }

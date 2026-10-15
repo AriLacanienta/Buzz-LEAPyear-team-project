@@ -1,5 +1,8 @@
 package com.buzzleapyear.trading_api.dto;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class AuthResponse {
     private String token;
     private String refreshToken;
@@ -7,6 +10,7 @@ public class AuthResponse {
     private String type = "Bearer";
     private String username;
     private String email;
+    private List<String> roles = new ArrayList<>();
 
     public AuthResponse() {}
 
@@ -17,11 +21,25 @@ public class AuthResponse {
         this.username = username;
         this.email = email;
     }
+
+    public AuthResponse(String accessToken, String refreshToken, String username,
+                        String email, List<String> roles) {
+        this(accessToken, refreshToken, username, email);
+        this.roles = roles;
+    }
     public String getAccessToken() {
         return accessToken;
     }
     public String getRefreshToken() {
         return refreshToken;
+    }
+
+    public AuthResponse(String token, String username, String email, List<String> roles) {
+        this.token = token;
+        this.accessToken = token;
+        this.username = username;
+        this.email = email;
+        this.roles = roles;
     }
 
     public String getToken() {
@@ -54,5 +72,13 @@ public class AuthResponse {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public List<String> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(List<String> roles) {
+        this.roles = roles;
     }
 }

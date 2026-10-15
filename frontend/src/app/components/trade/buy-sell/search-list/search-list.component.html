@@ -1,0 +1,7 @@
+<div class="search-list">
+  <app-search-list-item
+    *ngFor="let item of results"
+    [item]="item"
+    (mousedown)="selectItem(item)">
+  </app-search-list-item>
+</div>
