@@ -21,31 +21,65 @@ $spacing-lg: 2rem;
 $avatar-size: 1.5rem;
 
 .table-header {
-  padding: $spacing-md;
+  padding: 0.75rem 1.25rem;
   background-color: $bg-darker;
   border-bottom: 0.0625rem solid $border-dark;
+}
+
+.table-scroll {
+  overflow-x: auto;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 table {
   background-color: $bg-darker;
   border: none;
   width: 100%;
+  min-width: 42rem;
+  font-size: $text-xs;
+
+  .mat-mdc-header-cell,
+  .mat-mdc-cell {
+    padding: 0.75rem 1rem;
+    border-bottom-color: $border-dark;
+  }
   
   th {
     color: $color-slate-500;
-    font-weight: $font-weight-bold;
+    font-size: 0.8rem;
+    font-weight: $font-weight-semibold;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    white-space: nowrap;
     border-bottom: 0.0625rem solid $border-dark;
   }
   
   td {
     color: $color-slate-400;
     border-bottom: 0.0625rem solid $border-dark;
+    white-space: nowrap;
+  }
+
+  .cdk-column-instrumentSymbol,
+  .cdk-column-currentPrice,
+  .cdk-column-volume,
+  .cdk-column-marketCap {
+    font-family: 'DM Mono', monospace;
   }
 
   .cdk-column-instrumentSymbol {
     color: $color-white;
-    font-weight: $font-weight-bold;
-    font-family: 'DM Mono', monospace;
+    font-weight: $font-weight-semibold;
+  }
+
+  .cdk-column-instrumentName {
+    max-width: 7.5rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .cdk-column-currentPrice {
@@ -69,33 +103,38 @@ table {
   }
 
   .change-value {
-    display: flex;
-    align-items: center;
-    gap: $spacing-xs-half;
-    font-size: $text-sm;
-    opacity: 0.8;
+    font-size: $text-xs;
   }
 
   .change-percent {
     display: flex;
     align-items: center;
     gap: $spacing-xs-half;
-    font-size: $text-xs-lg;
+    font-size: 0.625rem;
     font-weight: $font-weight-semibold;
   }
 
+  .symbol-cell {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+  }
+
   .symbol-avatar {
-    display: inline-block;
-    width: $avatar-size;
-    height: $avatar-size;
-    line-height: $avatar-size;
-    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 0.25rem;
     background-color: $color-primary-light-bg;
     border-color: $border-dark;
     color: $color-primary-light;
     text-align: center;
-    font-weight: $font-weight-semibold;
-    margin-right: $spacing-sm;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.5rem;
+    font-weight: $font-weight-bold;
+    flex-shrink: 0;
   }
 }
 
