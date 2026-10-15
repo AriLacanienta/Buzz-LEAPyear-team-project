@@ -5,6 +5,7 @@ import { environment } from '../../environments/environment';
 import { BalanceResponse } from '@app/models/balance-response.model';
 import { CurrentAccountResponse } from '@app/models/current-account-response.model';
 import { RecentTradeOrderResponse, SpringPage } from '@app/models/recent-trade-order-response.model';
+import { FundsRequest } from '@app/models/funds-request.model';
 
 @Injectable({
   providedIn: 'root'
@@ -31,6 +32,10 @@ export class AccountService {
   getAccountBalance(id: string): Observable<BalanceResponse> {
       return this.http.get<BalanceResponse>(`${this.apiUrl}/${encodeURIComponent(id)}`);
   }
+
+    updateFunds(id: string, request: FundsRequest): Observable<void> {
+      return this.http.post<void>(`${this.apiUrl}/${encodeURIComponent(id)}/funds`, request);
+    }
 
   getRecentTradeOrders(accountId: string | number, page =0, size = 10): Observable<SpringPage<RecentTradeOrderResponse>> {
     const params = new HttpParams()
