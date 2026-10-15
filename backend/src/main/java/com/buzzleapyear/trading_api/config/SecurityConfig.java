@@ -42,6 +42,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/v1/auth/validate").permitAll()
                 
                 // RESTRICTED (RBAC)
+                //TODO(after admin-console merge): change revocation access from ADMIN to MANAGER.
                 .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/v1/test").hasRole("ADMIN")
                 .requestMatchers("/api/v1/analyst/**").hasAnyRole("ADMIN", "ANALYST")
