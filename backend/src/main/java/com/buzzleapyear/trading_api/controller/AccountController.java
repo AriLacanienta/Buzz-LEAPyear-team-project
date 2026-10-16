@@ -11,6 +11,7 @@ import java.util.List;
 import org.springframework.security.core.Authentication;
 import org.springframework.http.ResponseEntity;
 import com.buzzleapyear.trading_api.dto.AccountValueResponseDto;
+import com.buzzleapyear.trading_api.dto.PortfolioSummaryResponseDto;
 import com.buzzleapyear.trading_api.dto.CurrentAccountResponseDto;
 import com.buzzleapyear.trading_api.dto.FundsRequestDto;
 import com.buzzleapyear.trading_api.dto.RecentTradeOrderResponseDto;
@@ -33,6 +34,13 @@ public class AccountController {
     @GetMapping("/{id}")
     public ResponseEntity<AccountValueResponseDto> getAccountValue(@PathVariable String id, Authentication authentication) {
         return accountService.getAccountValue(id, authentication.getName())
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/{id}/portfolio-summary")
+    public ResponseEntity<PortfolioSummaryResponseDto> getPortfolioSummary(@PathVariable Long id, Authentication authentication) {
+        return accountService.getPortfolioSummary(id, authentication.getName())
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build());
     }
