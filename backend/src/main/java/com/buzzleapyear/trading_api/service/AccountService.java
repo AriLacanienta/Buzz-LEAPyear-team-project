@@ -25,6 +25,9 @@ import org.springframework.data.domain.Page;
 import com.buzzleapyear.trading_api.entity.TradeOrder;
 import java.math.RoundingMode;
 import com.buzzleapyear.trading_api.dto.PortfolioSummaryResponseDto;
+import java.util.Map;
+import java.util.HashMap;
+import java.time.LocalDate;
 
 @Service
 public class AccountService {
@@ -108,24 +111,45 @@ public class AccountService {
             return Optional.empty();
         }
 
-        BigDecimal portfolioValue = BigDecimal.ZERO;
-        BigDecimal totalCostBasis = BigDecimal.ZERO;
-        BigDecimal todayChange = BigDecimal.ZERO;
-
-        for (HoldingResponseDto holding : holdingService.getHoldingsByAccountId(accountId)) {
-            portfolioValue = portfolioValue.add(orZero(holding.totalValue()));
-            totalCostBasis = totalCostBasis.add(orZero(holding.totalCost()));
-            todayChange = todayChange.add(orZero(holding.quantity()).multiply(orZero(holding.change())));
+        Map<String, BigDecimal> qtyBoughtToday = new HashMap<>();
+        Map<String, BigDecimal> costBoughtToday = new HashMap<>();
+        for (TradeOrder order : tradeOrderRepository.findFilledOrdersSince(
+                accountId, TradeOrder.OrderSide.BUY, TradeOrderStatus.OrderStatus.FILLED, LocalDate.now().atStartOfDay())) {
+            String symbol = order.getInstrument().getInstrumentSymbol();
+            qtyBoughtToday.merge(symbol, order.getQuantity(), BigDecimal::add);
+            costBoughtToday.merge(symbol, order.getQuantity().multiply(order.getPrice()), BigDecimal::add);
         }
 
+        BigDecimal portfolioValue = BigDecimal.ZERO;
+        BigDecimal totalCostBasis = BigDecimal.ZERO;
+        BigDecimal todayStartValue = BigDecimal.ZERO;
+
+        for (HoldingResponseDto holding : holdingService.getHoldingsByAccountId(accountId)) {
+            BigDecimal quantity = orZero(holding.quantity());
+            BigDecimal price = orZero(holding.currentPrice());
+            BigDecimal previousClose = price.subtract(orZero(holding.change()));
+
+            BigDecimal boughtToday = qtyBoughtToday.getOrDefault(holding.instrumentSymbol(), BigDecimal.ZERO);
+            BigDecimal todayQty = boughtToday.min(quantity);
+            BigDecimal todayCost = todayQty.signum() == 0 ? BigDecimal.ZERO
+                : costBoughtToday.get(holding.instrumentSymbol())
+                    .multiply(todayQty)
+                    .divide(boughtToday, 10, RoundingMode.HALF_UP);
+            BigDecimal olderQty = quantity.subtract(todayQty);
+
+            portfolioValue = portfolioValue.add(orZero(holding.totalValue()));
+            totalCostBasis = totalCostBasis.add(orZero(holding.totalCost()));
+            todayStartValue = todayStartValue.add(olderQty.multiply(previousClose)).add(todayCost);
+        }
+
+        BigDecimal todayChange = portfolioValue.subtract(todayStartValue);
         BigDecimal allTimeChange = portfolioValue.subtract(totalCostBasis);
-        BigDecimal previousCloseValue = portfolioValue.subtract(todayChange);
 
         return Optional.of(new PortfolioSummaryResponseDto(
             portfolioValue.setScale(2, RoundingMode.HALF_UP),
             totalCostBasis.setScale(2, RoundingMode.HALF_UP),
             todayChange.setScale(2, RoundingMode.HALF_UP),
-            percentOf(todayChange, previousCloseValue),
+            percentOf(todayChange, todayStartValue),
             allTimeChange.setScale(2, RoundingMode.HALF_UP),
             percentOf(allTimeChange, totalCostBasis)
         ));
