@@ -1,5 +1,7 @@
 package com.buzzleapyear.trading_api.controller;
 
+import com.buzzleapyear.trading_api.dto.ErrorResponse;
+import com.buzzleapyear.trading_api.dto.UserProfileResponse;
 import com.buzzleapyear.trading_api.entity.User;
 import com.buzzleapyear.trading_api.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,52 +55,5 @@ public class UserController {
         }
     }
 
-    //Response DTO for user profile
-    public static class UserProfileResponse {
-        private String username;
-        private String email;
-        private String firstName;
-        private String lastName;
-
-        public UserProfileResponse(String username, String email, String firstName, String lastName) {
-            this.username = username;
-            this.email = email;
-            this.firstName = firstName;
-            this.lastName = lastName;
-        }
-
-        //Getters
-        public String getUsername() {
-            return username;
-        }
-
-        public String getEmail() {
-            return email;
-        }
-
-        public String getFirstName() {
-            return firstName;
-        }
-
-        public String getLastName() {
-            return lastName;
-        }
-    }
-
-   //Error response DTO
-    public static class ErrorResponse {
-        private String message;
-
-        public ErrorResponse(String message) {
-            this.message = message;
-        }
-
-        public String getMessage() {
-            return message;
-        }
-
-        public void setMessage(String message) {
-            this.message = message;
-        }
-    }
+   
 }
