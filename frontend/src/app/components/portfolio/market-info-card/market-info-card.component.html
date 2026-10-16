@@ -2,8 +2,8 @@
     <mat-card-content>
         <div class="market-info-content">
             <div class="market-info-header">
-                <h1 [ngClass]="getColorClass()"> | </h1>
-                <h2>{{ title }}</h2>
+                <div class="header-accent" [ngClass]="getColorClass()"></div>
+                <h2 class="card-title">{{ title }}</h2>
             </div>
             <div *ngIf="data.length > 0" class="data-list">
                 <div *ngFor="let item of data" class="data-item">
