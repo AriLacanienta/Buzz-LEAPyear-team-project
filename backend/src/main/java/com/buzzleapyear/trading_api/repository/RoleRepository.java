@@ -1,12 +1,12 @@
 package com.buzzleapyear.trading_api.repository;
 
-import com.buzzleapyear.trading_api.entity.Analyst;
+import com.buzzleapyear.trading_api.entity.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
 @Repository
-public interface AnalystRepository extends JpaRepository<Analyst, Long> {
-    Optional<Analyst> findByUserId(Long userId);
+public interface RoleRepository extends JpaRepository<Role, Long> {
+    Optional<Role> findByRoleName(Role.RoleName roleName);
 }

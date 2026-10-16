@@ -1,33 +1,35 @@
 package com.buzzleapyear.trading_api.service;
 
-import org.springframework.stereotype.Service;
-import org.springframework.scheduling.annotation.Scheduled;
-import jakarta.annotation.PostConstruct;
-import java.time.LocalDateTime;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ThreadLocalRandom;
-import com.buzzleapyear.trading_api.entity.Instrument;
-import com.buzzleapyear.trading_api.service.InstrumentService;
-import com.buzzleapyear.trading_api.repository.QuoteRepository;
-import com.buzzleapyear.trading_api.repository.InstrumentRepository;
-import com.buzzleapyear.trading_api.entity.Quote;
-import com.buzzleapyear.trading_api.dto.QuoteResponseDto;
-import java.util.Optional;
-import org.springframework.beans.factory.annotation.Value;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.ArrayList;
-import com.buzzleapyear.trading_api.entity.Instrument.AssetType;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.PageImpl;
-import com.buzzleapyear.trading_api.dto.ListMarketEquitySummaryResponseDto;
-import com.buzzleapyear.trading_api.dto.InstrumentSearchResponseDto;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadLocalRandom;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+
+import com.buzzleapyear.trading_api.dto.InstrumentSearchResponseDto;
+import com.buzzleapyear.trading_api.dto.ListMarketEquitySummaryResponseDto;
+import com.buzzleapyear.trading_api.dto.QuoteResponseDto;
+import com.buzzleapyear.trading_api.entity.Instrument;
+import com.buzzleapyear.trading_api.entity.Instrument.AssetType;
+import com.buzzleapyear.trading_api.entity.Quote;
+import com.buzzleapyear.trading_api.repository.InstrumentRepository;
+import com.buzzleapyear.trading_api.repository.QuoteRepository;
+
+import jakarta.annotation.PostConstruct;
 
 /*
     Possible future work:
@@ -66,7 +68,7 @@ public class QuoteService {
 
     public QuoteService(InstrumentService instrumentService, QuoteRepository quoteRepository,
         InstrumentRepository instrumentRepository,
-        @Value("${QUOTE_MIN_VOLATILITY:0.0}") double minVolatility, 
+        @Value("${QUOTE_MIN_VOLATILITY:0.0}") double minVolatility,
         @Value("${QUOTE_MAX_VOLATILITY:0.0}") double maxVolatility,
         @Value("${QUOTE_MIN_DRIFT:0.0}") double minDrift,
         @Value("${QUOTE_MAX_DRIFT:0.0}") double maxDrift
@@ -79,7 +81,7 @@ public class QuoteService {
         this.MIN_DRIFT = minDrift;
         this.MAX_DRIFT = maxDrift;
     }
-    
+
     /*
      * Initializes the latest quotes for all instruments by fetching the most recent quote from the repository.
      * If no quote is found for an instrument, it will not be added to the latestQuotes map.
@@ -143,7 +145,7 @@ public class QuoteService {
             double drift = prevState.drift; // Chance of rise vs decline
 
             BigDecimal newPrice = generateNextPrice(prevPrice, volatility, drift);
-            
+
             InstrumentQuoteState newState = new InstrumentQuoteState();
             newState.currentPrice = newPrice;
             newState.volatility = volatility;
@@ -172,7 +174,7 @@ public class QuoteService {
             try {
                 long instrumentId = instrument.getId();
                 InstrumentQuoteState quoteState = latestQuotes.get(instrumentId);
-                
+
                 if (quoteState == null) {
                     continue;
                 }

@@ -48,14 +48,13 @@ export class LoginComponent {
     this.authService.login(email, password).subscribe(
       // Success response
       (response) => {
-        // Step 3: Store token in localStorage
-        this.authService.storeToken(response.token);
-        
         this.loading = false;
         console.log('Login successful!', response);
-        
-        //Redirect to dashboard
-        this.router.navigate(['/dashboard']);
+
+        const landingPage = this.authService.hasRole('MANAGER')
+          ? '/admin'
+          : '/dashboard';
+        this.router.navigate([landingPage]);
       },
       // Error response
       (error) => {
