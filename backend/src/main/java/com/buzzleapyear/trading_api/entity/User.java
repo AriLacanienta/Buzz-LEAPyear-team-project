@@ -40,6 +40,9 @@ public class User {
     
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    @Column(name = "token_version", nullable = false)
+    private long tokenVersion = 0;
     
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private java.util.List<UserRole> userRoles = new java.util.ArrayList<>();
@@ -54,4 +57,7 @@ public class User {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
+    public long getTokenVersion() { return tokenVersion; }
+    public void revokeAccessTokens() { tokenVersion++; }
 }

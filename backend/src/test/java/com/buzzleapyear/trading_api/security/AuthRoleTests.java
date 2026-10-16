@@ -17,6 +17,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 import com.buzzleapyear.trading_api.controller.AuthController;
 import com.buzzleapyear.trading_api.dto.AuthResponse;
 import com.buzzleapyear.trading_api.dto.RegistrationRequest;
@@ -26,6 +28,9 @@ import com.buzzleapyear.trading_api.entity.UserRole;
 import com.buzzleapyear.trading_api.repository.AccountRepository;
 import com.buzzleapyear.trading_api.repository.ClientRepository;
 import com.buzzleapyear.trading_api.repository.RoleRepository;
+import com.buzzleapyear.trading_api.repository.AccountRepository;
+import com.buzzleapyear.trading_api.repository.ClientRepository;
+import com.buzzleapyear.trading_api.repository.RefreshSessionRepository;
 import com.buzzleapyear.trading_api.repository.UserRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -42,6 +47,12 @@ class AuthRoleTests {
 
     @Mock
     private RoleRepository roleRepository;
+
+    @Mock
+    private RefreshSessionRepository refreshSessionRepository;
+
+    @Mock
+    private HttpServletRequest httpRequest;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -74,6 +85,8 @@ class AuthRoleTests {
 
     @Test
     void registrationAssignsClientRoleAndReturnsItInAuthResponse() {
+        org.springframework.test.util.ReflectionTestUtils.setField(
+            authController, "refreshSessionRepository", refreshSessionRepository);
         RegistrationRequest request = new RegistrationRequest();
         request.setUsername("new-client");
         request.setEmail("new-client@example.com");
@@ -87,9 +100,9 @@ class AuthRoleTests {
         when(roleRepository.findByRoleName(Role.RoleName.CLIENT)).thenReturn(Optional.of(clientRole));
         when(passwordEncoder.encode(request.getPassword())).thenReturn("hashed-password");
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(tokenProvider.generateToken(request.getUsername())).thenReturn("token");
+        when(tokenProvider.generateAccessToken(request.getUsername(), 0)).thenReturn("token");
 
-        ResponseEntity<?> response = authController.register(request);
+        ResponseEntity<?> response = authController.register(request, httpRequest);
 
         AuthResponse authResponse = assertInstanceOf(AuthResponse.class, response.getBody());
         assertEquals(List.of("CLIENT"), authResponse.getRoles());
