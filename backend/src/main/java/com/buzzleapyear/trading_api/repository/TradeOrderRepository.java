@@ -26,6 +26,10 @@ public interface TradeOrderRepository extends JpaRepository<TradeOrder, Long> {
         countQuery = "SELECT COUNT(o) FROM TradeOrder o WHERE o.account.id = ?1"
     )
     Page<TradeOrder> findByAccountIdOrderByOrderDateDesc(Long accountId, Pageable pageable);
+
+    @EntityGraph(attributePaths = {"account", "account.client", "account.client.user", "instrument"})
+    @Query("SELECT o FROM TradeOrder o ORDER BY o.orderDate DESC, o.id DESC")
+    Page<TradeOrder> findAllForManager(Pageable pageable);
     
     List<TradeOrder> findByInstrumentId(Long instrumentId);
     List<TradeOrder> findByAccountIdOrderByOrderDateDesc(Long accountId);
