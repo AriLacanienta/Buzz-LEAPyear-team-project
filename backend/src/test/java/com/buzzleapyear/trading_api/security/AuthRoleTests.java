@@ -49,12 +49,6 @@ class AuthRoleTests {
     private RoleRepository roleRepository;
 
     @Mock
-    private AccountRepository accountRepository;
-
-    @Mock
-    private ClientRepository clientRepository;
-
-    @Mock
     private RefreshSessionRepository refreshSessionRepository;
 
     @Mock
