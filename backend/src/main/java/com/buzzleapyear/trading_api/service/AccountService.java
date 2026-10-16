@@ -23,6 +23,8 @@ import java.util.Locale;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Page;
 import com.buzzleapyear.trading_api.entity.TradeOrder;
+import java.math.RoundingMode;
+import com.buzzleapyear.trading_api.dto.PortfolioSummaryResponseDto;
 
 @Service
 public class AccountService {
@@ -100,6 +102,35 @@ public class AccountService {
         ));
     }
 
+    @Transactional(readOnly = true)
+    public Optional<PortfolioSummaryResponseDto> getPortfolioSummary(Long accountId, String username) {
+        if(findAccountByIdForUser(accountId, username).isEmpty()) {
+            return Optional.empty();
+        }
+
+        BigDecimal portfolioValue = BigDecimal.ZERO;
+        BigDecimal totalCostBasis = BigDecimal.ZERO;
+        BigDecimal todayChange = BigDecimal.ZERO;
+
+        for (HoldingResponseDto holding : holdingService.getHoldingsByAccountId(accountId)) {
+            portfolioValue = portfolioValue.add(orZero(holding.totalValue()));
+            totalCostBasis = totalCostBasis.add(orZero(holding.totalCost()));
+            todayChange = todayChange.add(orZero(holding.quantity()).multiply(orZero(holding.change())));
+        }
+
+        BigDecimal allTimeChange = portfolioValue.subtract(totalCostBasis);
+        BigDecimal previousCloseValue = portfolioValue.subtract(todayChange);
+
+        return Optional.of(new PortfolioSummaryResponseDto(
+            portfolioValue.setScale(2, RoundingMode.HALF_UP),
+            totalCostBasis.setScale(2, RoundingMode.HALF_UP),
+            todayChange.setScale(2, RoundingMode.HALF_UP),
+            percentOf(todayChange, previousCloseValue),
+            allTimeChange.setScale(2, RoundingMode.HALF_UP),
+            percentOf(allTimeChange, totalCostBasis)
+        ));
+    }
+
     @Transactional
     public void updateFunds(Long accountId, FundsRequestDto request, String username) {
         if (request == null || request.amount() == null || request.amount().signum() <= 0 || request.amount().scale() > 2) {
@@ -157,5 +188,16 @@ public class AccountService {
                     status == null ? null : status.getReasonText()
                 );
             }));
+    }
+
+    private static BigDecimal orZero(BigDecimal value) {
+        return value == null ? BigDecimal.ZERO : value;
+    }
+
+    private static BigDecimal percentOf(BigDecimal amount, BigDecimal base) {
+        if (base.signum() <= 0) {
+            return BigDecimal.ZERO.setScale(2);
+        }
+        return amount.multiply(BigDecimal.valueOf(100)).divide(base, 2, RoundingMode.HALF_UP);
     }
 }
