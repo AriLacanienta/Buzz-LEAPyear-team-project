@@ -32,6 +32,30 @@ WHERE i.instrument_symbol = 'VUSA'
       WHERE q.instrument_id = i.instrument_id
   );
 
+-- Add the status history that precedes each preallocated filled client order.
+INSERT INTO trade_order_status (trade_order_id, status, time_updated)
+SELECT t.trade_order_id,
+             status_data.status,
+             filled_status.time_updated - status_data.time_offset
+FROM trade_orders t
+JOIN accounts a ON a.account_id = t.account_id
+JOIN clients c ON c.clients_id = a.client_id
+JOIN users u ON u.user_id = c.user_id
+JOIN trade_order_status filled_status
+    ON filled_status.trade_order_id = t.trade_order_id
+ AND filled_status.status = 'FILLED'
+CROSS JOIN (VALUES
+        ('SUBMITTED', INTERVAL '2 seconds'),
+        ('ACCEPTED', INTERVAL '1 second')
+) AS status_data(status, time_offset)
+WHERE u.username LIKE 'C%'
+    AND NOT EXISTS (
+            SELECT 1
+            FROM trade_order_status existing_status
+            WHERE existing_status.trade_order_id = t.trade_order_id
+                AND existing_status.status = status_data.status
+    );
+
 -- Rebuild seeded holdings from filled orders using average-cost accounting.
 DO $$
 DECLARE
