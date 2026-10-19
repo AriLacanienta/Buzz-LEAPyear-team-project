@@ -98,6 +98,16 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/user/**").authenticated()
 >>>>>>> a812211 (stubbed /user endpoint, minimal admin page)
 
+                
+                // RESTRICTED (RBAC)
+                .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/v1/test").hasRole("ADMIN")
+                // The analyst dashboard is currently available to authenticated users
+                // until the application has a role-management flow for assigning analysts.
+                .requestMatchers("/api/v1/analyst/**").authenticated()
+                .requestMatchers("/api/v1/compliance/**").hasAnyRole("ADMIN", "COMPLIANCE")
+                .requestMatchers("/api/v1/client/**").hasAnyRole("ADMIN","CLIENT","ANALYST")
+                
                 // HEALTHCHECK (internal only - docker-compose, kubernetes, etc.)
                 .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
                 .requestMatchers("/actuator/**").denyAll()

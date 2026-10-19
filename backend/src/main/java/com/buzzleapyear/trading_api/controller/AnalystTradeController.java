@@ -26,13 +26,20 @@ public class AnalystTradeController {
     public ResponseEntity<Page<AnalystTradeResponseDto>> getTrades(
         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+<<<<<<< HEAD
         @RequestParam(defaultValue = "") String search,
+=======
+>>>>>>> 6c2fa5f (created analyst dashboard)
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "25") int size) {
         if (page < 0 || size < 1 || size > 100 || (from != null && to != null && to.isBefore(from))) {
             return ResponseEntity.badRequest().build();
         }
         PageRequest pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "orderDate"));
+<<<<<<< HEAD
         return ResponseEntity.ok(analystTradeService.findTrades(from, to, search, pageable));
+=======
+        return ResponseEntity.ok(analystTradeService.findTrades(from, to, pageable));
+>>>>>>> 6c2fa5f (created analyst dashboard)
     }
 }

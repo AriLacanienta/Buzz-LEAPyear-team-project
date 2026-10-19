@@ -24,7 +24,11 @@ import { HoldingService } from './services/holding.service';
 import { HighchartsChartModule } from 'highcharts-angular';
 import { AnalystDashboardComponent } from './pages/analyst-dashboard/analyst-dashboard.component';
 import { AdminComponent } from './pages/admin/admin.component';
+<<<<<<< HEAD
 import { FundsComponent } from './components/trade/funds/funds.component';
+=======
+import { AnalystDashboardComponent } from './pages/analyst-dashboard/analyst-dashboard.component';
+>>>>>>> 6c2fa5f (created analyst dashboard)
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -37,6 +41,7 @@ const routes: Routes = [
   { path: 'analyst', component: AnalystDashboardComponent, canActivate: [authGuard] },
   { path: 'markets', component: MarketsComponent, canActivate: [authGuard]},
   { path: 'admin', component: AdminComponent, canActivate: [authGuard], data: { roles: ['MANAGER'] } },
+  { path: 'analyst', component: AnalystDashboardComponent, canActivate: [authGuard] },
   { path: '', redirectTo: '/login', pathMatch: 'full' }
 ];
 
@@ -63,6 +68,7 @@ const routes: Routes = [
     DashboardComponent,
     AnalystDashboardComponent,
     FundsComponent,
+    AnalystDashboardComponent,
     HighchartsChartModule
   ],
   providers: [
