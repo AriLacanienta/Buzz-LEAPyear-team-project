@@ -12,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
+import java.time.LocalDateTime;
 
 @Repository
 public interface TradeOrderRepository extends JpaRepository<TradeOrder, Long> {
@@ -29,4 +30,27 @@ public interface TradeOrderRepository extends JpaRepository<TradeOrder, Long> {
     
     List<TradeOrder> findByInstrumentId(Long instrumentId);
     List<TradeOrder> findByAccountIdOrderByOrderDateDesc(Long accountId);
+
+    @Query(value = """
+        SELECT o.id, a.id, a.accountName, u.firstName, u.lastName,
+               i.instrumentSymbol, i.assetType, i.currencyCode,
+               o.side, o.quantity, o.price, o.tradeValue, o.orderDate,
+               s.status, s.timeUpdated, s.reasonText
+        FROM TradeOrder o
+        JOIN o.account a
+        JOIN a.client c
+        JOIN c.user u
+        JOIN o.instrument i
+        LEFT JOIN TradeOrderStatus s ON s.tradeOrder = o
+            AND s.timeUpdated = (SELECT MAX(latest.timeUpdated)
+                                 FROM TradeOrderStatus latest
+                                 WHERE latest.tradeOrder = o)
+        WHERE o.orderDate >= :fromDate AND o.orderDate < :toDate
+        ORDER BY o.orderDate DESC, o.id DESC
+        """,
+        countQuery = "SELECT COUNT(o) FROM TradeOrder o WHERE o.orderDate >= :fromDate AND o.orderDate < :toDate")
+    Page<Object[]> findAnalystTrades(
+        @Param("fromDate") LocalDateTime fromDate,
+        @Param("toDate") LocalDateTime toDate,
+        Pageable pageable);
 }

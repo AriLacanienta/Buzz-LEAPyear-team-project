@@ -54,7 +54,9 @@ public class SecurityConfig {
                 // RESTRICTED (RBAC)
                 .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/v1/test").hasRole("ADMIN")
-                .requestMatchers("/api/v1/analyst/**").hasAnyRole("ADMIN", "ANALYST")
+                // The analyst dashboard is currently available to authenticated users
+                // until the application has a role-management flow for assigning analysts.
+                .requestMatchers("/api/v1/analyst/**").authenticated()
                 .requestMatchers("/api/v1/compliance/**").hasAnyRole("ADMIN", "COMPLIANCE")
                 .requestMatchers("/api/v1/client/**").hasAnyRole("ADMIN","CLIENT","ANALYST")
                 

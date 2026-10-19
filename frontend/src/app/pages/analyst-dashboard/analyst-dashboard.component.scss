@@ -1,0 +1,74 @@
+:host { display: block; min-height: calc(100vh - 72px); background: #0F1520; color: #9aa1ad; }
+
+.analyst-page { max-width: 1500px; margin: 0 auto; padding: 42px 36px 64px; }
+.page-heading { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; margin-bottom: 28px; }
+.eyebrow { margin: 0 0 8px; color: #3B82F6; font-size: 11px; font-weight: 700; letter-spacing: 1.6px; text-transform: uppercase; }
+h1 { margin: 0; color: #f6f8fb; font-size: clamp(28px, 4vw, 46px); letter-spacing: 0; }
+.subheading { margin: 10px 0 0; color: #8795a8; }
+.live-state { color: #10B981; font-size: 12px; font-weight: 800; letter-spacing: 1px; white-space: nowrap; }
+.live-state small { margin-left: 9px; color: #8290a2; font-weight: 500; letter-spacing: 0; }
+.pulse { display: inline-block; width: 8px; height: 8px; margin-right: 7px; border-radius: 50%; background: #10B981; box-shadow: 0 0 0 5px rgba(16,185,129,.12); }
+.toolbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 14px; padding: 14px; border: 1px solid #1E2D45; background: #1E2D45; }
+.presets { display: flex; gap: 6px; }
+button { border: 1px solid #334456; padding: 9px 14px; color: #a8b6c7; background: #17212d; cursor: pointer; font: inherit; font-size: 12px; }
+button:hover, button.active { border-color: #3B82F6; color: #ffffff; background: #3B82F6; }
+button:disabled { cursor: default; opacity: .4; }
+.date-fields { display: flex; align-items: center; gap: 9px; color: #708096; font-size: 12px; }
+label { display: flex; align-items: center; gap: 7px; color: #a8b6c7; }
+input { border: 1px solid #1E2D45; padding: 8px 9px; color: #ffffff; background: #0F1520; font: inherit; }
+.search-strip { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; padding: 10px 12px; border: 1px solid #1E2D45; background: #1E2D45; }
+.search-icon { color: #3B82F6; font-size: 23px; line-height: 1; }
+.trade-search { flex: 1; min-width: 0; border: 0; outline: 0; padding: 8px 2px; background: transparent; }
+.search-button, .clear-button { padding: 8px 12px; }
+.clear-button { color: #9aa1ad; background: transparent; }
+.summary-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 14px; }
+.summary-card { min-height: 128px; padding: 18px; border: 1px solid #1E2D45; background: #1E2D45; }
+.summary-card.buy-card { border-top: 3px solid #3B82F6; }
+.summary-card.sell-card { border-top: 3px solid #EF4444; }
+.summary-label, .panel-kicker { color: #62748E; font-size: 10px; font-weight: 700; letter-spacing: 1.1px; text-transform: uppercase; }
+.summary-value { margin-top: 14px; color: #ffffff; font-size: 30px; font-weight: 700; line-height: 1; }
+.summary-detail { margin-top: 12px; color: #9aa1ad; font-size: 11px; }
+.insight-grid { display: grid; grid-template-columns: 1.35fr 1fr; gap: 14px; margin-bottom: 14px; }
+.insight-panel { min-height: 225px; padding: 20px; border: 1px solid #1E2D45; background: #1E2D45; }
+.panel-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.insight-panel h2 { margin: 5px 0 20px; color: #f1f5f9; font-size: 18px; }
+.panel-period { color: #3B82F6; font-size: 10px; font-weight: 700; letter-spacing: 1px; }
+.stock-row { display: grid; grid-template-columns: 100px 1fr 24px; align-items: center; gap: 12px; margin: 13px 0; }
+.stock-name strong { display: block; color: #ffffff; font-size: 13px; }
+.stock-name small { display: block; margin-top: 3px; color: #728196; font-size: 10px; }
+.stock-bar { height: 7px; overflow: hidden; background: #0F1520; }
+.stock-bar span { display: block; height: 100%; background: #3B82F6; }
+.stock-count { color: #ffffff; font-size: 12px; text-align: right; }
+.flow-bar { display: flex; height: 14px; overflow: hidden; margin: 30px 0 18px; background: #EF4444; }
+.buy-flow { display: block; background: #3B82F6; }
+.flow-legend { display: flex; justify-content: space-between; color: #9aa1ad; font-size: 12px; }
+.flow-legend span { display: flex; align-items: center; gap: 6px; }
+.flow-legend strong { color: #ffffff; }
+.flow-legend i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; }
+.buy-dot { background: #3B82F6; }
+.sell-dot { background: #EF4444; }
+.panel-note { margin-top: 26px; color: #62748E; font-size: 11px; line-height: 1.5; }
+.panel-empty { padding: 20px 0; color: #9aa1ad; font-size: 12px; }
+.table-shell { border: 1px solid #1E2D45; background: #1E2D45; }
+.table-meta, .pagination { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; color: #8392a5; font-size: 12px; }
+.table-meta { border-bottom: 1px solid #1E2D45; }
+.table-meta strong { color: #f5f7fa; }
+.table-scroll { overflow-x: auto; }
+table { width: 100%; min-width: 1100px; border-collapse: collapse; text-align: left; }
+th { padding: 12px 14px; color: #718198; background: #131c27; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; white-space: nowrap; }
+td { padding: 14px; border-top: 1px solid #263443; color: #bfccda; font-size: 12px; white-space: nowrap; }
+td small { display: block; margin-top: 4px; color: #728196; font-size: 10px; }
+td strong { color: #eef3f8; font-weight: 650; }
+.order-id { color: #3B82F6; font-variant-numeric: tabular-nums; }
+.side, .status { display: inline-block; padding: 4px 7px; color: #3B82F6; background: rgba(59,130,246,.12); font-size: 10px; font-weight: 800; letter-spacing: .5px; }
+.side.sell { color: #ff8b87; background: rgba(255,139,135,.12); }
+.status.submitted { color: #f5c76d; background: rgba(245,199,109,.12); }
+.status.accepted, .status.validated { color: #72b7ff; background: rgba(114,183,255,.12); }
+.status.rejected { color: #ff8b87; background: rgba(255,139,135,.12); }
+.value { color: #f5f7fa; font-weight: 650; }
+.reason { max-width: 150px; overflow: hidden; text-overflow: ellipsis; }
+.empty-state, .loading-state, .error-state { padding: 36px; text-align: center; }
+.loading-state { color: #8392a5; }
+.error-state { margin-bottom: 14px; border: 1px solid #7d4142; color: #ffaaa6; background: #331f27; }
+@media (max-width: 900px) { .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .insight-grid { grid-template-columns: 1fr; } }
+@media (max-width: 760px) { .analyst-page { padding: 28px 16px; } .page-heading, .toolbar { align-items: flex-start; flex-direction: column; } .date-fields { flex-wrap: wrap; } .presets { flex-wrap: wrap; } .summary-grid { grid-template-columns: 1fr 1fr; } }
