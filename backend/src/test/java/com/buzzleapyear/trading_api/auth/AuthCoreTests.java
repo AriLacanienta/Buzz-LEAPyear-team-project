@@ -4,6 +4,10 @@ import com.buzzleapyear.trading_api.controller.AuthController;
 import com.buzzleapyear.trading_api.dto.LoginRequest;
 import com.buzzleapyear.trading_api.dto.RegistrationRequest;
 import com.buzzleapyear.trading_api.entity.User;
+import com.buzzleapyear.trading_api.entity.Role;
+import com.buzzleapyear.trading_api.repository.AccountRepository;
+import com.buzzleapyear.trading_api.repository.ClientRepository;
+import com.buzzleapyear.trading_api.repository.RoleRepository;
 import com.buzzleapyear.trading_api.repository.RefreshSessionRepository;
 import com.buzzleapyear.trading_api.repository.UserRepository;
 import com.buzzleapyear.trading_api.security.JwtTokenProvider;
@@ -27,6 +31,9 @@ import static org.mockito.Mockito.*;
 class AuthCoreTests {
 
     @Mock UserRepository userRepository;
+    @Mock AccountRepository accountRepository;
+    @Mock ClientRepository clientRepository;
+    @Mock RoleRepository roleRepository;
     @Mock RefreshSessionRepository refreshSessionRepository;
     @Mock JwtTokenProvider tokenProvider;
     @Mock HttpServletRequest request;
@@ -37,10 +44,15 @@ class AuthCoreTests {
     @Test
     void registerAndLoginFlowWorks() {
         ReflectionTestUtils.setField(controller, "passwordEncoder", passwordEncoder);
+        ReflectionTestUtils.setField(controller, "refreshSessionRepository", refreshSessionRepository);
         when(userRepository.findByUsername(any())).thenReturn(java.util.Optional.empty());
         when(userRepository.findByEmail(any())).thenReturn(java.util.Optional.empty());
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(roleRepository.findByRoleName(Role.RoleName.CLIENT))
+            .thenReturn(java.util.Optional.of(new Role(Role.RoleName.CLIENT, "Client")));
         when(tokenProvider.generateAccessToken(eq("alice"), eq(0L))).thenReturn("access-token");
+        when(request.isSecure()).thenReturn(false);
+        when(request.getHeader("X-Forwarded-Proto")).thenReturn(null);
 
         RegistrationRequest registration = new RegistrationRequest(
                 "alice", "alice@example.com", "Alice", "Client", "Password123");
