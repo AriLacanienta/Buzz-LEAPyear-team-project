@@ -34,6 +34,7 @@ import com.buzzleapyear.trading_api.service.ProcessOrderService;
 import com.buzzleapyear.trading_api.service.TradeOrderService;
 import com.buzzleapyear.trading_api.service.AccountService;
 import com.buzzleapyear.trading_api.service.OrderProcessor;
+import com.buzzleapyear.trading_api.service.TradeOrderEventService;
 
 import jakarta.validation.Valid;
 
@@ -57,6 +58,7 @@ public class TradeOrderController {
     private final TradeOrderService tradeOrderService;
     private final AccountService accountService;
     private final OrderProcessor orderProcessor;
+    private final TradeOrderEventService tradeOrderEventService;
 
     public TradeOrderController(
             ProcessOrderService processOrderService,
@@ -66,7 +68,8 @@ public class TradeOrderController {
             InstrumentRepository instrumentRepository,
             TradeOrderService tradeOrderService,
             AccountService accountService,
-            OrderProcessor orderProcessor) {
+            OrderProcessor orderProcessor,
+            TradeOrderEventService tradeOrderEventService) {
         this.processOrderService = processOrderService;
         this.tradeOrderRepository = tradeOrderRepository;
         this.tradeOrderStatusRepository = tradeOrderStatusRepository;
@@ -75,6 +78,7 @@ public class TradeOrderController {
         this.tradeOrderService = tradeOrderService;
         this.accountService = accountService;
         this.orderProcessor = orderProcessor;
+        this.tradeOrderEventService = tradeOrderEventService;
     }
 
     /*
@@ -129,17 +133,8 @@ public class TradeOrderController {
             order.setOrderDate(LocalDateTime.now());
             
             // Save order to database (generates ID)
-            order = tradeOrderRepository.save(order);
+            order = tradeOrderEventService.createOrder(order);
             logger.info("Order persisted with ID: {}", order.getId());
-            
-            // Create initial SUBMITTED status
-            TradeOrderStatus submittedStatus = new TradeOrderStatus();
-            submittedStatus.setTradeOrder(order);
-            submittedStatus.setStatus(TradeOrderStatus.OrderStatus.SUBMITTED);
-            submittedStatus.setTimeUpdated(LocalDateTime.now());
-            submittedStatus.setReasonText(null);
-            tradeOrderStatusRepository.save(submittedStatus);
-            logger.info("SUBMITTED status logged for order ID: {}", order.getId());
             
             // Submit for processing
             processOrderService.submitOrder(order.getId());

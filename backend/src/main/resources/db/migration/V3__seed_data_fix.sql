@@ -126,3 +126,17 @@ BEGIN
         END IF;
     END LOOP;
 END $$;
+
+-- KAFKA
+CREATE TABLE trade_event_outbox (
+    event_id UUID PRIMARY KEY,
+    account_id BIGINT NOT NULL,
+    event_type VARCHAR(50) NOT NULL,
+    payload TEXT NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    published_at TIMESTAMP
+);
+
+CREATE INDEX idx_trade_event_outbox_pending
+    ON trade_event_outbox (created_at)
+    WHERE published_at IS NULL;
