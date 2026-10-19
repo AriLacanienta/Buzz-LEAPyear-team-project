@@ -51,7 +51,9 @@ export class RegisterComponent {
 
         const landingPage = this.authService.hasRole('MANAGER')
           ? '/admin'
-          : '/dashboard';
+          : this.authService.hasRole('ANALYST')
+            ? '/analyst'
+            : '/dashboard';
         this.router.navigate([landingPage]);
       },
       (error) => {

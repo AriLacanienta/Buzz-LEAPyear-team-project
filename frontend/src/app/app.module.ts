@@ -24,11 +24,7 @@ import { HoldingService } from './services/holding.service';
 import { HighchartsChartModule } from 'highcharts-angular';
 import { AnalystDashboardComponent } from './pages/analyst-dashboard/analyst-dashboard.component';
 import { AdminComponent } from './pages/admin/admin.component';
-<<<<<<< HEAD
 import { FundsComponent } from './components/trade/funds/funds.component';
-=======
-import { AnalystDashboardComponent } from './pages/analyst-dashboard/analyst-dashboard.component';
->>>>>>> 6c2fa5f (created analyst dashboard)
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -40,8 +36,13 @@ const routes: Routes = [
   { path: 'markets', component: MarketsComponent, canActivate: [authGuard] },
   { path: 'analyst', component: AnalystDashboardComponent, canActivate: [authGuard] },
   { path: 'markets', component: MarketsComponent, canActivate: [authGuard]},
+  { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard], data: { roles: ['CLIENT', 'MANAGER'] } },
+  { path: 'account', component: AccountComponent, canActivate: [authGuard], data: { roles: ['CLIENT', 'MANAGER'] } },
+  { path: 'portfolio', component: DashboardComponent, canActivate: [authGuard], data: { roles: ['CLIENT', 'MANAGER'] } },
+  { path: 'trade', component: TradeComponent, canActivate: [authGuard], data: { roles: ['CLIENT', 'MANAGER'] } },
+  { path: 'markets', component: MarketsComponent, canActivate: [authGuard], data: { roles: ['CLIENT', 'MANAGER'] } },
   { path: 'admin', component: AdminComponent, canActivate: [authGuard], data: { roles: ['MANAGER'] } },
-  { path: 'analyst', component: AnalystDashboardComponent, canActivate: [authGuard] },
+  { path: 'analyst', component: AnalystDashboardComponent, canActivate: [authGuard], data: { roles: ['ANALYST', 'MANAGER'] } },
   { path: '', redirectTo: '/login', pathMatch: 'full' }
 ];
 

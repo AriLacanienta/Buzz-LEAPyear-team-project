@@ -11,15 +11,19 @@
     </div>
     <div class="divider">|</div>
     <nav class="tabs">
-      <a routerLink="/account" routerLinkActive="active" class="account-tab">
+      <a *ngIf="!isAnalystOnly" routerLink="/account" routerLinkActive="active" class="account-tab">
         <img src="assets/images/joanna.jpg" alt="Account"/>
         <span class="account-name">{{ accountName$ | async }}</span>
       </a>
-      <a routerLink="/portfolio" routerLinkActive="active" class="tab">Portfolio</a>
-      <a routerLink="/markets" routerLinkActive="active" class="tab">Markets</a>
-      <a routerLink="/trade" routerLinkActive="active" class="tab">Trade</a>
-      <a routerLink="/analyst" routerLinkActive="active" class="tab">Analyst</a>
-      <a routerLink="/account" routerLinkActive="active" class="tab">Account</a>
+      <ng-container *ngIf="!isAnalystOnly; else analystNavigation">
+        <a routerLink="/portfolio" routerLinkActive="active" class="tab">Portfolio</a>
+        <a routerLink="/markets" routerLinkActive="active" class="tab">Markets</a>
+        <a routerLink="/trade" routerLinkActive="active" class="tab">Trade</a>
+        <a routerLink="/account" routerLinkActive="active" class="tab">Account</a>
+      </ng-container>
+      <ng-template #analystNavigation>
+        <a routerLink="/analyst" routerLinkActive="active" class="tab">Analyst</a>
+      </ng-template>
     </nav>
 
     <div class="navbar-right">

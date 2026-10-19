@@ -25,6 +25,10 @@ export class NavbarComponent {
     }))
   );
 
+  get isAnalystOnly(): boolean {
+    return this.authService.hasRole('ANALYST') && !this.authService.hasRole('MANAGER');
+  }
+
   constructor(
     private accountService: AccountService,
     private marketStatusService: MarketStatusService,

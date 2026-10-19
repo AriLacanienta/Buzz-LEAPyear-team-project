@@ -53,7 +53,9 @@ export class LoginComponent {
 
         const landingPage = this.authService.hasRole('MANAGER')
           ? '/admin'
-          : '/dashboard';
+          : this.authService.hasRole('ANALYST')
+            ? '/analyst'
+            : '/dashboard';
         this.router.navigate([landingPage]);
       },
       // Error response
