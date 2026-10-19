@@ -1,4 +1,19 @@
-main {
-	max-width: 85%;
-	margin: 0 auto;
+:host {
+  display: block;
+  min-height: calc(100vh - 5rem);
+}
+
+.clients-page {
+  display: grid;
+  grid-template-columns: 19rem minmax(0, 1fr);
+  gap: 1.25rem;
+  width: min(92%, 90rem);
+  min-height: calc(100vh - 8rem);
+  margin: 1.5rem auto;
+}
+
+@media (max-width: 900px) {
+  .clients-page {
+    grid-template-columns: 1fr;
+  }
 }

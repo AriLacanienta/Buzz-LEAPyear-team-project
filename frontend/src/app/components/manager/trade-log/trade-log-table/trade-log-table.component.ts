@@ -14,7 +14,7 @@ export class TradeLogTableComponent implements OnInit {
     trades: ManagerTradeLog[] = [];
     filteredTrades: ManagerTradeLog[] = [];
     pageIndex = 0;
-    pageSize = 25;
+    pageSize = 15;
     totalElements = 0;
     totalPages = 0;
     loading = false;
