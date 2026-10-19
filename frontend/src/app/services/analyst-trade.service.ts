@@ -10,10 +10,11 @@ export class AnalystTradeService {
 
   constructor(private http: HttpClient) {}
 
-  getTrades(from: string, to: string, page = 0, size = 25): Observable<AnalystTradePage> {
+  getTrades(from: string, to: string, search = '', page = 0, size = 25): Observable<AnalystTradePage> {
     const params = new HttpParams()
       .set('from', from)
       .set('to', to)
+      .set('search', search.trim())
       .set('page', String(page))
       .set('size', String(size));
     return this.http.get<AnalystTradePage>(this.apiUrl, { params });

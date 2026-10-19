@@ -17,7 +17,7 @@ public class AnalystTradeService {
         this.tradeOrderRepository = tradeOrderRepository;
     }
 
-    public Page<AnalystTradeResponseDto> findTrades(LocalDate from, LocalDate to, Pageable pageable) {
+    public Page<AnalystTradeResponseDto> findTrades(LocalDate from, LocalDate to, String search, Pageable pageable) {
         LocalDate start = from == null ? LocalDate.now() : from;
         LocalDate end = to == null ? start : to;
         if (end.isBefore(start)) {
@@ -25,7 +25,7 @@ public class AnalystTradeService {
         }
 
         var rows = tradeOrderRepository.findAnalystTrades(
-            start.atStartOfDay(), end.plusDays(1).atStartOfDay(), pageable);
+            start.atStartOfDay(), end.plusDays(1).atStartOfDay(), search == null ? "" : search.trim(), pageable);
         var content = rows.getContent().stream().map(this::toDto).toList();
         return new PageImpl<>(content, pageable, rows.getTotalElements());
     }

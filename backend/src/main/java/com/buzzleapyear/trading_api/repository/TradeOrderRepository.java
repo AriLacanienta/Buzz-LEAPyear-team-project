@@ -45,12 +45,30 @@ public interface TradeOrderRepository extends JpaRepository<TradeOrder, Long> {
             AND s.timeUpdated = (SELECT MAX(latest.timeUpdated)
                                  FROM TradeOrderStatus latest
                                  WHERE latest.tradeOrder = o)
-        WHERE o.orderDate >= :fromDate AND o.orderDate < :toDate
+                WHERE o.orderDate >= :fromDate AND o.orderDate < :toDate
+                    AND (:search = '' OR
+                             LOWER(CONCAT(u.firstName, ' ', u.lastName)) LIKE CONCAT('%', LOWER(:search), '%') OR
+                             LOWER(u.username) LIKE CONCAT('%', LOWER(:search), '%') OR
+                             LOWER(a.accountName) LIKE CONCAT('%', LOWER(:search), '%') OR
+                             LOWER(i.instrumentSymbol) LIKE CONCAT('%', LOWER(:search), '%'))
         ORDER BY o.orderDate DESC, o.id DESC
         """,
-        countQuery = "SELECT COUNT(o) FROM TradeOrder o WHERE o.orderDate >= :fromDate AND o.orderDate < :toDate")
+                countQuery = """
+                SELECT COUNT(o) FROM TradeOrder o
+                JOIN o.account a
+                JOIN a.client c
+                JOIN c.user u
+                JOIN o.instrument i
+                WHERE o.orderDate >= :fromDate AND o.orderDate < :toDate
+                    AND (:search = '' OR
+                             LOWER(CONCAT(u.firstName, ' ', u.lastName)) LIKE CONCAT('%', LOWER(:search), '%') OR
+                             LOWER(u.username) LIKE CONCAT('%', LOWER(:search), '%') OR
+                             LOWER(a.accountName) LIKE CONCAT('%', LOWER(:search), '%') OR
+                             LOWER(i.instrumentSymbol) LIKE CONCAT('%', LOWER(:search), '%'))
+                """)
     Page<Object[]> findAnalystTrades(
         @Param("fromDate") LocalDateTime fromDate,
         @Param("toDate") LocalDateTime toDate,
+                @Param("search") String search,
         Pageable pageable);
 }
