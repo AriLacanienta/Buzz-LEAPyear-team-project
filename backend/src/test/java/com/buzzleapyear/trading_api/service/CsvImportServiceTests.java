@@ -39,7 +39,7 @@ import jakarta.persistence.EntityManager;
 class CsvImportServiceTests {
 
 	private ImportCSVService testService;
-	
+
 	@Mock
 	private InstrumentRepository mockInstrumentRepository;
 
@@ -76,14 +76,14 @@ class CsvImportServiceTests {
             Assertions.assertTrue(result.side == OrderSide.BUY || result.side == OrderSide.SELL,
                 "Side should be either BUY or SELL");
         }
-        
+
         @Test
         void testParseLineWithSellOrder() {
             final String TEST_LINE = "T0002,2026-01-10,C002,Bob Smith,Jane Doe,GOOGL,Equity,SELL,50,2800.00,USD,140000.00";
             LineValues result = testService.parseLine(TEST_LINE);
 
             Assertions.assertAll("parsed SELL order",
-                () -> Assertions.assertTrue(result.side == OrderSide.BUY || result.side == OrderSide.SELL, 
+                () -> Assertions.assertTrue(result.side == OrderSide.BUY || result.side == OrderSide.SELL,
                     "Side should be BUY or SELL"),
                 () -> Assertions.assertEquals("Bob Smith", result.client_name),
                 () -> Assertions.assertEquals(50.0, result.quantity, 0.01),
@@ -106,7 +106,7 @@ class CsvImportServiceTests {
 
     @Nested
     class EntityPersistenceTests {
-        
+
         private ImportCSVService service;
         @Mock
         private EntityManager mockEntityManager;
@@ -356,7 +356,7 @@ class CsvImportServiceTests {
             Assertions.assertAll("TradeOrder entity data validation",
                 () -> Assertions.assertNotNull(persistedTradeOrder.getAccount(), "TradeOrder should have Account relationship"),
                 () -> Assertions.assertNotNull(persistedTradeOrder.getInstrument(), "TradeOrder should have Instrument relationship"),
-                () -> Assertions.assertTrue(persistedTradeOrder.getSide() == OrderSide.BUY || persistedTradeOrder.getSide() == OrderSide.SELL, 
+                () -> Assertions.assertTrue(persistedTradeOrder.getSide() == OrderSide.BUY || persistedTradeOrder.getSide() == OrderSide.SELL,
                     "TradeOrder side should be BUY or SELL"),
                 () -> Assertions.assertEquals(new BigDecimal("120"), persistedTradeOrder.getQuantity().setScale(0)),
                 () -> Assertions.assertEquals(new BigDecimal("185.32").setScale(2), persistedTradeOrder.getPrice().setScale(2)),
@@ -394,7 +394,7 @@ class CsvImportServiceTests {
             ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
             verify(mockEntityManager, times(1)).persist(userCaptor.capture());
 
-            Assertions.assertEquals(1L, userCaptor.getAllValues().size(), 
+            Assertions.assertEquals(1L, userCaptor.getAllValues().size(),
                 "Only ONE User should be persisted (cached for second row)");
         }
 
@@ -427,7 +427,7 @@ class CsvImportServiceTests {
             ArgumentCaptor<Instrument> instrumentCaptor = ArgumentCaptor.forClass(Instrument.class);
             verify(mockEntityManager, times(1)).persist(instrumentCaptor.capture());
 
-            Assertions.assertEquals(1L, instrumentCaptor.getAllValues().size(), 
+            Assertions.assertEquals(1L, instrumentCaptor.getAllValues().size(),
                 "Only ONE Instrument should be persisted (cached for second row)");
         }
 
@@ -460,7 +460,7 @@ class CsvImportServiceTests {
             ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
             verify(mockEntityManager, times(2)).persist(userCaptor.capture());
 
-            Assertions.assertEquals(2L, userCaptor.getAllValues().size(), 
+            Assertions.assertEquals(2L, userCaptor.getAllValues().size(),
                 "TWO Users should be persisted for different clients");
         }
 

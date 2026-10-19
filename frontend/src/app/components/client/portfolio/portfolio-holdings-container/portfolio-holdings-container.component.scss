@@ -7,10 +7,11 @@ $spacing-md: 1rem;
 $spacing-lg: 2.5rem;
 
 h2 {
-  font-size: $text-lg;
+  font-size: 1rem;
   font-weight: $font-weight-semibold;
   margin-bottom: $spacing-xs;
   color: $color-white;
+  font-family: Inter, sans-serif;
 }
 
 .loading-state,
@@ -19,6 +20,7 @@ h2 {
   text-align: center;
   border-radius: $radius-sm;
   color: $color-white;
+  font-family: Inter, sans-serif;
 }
 
 .holdings-column {

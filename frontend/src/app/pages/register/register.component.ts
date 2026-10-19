@@ -46,11 +46,13 @@ export class RegisterComponent {
 
     this.authService.register(username, email, firstName, lastName, password).subscribe(
       (response) => {
-        this.authService.storeToken(response.token);
-        this.authService.storeRole(response.role || 'CLIENT');
         this.loading = false;
         console.log('Registration successful!', response);
-        this.router.navigate(['/dashboard']);
+
+        const landingPage = this.authService.hasRole('MANAGER')
+          ? '/admin'
+          : '/dashboard';
+        this.router.navigate([landingPage]);
       },
       (error) => {
         this.loading = false;

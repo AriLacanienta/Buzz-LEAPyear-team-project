@@ -1,0 +1,31 @@
+<section class="admin-page">
+  <h1>Admin</h1>
+
+  <button type="button" (click)="loadAllUsers()" [disabled]="isLoading">
+    {{ isLoading ? 'Loading users...' : 'Load all users' }}
+  </button>
+
+  <p *ngIf="errorMessage" class="error-message">{{ errorMessage }}</p>
+
+  <table *ngIf="hasLoadedUsers" class="users-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Roles</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let user of users">
+        <td>{{ user.id }}</td>
+        <td>{{ user.firstName }} {{ user.lastName }}</td>
+        <td>{{ user.email }}</td>
+        <td>{{ user.roles.join(', ') }}</td>
+      </tr>
+      <tr *ngIf="users.length === 0">
+        <td colspan="4">No users found.</td>
+      </tr>
+    </tbody>
+  </table>
+</section>

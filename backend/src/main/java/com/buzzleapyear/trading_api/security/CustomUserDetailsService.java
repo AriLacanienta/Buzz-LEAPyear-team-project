@@ -8,12 +8,13 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.stream.Collectors;
 //This acts as a user database lookup service
 //when spring security needs to authenticate a user by username, it will use this service to load user details
 @Service
@@ -35,9 +36,10 @@ public class CustomUserDetailsService implements UserDetailsService {
         }
 
         User appUser = user.get();
-        Collection<GrantedAuthority> authorities = new ArrayList<>();
-        boolean isAdmin = appUser.getOperations() != null && !appUser.getOperations().isEmpty();
-        authorities.add(new SimpleGrantedAuthority(isAdmin ? "ROLE_ADMIN" : "ROLE_CLIENT"));
+        Collection<GrantedAuthority> authorities = appUser.getUserRoles().stream()
+            .map(userRole -> new SimpleGrantedAuthority(
+                "ROLE_" + userRole.getRole().getRoleName().name()))
+            .collect(Collectors.toList());
 
         //return a UserDetails object containing the username, hashed password, and authorities
         return org.springframework.security.core.userdetails.User.builder()

@@ -15,12 +15,19 @@ import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { managerRoutes } from './manager.routes';
 import { clientRoutes } from './client.routes';
+import { PortfolioHoldingCardComponent } from './components/client/portfolio/portfolio-holding-card/portfolio-holding-card.component';
+import { HoldingService } from './services/holding.service';
+import { HighchartsChartModule } from 'highcharts-angular';
+import { FundsComponent } from './components/trade/funds/funds.component';
+import { AdminComponent } from './pages/admin/admin.component';
+import { authGuard } from './guards/auth.guard';
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
   ...managerRoutes,
   ...clientRoutes,
+  { path: 'admin', component: AdminComponent, canActivate: [authGuard], data: { roles: ['MANAGER'] } },
   { path: '', redirectTo: '/login', pathMatch: 'full' }
 ];
 
@@ -29,7 +36,8 @@ const routes: Routes = [
     AppComponent,
     LoginComponent,
     RegisterComponent,
-    AccountComponent
+    AccountComponent,
+    AdminComponent
   ],
   imports: [
     BrowserModule,
@@ -39,9 +47,13 @@ const routes: Routes = [
     HttpClientModule,
     RouterModule.forRoot(routes),
     MatTableModule,
-    MatIconModule
+    MatIconModule,
+    PortfolioHoldingCardComponent,
+    FundsComponent,
+    HighchartsChartModule
   ],
   providers: [
+    { provide: HoldingService, useClass: HoldingService },
     // Register HTTP interceptor to add JWT token to all requests
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }
   ],

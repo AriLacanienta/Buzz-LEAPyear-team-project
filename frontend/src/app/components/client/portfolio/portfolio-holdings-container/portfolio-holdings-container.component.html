@@ -10,7 +10,7 @@
 
 <div *ngIf="!isLoading && visibleHoldings.length > 0" class="holdings-column">
   <app-portfolio-holding-card 
-    *ngFor="let holding of visibleHoldings; let i = index"
+    *ngFor="let holding of visibleHoldings; let i = index; trackBy: trackBySymbol"
     [holding]="holding"
     [index]="i">
   </app-portfolio-holding-card>

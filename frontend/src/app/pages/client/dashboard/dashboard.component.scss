@@ -9,6 +9,95 @@ main {
   margin: 0 auto;
 }
 
+.portfolio-chart-section {
+  margin-bottom: 3rem;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  border: 0.1rem solid #1E2D45;
+  background: #0F1520;
+
+  .portfolio-label {
+    margin: 0 0 0.5rem 0;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #62748E;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+  }
+
+  h2 {
+    margin: 0 0 1.5rem 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #f1f5f9;
+  }
+
+  .total-balance {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin-bottom: 0;
+
+    .value {
+      font-family: 'DM Mono', monospace;
+      font-size: 2.25rem;
+      font-weight: 500;
+      color: #ffffff;
+      letter-spacing: 0;
+    }
+
+    .today-change {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+  }
+
+  .portfolio-stats {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 0.5rem;
+
+    .all-time-change {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+  }
+
+  .positive {
+    color: #10b981;
+  }
+
+  .negative {
+    color: #ef4444;
+  }
+
+  .chart-wrapper {
+    width: 100%;
+    height: 300px;
+  }
+
+  highcharts-chart {
+    width: 100%;
+    height: 300px;
+    display: block;
+    
+    ::ng-deep {
+      .highcharts-container {
+        width: 100% !important;
+        height: 100% !important;
+      }
+      
+      svg {
+        width: 100% !important;
+        height: 100% !important;
+      }
+    }
+  }
+}
+
 .portfolio-section {
   margin-bottom: clamp(0.65rem, 1.5vw, $spacing-md);
 }
@@ -50,4 +139,19 @@ main {
   color: #e8eaf0;
   font-size: 1rem;
   margin: 0;
+}
+
+.holdings-column {
+  display: flex;
+  flex-direction: row;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  max-width: 100%;
+}
+.holdings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(13.5rem, 1fr));
+  gap: 1.25rem;
+  width: 100%;
+  margin-top: 1.5rem;
 }

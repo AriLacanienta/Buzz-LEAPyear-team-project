@@ -2,12 +2,16 @@
   <ng-content select="[table-header]"></ng-content>
 </div>
 
+<div class="table-scroll">
 <table mat-table [dataSource]="instruments" *ngIf="instruments.length > 0">
 
   <ng-container matColumnDef="instrumentSymbol">
     <th mat-header-cell *matHeaderCellDef> SYMBOL </th>
     <td mat-cell *matCellDef="let instrument">
-      <span class="symbol-avatar">{{ getSymbolFirstLetter(instrument.instrumentSymbol) }}</span>{{ instrument.instrumentSymbol }}
+      <div class="symbol-cell">
+        <span class="symbol-avatar">{{ getSymbolFirstLetter(instrument.instrumentSymbol) }}</span>
+        <span>{{ instrument.instrumentSymbol }}</span>
+      </div>
     </td>
   </ng-container>
 
@@ -26,7 +30,7 @@
     <td mat-cell *matCellDef="let instrument" [ngClass]="getChangePercentClass(instrument.changePercent)">
       <div class="change-container">
         <div class="change-value">
-          {{ formatPrice(instrument.change) }}
+          {{ instrument.change >= 0 ? '+' : '' }}{{ formatPrice(instrument.change) }}
         </div>
         <div class="change-percent">
           {{ formatChangePercent(instrument.changePercent) }}%
@@ -49,6 +53,7 @@
   <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
   <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
 </table>
+</div>
 
 <div *ngIf="instruments.length === 0" class="no-data-message">
   No instruments available
