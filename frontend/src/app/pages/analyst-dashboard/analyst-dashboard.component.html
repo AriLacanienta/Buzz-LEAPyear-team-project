@@ -28,7 +28,7 @@
       type="search"
       [(ngModel)]="searchTerm"
       (keyup.enter)="applySearch()"
-      placeholder="Search client, username, account, or stock symbol"
+      placeholder="Search order ID, client, username, account, or stock symbol"
       aria-label="Search trades">
     <button class="search-button" (click)="applySearch()">Search</button>
     <button class="clear-button" *ngIf="searchTerm" (click)="clearSearch()">Clear</button>

@@ -58,6 +58,7 @@ public interface TradeOrderRepository extends JpaRepository<TradeOrder, Long> {
 <<<<<<< HEAD
                 WHERE o.orderDate >= :fromDate AND o.orderDate < :toDate
                     AND (:search = '' OR
+                             STR(o.id) LIKE CONCAT('%', :search, '%') OR
                              LOWER(CONCAT(u.firstName, ' ', u.lastName)) LIKE CONCAT('%', LOWER(:search), '%') OR
                              LOWER(u.username) LIKE CONCAT('%', LOWER(:search), '%') OR
                              LOWER(a.accountName) LIKE CONCAT('%', LOWER(:search), '%') OR
@@ -72,6 +73,7 @@ public interface TradeOrderRepository extends JpaRepository<TradeOrder, Long> {
                 JOIN o.instrument i
                 WHERE o.orderDate >= :fromDate AND o.orderDate < :toDate
                     AND (:search = '' OR
+                             STR(o.id) LIKE CONCAT('%', :search, '%') OR
                              LOWER(CONCAT(u.firstName, ' ', u.lastName)) LIKE CONCAT('%', LOWER(:search), '%') OR
                              LOWER(u.username) LIKE CONCAT('%', LOWER(:search), '%') OR
                              LOWER(a.accountName) LIKE CONCAT('%', LOWER(:search), '%') OR

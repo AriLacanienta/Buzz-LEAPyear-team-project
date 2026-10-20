@@ -3,6 +3,7 @@ package com.buzzleapyear.trading_api.config;
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 import java.util.Arrays;
 import org.springframework.http.HttpStatus;
 =======
@@ -13,6 +14,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 =======
 import org.springframework.http.HttpStatus;
 >>>>>>> e7922e0 (making role specific log ins work)
+=======
+import java.util.Arrays;
+import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Autowired;
+>>>>>>> c725be8 (added search capabilities and role log in)
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -102,6 +108,16 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/user/**").authenticated()
 >>>>>>> a812211 (stubbed /user endpoint, minimal admin page)
 
+                
+                // RESTRICTED (RBAC)
+                .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/v1/test").hasRole("ADMIN")
+                // The analyst dashboard is currently available to authenticated users
+                // until the application has a role-management flow for assigning analysts.
+                .requestMatchers("/api/v1/analyst/**").authenticated()
+                .requestMatchers("/api/v1/compliance/**").hasAnyRole("ADMIN", "COMPLIANCE")
+                .requestMatchers("/api/v1/client/**").hasAnyRole("ADMIN","CLIENT","ANALYST")
+                
                 // HEALTHCHECK (internal only - docker-compose, kubernetes, etc.)
                 .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
                 .requestMatchers("/actuator/**").denyAll()
