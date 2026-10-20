@@ -1,4 +1,4 @@
-  import { Component, DestroyRef, OnInit } from '@angular/core';
+  import { Component, DestroyRef, HostListener, OnInit } from '@angular/core';
 import { HoldingService } from '@app/services/holding.service';
 import { TradeOrderService } from '@app/services/trade-order.service';
 import { TradeOrderPreviewRequest, TradeOrderPreviewResponse } from '@app/models/trade-order.model';
@@ -34,6 +34,7 @@ export class BuySellComponent implements OnInit {
   preview: TradeOrderPreviewResponse | null = null;
   cashAvailable: number | null = null;
   isSubmitting: boolean = false;
+  isConfirmationOpen: boolean = false;
 
   private accountId: string | null = null;
   private ownsSelected: boolean | null = null;
@@ -131,17 +132,38 @@ export class BuySellComponent implements OnInit {
     if (this.isPreviewRejected(side)) {
       return;
     }
-    this.submitOrder(side);
+    this.isConfirmationOpen = true;
   }
 
-  submitOrder(side: 'BUY' | 'SELL'): void {
+  confirmOrder(): void {
+    if (this.isSubmitting) {
+      return;
+    }
+
+    const side = this.isBuy ? 'BUY' : 'SELL';
+    this.isConfirmationOpen = false;
+    this.submitOrder(side, this.indicativePrice);
+  }
+
+  cancelConfirmation(): void {
+    this.isConfirmationOpen = false;
+  }
+
+  @HostListener('document:keydown.escape')
+  closeConfirmationWithEscape(): void {
+    if (this.isConfirmationOpen && !this.isSubmitting) {
+      this.cancelConfirmation();
+    }
+  }
+
+  submitOrder(side: 'BUY' | 'SELL', confirmedPrice: number | null = null): void {
     if (!this.selectedResult || !this.accountId) {
       this.errorMessage = 'Account not loaded yet. Please try again.';
       return;
     }
     const symbol = this.selectedResult?.instrumentSymbol;
     const quantity = this.quantity;
-    const price = this.preview?.livePrice ?? this.selectedResult.currentPrice;
+    const price = confirmedPrice ?? this.preview?.livePrice ?? this.selectedResult.currentPrice;
 
     this.isSubmitting = true;
     this.tradeOrderService.submitOrder({

@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { HoldingService } from '@app/services/holding.service';
 import { InstrumentService } from '@app/services/instrument.service';
-import { interval, Subscription } from 'rxjs';
+import { forkJoin, interval, Subscription } from 'rxjs';
 import { switchMap, startWith } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
 import { PortfolioHoldingsContainerComponent } from '@app/components/portfolio/portfolio-holdings-container/portfolio-holdings-container.component';
@@ -108,50 +108,23 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.refreshSubscription = interval(5000)
       .pipe(
         startWith(0),
-        switchMap(() => this.holdingService.getHoldingsByAccountId(accountId))
+        switchMap(() => forkJoin({
+          holdings: this.holdingService.getHoldingsByAccountId(accountId),
+          summary: this.accountService.getPortfolioSummary(accountId)
+        }))
       )
       .subscribe({
-        next: (response: any) => {
-          this.holdings = (Array.isArray(response) ? response : [])
+        next: ({ holdings, summary }) => {
+          this.holdings = (Array.isArray(holdings) ? holdings : [])
             .sort((a: any, b: any) => b.totalValue - a.totalValue)
             .slice(0, 10);
-
-          // Calculate total portfolio value from ALL holdings, not just top 5
-          const allHoldings = Array.isArray(response) ? response : [];
-
-          // Calculate new portfolio value
-          const newPortfolioValue = Number(
-            allHoldings
-              .reduce((sum: number, holding: any) => sum + (holding.totalValue || 0), 0)
-              .toFixed(2)
-          );
-
-          // Calculate total cost basis (initial investment)
-          this.totalCostBasis = Number(
-            allHoldings
-              .reduce((sum: number, holding: any) => sum + (holding.totalCost || 0), 0)
-              .toFixed(2)
-          );
-
-          // Calculate all-time change
-          this.allTimeChange = Number((newPortfolioValue - this.totalCostBasis).toFixed(2));
-          this.allTimeChangePercent = this.totalCostBasis > 0
-            ? Number(((this.allTimeChange / this.totalCostBasis) * 100).toFixed(2))
-            : 0;
-
-          // Calculate today's change
-          if (this.previousPortfolioValue === null) {
-            this.previousPortfolioValue = newPortfolioValue;
-            this.todayChange = 0;
-            this.todayChangePercent = 0;
-          } else {
-            this.todayChange = Number((newPortfolioValue - this.previousPortfolioValue).toFixed(2));
-            this.todayChangePercent = this.previousPortfolioValue > 0
-              ? Number(((this.todayChange / this.previousPortfolioValue) * 100).toFixed(2))
-              : 0;
-          }
-
-          this.totalPortfolioValue = newPortfolioValue;
+          
+          this.totalPortfolioValue = Number(summary.portfolioValue);
+          this.totalCostBasis = Number(summary.totalCostBasis);
+          this.todayChange = Number(summary.todayChange);
+          this.todayChangePercent = Number(summary.todayChangePercent);
+          this.allTimeChange = Number(summary.allTimeChange);
+          this.allTimeChangePercent = Number(summary.allTimeChangePercent);
 
           this.updatePortfolioChart();
           this.cdr.detectChanges();
