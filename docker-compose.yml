@@ -9,6 +9,10 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:${POSTGRES_PORT}/${POSTGRES_DB}
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - ANALYTICS_DATASOURCE_URL=jdbc:postgresql://analytics_db:5432/${ANALYTICS_DB}
+      - ANALYTICS_USER=${ANALYTICS_USER}
+      - ANALYTICS_PASSWORD=${ANALYTICS_PASSWORD}
     ports:
       - "${HOST_APP_PORT}:6767"
     healthcheck:
@@ -20,6 +24,8 @@ services:
       start_interval: 5s
     depends_on:
       - db
+      - kafka
+      - analytics_db
   db:
     image: postgres:16-alpine
     environment:
@@ -31,7 +37,43 @@ services:
     ports:
      - "${POSTGRES_PORT}:5432"
     healthcheck:
-      test: ["CMD", "pg_isready", "-d", "${POSTGRES_DB}", "-U"," ${POSTGRES_USER}"]
+      test: ["CMD", "pg_isready", "-d", "${POSTGRES_DB}", "-U", "${POSTGRES_USER}"]
+      interval: 2m
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+      start_interval: 3s
+
+  kafka:
+    image: apache/kafka:4.0.0
+    ports:
+      - "29092:29092"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093,PLAINTEXT_HOST://:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+
+  analytics_db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${ANALYTICS_DB}
+      POSTGRES_USER: ${ANALYTICS_USER}
+      POSTGRES_PASSWORD: ${ANALYTICS_PASSWORD}
+    volumes:
+      - analytics_data:/var/lib/postgresql/data
+    ports:
+      - "${ANALYTICS_PORT}:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-d", "${ANALYTICS_DB}", "-U", "${ANALYTICS_USER}"]
       interval: 2m
       timeout: 5s
       retries: 3
@@ -40,3 +82,7 @@ services:
 
 volumes:
   postgres_data:
+<<<<<<< HEAD
+=======
+  analytics_data:
+>>>>>>> feature/kafka

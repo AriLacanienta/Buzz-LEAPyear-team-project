@@ -114,6 +114,7 @@ export class AuthService {
 
   hasRole(role: string): boolean {
     return this.getRoles().includes(role.replace(/^ROLE_/, '').toUpperCase());
+    //return this.getRoles().includes(role);
   }
 
   /**

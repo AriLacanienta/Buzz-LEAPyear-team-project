@@ -41,7 +41,12 @@ public class SecurityConfig {
             ))
             .authorizeHttpRequests(authorize -> authorize
                 // PUBLIC
+<<<<<<< HEAD
                 .requestMatchers(HttpMethod.GET, "/api/v1/auth/validate").permitAll()
+=======
+                .requestMatchers("/error").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/auth/validate").authenticated()
+>>>>>>> feature/kafka
                 .requestMatchers(HttpMethod.POST, "/api/v1/auth/**").permitAll()
 
                 // RESTRICTED (RBAC)
@@ -58,7 +63,11 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/test").hasRole(ROLE_MANAGER)
                 .requestMatchers("/api/v1/user/allUsers").hasRole(ROLE_MANAGER)
                 .requestMatchers("/api/v1/user/**").authenticated()
+<<<<<<< HEAD
                 
+=======
+
+>>>>>>> feature/kafka
                 // HEALTHCHECK (internal only - docker-compose, kubernetes, etc.)
                 .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
                 .requestMatchers("/actuator/**").denyAll()

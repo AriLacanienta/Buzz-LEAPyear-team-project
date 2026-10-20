@@ -53,9 +53,13 @@ export class LoginComponent {
 
         const landingPage = this.authService.hasRole('MANAGER')
           ? '/admin'
+<<<<<<< HEAD
           : this.authService.hasRole('ANALYST')
             ? '/analyst'
             : '/dashboard';
+=======
+          : '/dashboard';
+>>>>>>> feature/kafka
         this.router.navigate([landingPage]);
       },
       // Error response

@@ -23,18 +23,19 @@ import { PortfolioHoldingCardComponent } from './components/portfolio/portfolio-
 import { HoldingService } from './services/holding.service';
 import { HighchartsChartModule } from 'highcharts-angular';
 import { FundsComponent } from './components/trade/funds/funds.component';
-import { AnalystDashboardComponent } from './pages/analyst-dashboard/analyst-dashboard.component';
 import { AdminComponent } from './pages/admin/admin.component';
+import { AnalystDashboardComponent } from './pages/analyst-dashboard/analyst-dashboard.component';
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
-  { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard], data: { roles: ['CLIENT', 'MANAGER'] } },
-  { path: 'account', component: AccountComponent, canActivate: [authGuard], data: { roles: ['CLIENT', 'MANAGER'] } },
-  { path: 'portfolio', component: DashboardComponent, canActivate: [authGuard], data: { roles: ['CLIENT', 'MANAGER'] } },
-  { path: 'trade', component: TradeComponent, canActivate: [authGuard], data: { roles: ['CLIENT', 'MANAGER'] } },
-  { path: 'markets', component: MarketsComponent, canActivate: [authGuard], data: { roles: ['CLIENT', 'MANAGER'] } },
-  { path: 'analyst', component: AnalystDashboardComponent, canActivate: [authGuard], data: { roles: ['ANALYST', 'MANAGER'] } },
+  { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard] },
+  { path: 'account', component: AccountComponent, canActivate: [authGuard] },
+  { path: 'portfolio', component: DashboardComponent, canActivate: [authGuard] },
+  { path: 'trade', component: TradeComponent, canActivate: [authGuard] },
+  { path: 'markets', component: MarketsComponent, canActivate: [authGuard] },
+  { path: 'admin', component: AdminComponent, canActivate: [authGuard], data: { roles: ['MANAGER'] } },
+  { path: 'analyst', component: AnalystDashboardComponent, canActivate: [authGuard] },
   { path: '', redirectTo: '/login', pathMatch: 'full' }
 ];
 
@@ -44,7 +45,8 @@ const routes: Routes = [
     LoginComponent,
     RegisterComponent,
     AccountComponent,
-    NavbarComponent
+    NavbarComponent,
+    AdminComponent
   ],
   imports: [
     BrowserModule,
@@ -58,8 +60,8 @@ const routes: Routes = [
     PortfolioHoldingCardComponent,
     MarketsComponent,
     DashboardComponent,
-    AnalystDashboardComponent,
     FundsComponent,
+    AnalystDashboardComponent,
     HighchartsChartModule
   ],
   providers: [
