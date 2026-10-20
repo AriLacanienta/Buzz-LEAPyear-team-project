@@ -34,6 +34,14 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 
+/**
+ * These methods were once used by DatabaseSeeder to seed the
+ * database at startup. DatabaseSeeder has been deprecated,
+ * but this class is being kept around in case we need to
+ * support batch import in the future
+ *
+ * ImportCSVService
+ */
 @Service
 public class ImportCSVService {
 
