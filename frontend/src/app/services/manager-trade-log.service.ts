@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { ManagerTradeLogPage } from '../models/manager-trade-log.model';
+import { ManagerTradeDetail, ManagerTradeLogPage } from '../models/manager-trade-log.model';
 
 @Injectable({ providedIn: 'root' })
 export class ManagerTradeLogService {
@@ -16,5 +16,9 @@ export class ManagerTradeLogService {
             .set('size', String(size));
 
         return this.http.get<ManagerTradeLogPage>(this.apiUrl, { params });
+    }
+
+    getTradeDetail(tradeId: number): Observable<ManagerTradeDetail> {
+        return this.http.get<ManagerTradeDetail>(`${this.apiUrl}/${tradeId}`);
     }
 }

@@ -28,3 +28,14 @@ export interface ManagerTradeLogPage {
     totalElements: number;
     totalPages: number;
 }
+
+export interface ManagerTradeStatus {
+    status: string;
+    timeUpdated: string;
+    reason: string | null;
+}
+
+export interface ManagerTradeDetail {
+    trade: ManagerTradeLog;
+    statusHistory: ManagerTradeStatus[];
+}

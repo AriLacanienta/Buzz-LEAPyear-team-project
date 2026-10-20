@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { NgIf, NgFor, DatePipe, CurrencyPipe } from '@angular/common';
 import { ManagerTradeLog } from '../../../../models/manager-trade-log.model';
 import { ManagerTradeLogService } from '../../../../services/manager-trade-log.service';
@@ -11,10 +11,13 @@ import { ManagerTradeLogService } from '../../../../services/manager-trade-log.s
     styleUrls: ['./trade-log-table.component.scss']
 })
 export class TradeLogTableComponent implements OnInit {
+    @Input() selectedTradeId: number | null = null;
+    @Output() tradeSelected = new EventEmitter<number>();
     trades: ManagerTradeLog[] = [];
     filteredTrades: ManagerTradeLog[] = [];
+    filteredTradeSet: ManagerTradeLog[] = [];
     pageIndex = 0;
-    pageSize = 15;
+    pageSize = 10;
     totalElements = 0;
     totalPages = 0;
     loading = false;
@@ -33,13 +36,11 @@ export class TradeLogTableComponent implements OnInit {
         this.loading = true;
     this.error = false;
 
-    this.service.getTradeLog(this.pageIndex, this.pageSize).subscribe({
+    this.service.getTradeLog(0, 100).subscribe({
     next: page => {
         this.trades = page.content;
+        this.pageIndex = 0;
         this.applyFilters();
-        this.pageIndex = page.number;
-        this.totalElements = page.totalElements;
-        this.totalPages = page.totalPages;
         this.loading = false;
     },
     error: () => {
@@ -52,14 +53,14 @@ export class TradeLogTableComponent implements OnInit {
     previousPage(): void {
         if (this.pageIndex > 0) {
         this.pageIndex--;
-        this.loadTrades();
+        this.updateVisiblePage();
         }
     }
 
     nextPage(): void {
         if (this.pageIndex + 1 < this.totalPages) {
         this.pageIndex++;
-        this.loadTrades();
+        this.updateVisiblePage();
         }
     }
 
@@ -67,10 +68,14 @@ export class TradeLogTableComponent implements OnInit {
         return trade.tradeId;
     }
 
+    selectTrade(trade: ManagerTradeLog): void {
+        this.tradeSelected.emit(trade.tradeId);
+    }
+
     private applyFilters(): void {
         const search = this.searchTerm.trim().toLowerCase();
 
-        this.filteredTrades = this.trades.filter(trade => {
+        this.filteredTradeSet = this.trades.filter(trade => {
             const searchableText = [
                 trade.tradeId,
                 trade.clientName,
@@ -86,20 +91,33 @@ export class TradeLogTableComponent implements OnInit {
 
             return matchesSearch && matchesStatus && matchesSide;
         });
+
+        this.totalElements = this.filteredTradeSet.length;
+        this.totalPages = Math.ceil(this.totalElements / this.pageSize);
+        this.pageIndex = Math.min(this.pageIndex, Math.max(this.totalPages - 1, 0));
+        this.updateVisiblePage();
+    }
+
+    private updateVisiblePage(): void {
+        const start = this.pageIndex * this.pageSize;
+        this.filteredTrades = this.filteredTradeSet.slice(start, start + this.pageSize);
     }
 
     setSearchTerm(value: string): void {
         this.searchTerm = value;
+        this.pageIndex = 0;
         this.applyFilters();
     }
 
     setStatusFilter(value: string): void {
         this.statusFilter = value;
+        this.pageIndex = 0;
         this.applyFilters();
     }
 
     setSideFilter(value: string): void {
         this.sideFilter = value;
+        this.pageIndex = 0;
         this.applyFilters();
     }
 
@@ -107,6 +125,7 @@ export class TradeLogTableComponent implements OnInit {
         this.searchTerm = '';
         this.statusFilter = 'ALL';
         this.sideFilter = 'ALL';
+        this.pageIndex = 0;
         this.applyFilters();
     }
 

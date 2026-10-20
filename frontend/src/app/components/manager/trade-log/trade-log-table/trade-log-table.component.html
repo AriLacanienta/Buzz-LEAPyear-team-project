@@ -49,7 +49,15 @@
       </thead>
 
       <tbody>
-        <tr *ngFor="let trade of filteredTrades; trackBy: trackByTradeId">
+        <tr
+          *ngFor="let trade of filteredTrades; trackBy: trackByTradeId"
+          class="trade-row"
+          [class.selected]="selectedTradeId === trade.tradeId"
+          [attr.aria-selected]="selectedTradeId === trade.tradeId"
+          tabindex="0"
+          (click)="selectTrade(trade)"
+          (keydown.enter)="selectTrade(trade)"
+          (keydown.space)="$event.preventDefault(); selectTrade(trade)">
           <td class="order-id">{{ trade.tradeId }}</td>
           <td class="client">
             {{ trade.clientName }}

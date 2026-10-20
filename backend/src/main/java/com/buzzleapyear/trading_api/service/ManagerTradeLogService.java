@@ -1,6 +1,8 @@
 package com.buzzleapyear.trading_api.service;
 
 import com.buzzleapyear.trading_api.dto.ManagerTradeLogResponseDTO;
+import com.buzzleapyear.trading_api.dto.ManagerTradeDetailResponseDTO;
+import com.buzzleapyear.trading_api.dto.ManagerTradeStatusResponseDTO;
 import com.buzzleapyear.trading_api.entity.Account;
 import com.buzzleapyear.trading_api.entity.Client;
 import com.buzzleapyear.trading_api.entity.Instrument;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ManagerTradeLogService {
@@ -32,6 +35,20 @@ public class ManagerTradeLogService {
 
     public Page<ManagerTradeLogResponseDTO> getTradeLog(Pageable pageable) {
         return tradeOrderRepository.findAllForManager(pageable).map(this::toDto);
+    }
+
+    public Optional<ManagerTradeDetailResponseDTO> getTradeDetail(Long tradeId) {
+        return tradeOrderRepository.findForManagerById(tradeId)
+            .map(order -> new ManagerTradeDetailResponseDTO(
+                toDto(order),
+                statusRepository.findByTradeOrderIdOrderByTimeUpdatedAscIdAsc(order.getId()).stream()
+                    .map(status -> new ManagerTradeStatusResponseDTO(
+                        status.getStatus(),
+                        status.getTimeUpdated(),
+                        status.getReasonText()
+                    ))
+                    .toList()
+            ));
     }
 
     private ManagerTradeLogResponseDTO toDto(TradeOrder order) {

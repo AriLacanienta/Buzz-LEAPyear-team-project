@@ -1,0 +1,100 @@
+$background: #111a2a;
+$border: #263956;
+$muted: #8ea0b9;
+$text: #dbe7f5;
+$accent: #51a2ff;
+$font-body: clamp(0.68rem, 0.74vw, 0.84rem);
+$font-label: clamp(0.56rem, 0.62vw, 0.7rem);
+$font-heading: clamp(0.95rem, 1.1vw, 1.25rem);
+
+.trade-detail {
+  box-sizing: border-box;
+  min-width: 0;
+  width: 100%;
+  padding: 1.25rem;
+  border: 1px solid $border;
+  border-radius: 0.75rem;
+  background: $background;
+  color: $text;
+  font-family: 'DM Mono', monospace;
+  font-size: $font-body;
+}
+
+.detail-header,
+.section-heading,
+.identity,
+.metrics div,
+.timeline li > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.detail-header {
+  padding-bottom: 1rem;
+  border-bottom: 1px solid $border;
+}
+
+.eyebrow,
+.label {
+  margin: 0;
+  color: $muted;
+  font-size: $font-label;
+  text-transform: uppercase;
+  margin-top: 2rem;
+}
+
+h2, h3, p { margin-top: 0; }
+h2 { margin-bottom: 0; font-size: $font-heading; }
+h3 { margin-bottom: 0; font-size: clamp(0.82rem, 0.9vw, 1rem); }
+
+.close-button {
+  border: 1px solid $border;
+  border-radius: 0.4rem;
+  padding: 0.4rem 0.6rem;
+  color: $text;
+  background: transparent;
+  cursor: pointer;
+}
+
+.detail-section {
+  padding: 1rem 0;
+  border-bottom: 1px solid $border;
+}
+
+.identity { align-items: flex-start; }
+.identity div { min-width: 0; display: flex; flex-direction: column; gap: 0.25rem; }
+.identity small, .instrument-name, .reason, .timeline p { color: $muted; }
+.instrument-name { margin: 0.5rem 0 1rem; }
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin: 0;
+}
+
+.metrics div { align-items: flex-start; flex-direction: column; gap: 0.2rem; }
+dt { color: $muted; font-size: $font-label; text-transform: uppercase; }
+dd { margin: 0; }
+.reason { margin: 1rem 0 0; }
+.status-badge { color: $accent; font-size: $font-label; }
+.detail-state { color: $muted; }
+.error { color: #ff777b; }
+
+.timeline {
+  display: grid;
+  gap: 0.85rem;
+  margin: 1rem 0 0;
+  padding-left: 1rem;
+}
+
+.timeline li::marker { color: $accent; }
+.timeline time { color: $muted; font-size: $font-label; }
+.timeline p { margin: 0.35rem 0 0; font-size: $font-body; }
+
+@media (max-width: 700px) {
+  .trade-detail { min-width: 0; }
+  .identity { align-items: flex-start; flex-direction: column; }
+}

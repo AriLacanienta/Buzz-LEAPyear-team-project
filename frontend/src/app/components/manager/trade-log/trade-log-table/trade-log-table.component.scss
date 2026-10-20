@@ -13,9 +13,14 @@ $color-button: #64748b;
 $color-white: #ffffff;
 
 $radius-xl: 0.75rem;
+$font-table: clamp(0.66rem, 0.72vw, 0.82rem);
+$font-label: clamp(0.58rem, 0.62vw, 0.72rem);
+$font-control: clamp(0.64rem, 0.7vw, 0.8rem);
 
 .trade-log-table {
     box-sizing: border-box;
+    min-width: 0;
+    width: 100%;
     display: flex;
     flex-direction: column;
     background-color: $bg-dark;
@@ -32,7 +37,8 @@ $radius-xl: 0.75rem;
     border-bottom: 1px solid $border-dark;
     color: $color-header;
     font-family: 'DM Mono', monospace;
-    overflow-x: auto;
+    font-size: $font-control;
+    flex-wrap: wrap;
 }
 
 .search-field {
@@ -71,7 +77,7 @@ $radius-xl: 0.75rem;
         color: $color-header;
         background: transparent;
         font: inherit;
-        font-size: 0.875rem;
+        font-size: $font-control;
         cursor: pointer;
 
         &:hover {
@@ -90,7 +96,7 @@ $radius-xl: 0.75rem;
 .order-count {
     margin-left: auto;
     white-space: nowrap;
-    font-size: 0.75rem;
+    font-size: $font-label;
 }
 
 .divider {
@@ -105,12 +111,18 @@ $radius-xl: 0.75rem;
     text-align: left;
     text-transform: uppercase;
     font-weight: 600;
+    font-size: $font-label;
 }
 
 .table-wrapper table {
     width: 100%;
     border-collapse: collapse;
-    
+    table-layout: fixed;
+}
+
+.table-wrapper {
+    overflow: hidden;
+    min-width: 0;
 }
 
 .trade-log-table td {
@@ -118,11 +130,27 @@ $radius-xl: 0.75rem;
     border-top: 1px solid $border-dark;
     text-align: left;
     font-family: 'DM Mono', monospace;
+    font-size: $font-table;
 }
 
 
 .trade-log-table tr:hover {
     background-color: $color-hover;
+}
+
+.trade-log-table .trade-row {
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible,
+    &.selected {
+        background-color: $color-hover;
+    }
+
+    &:focus-visible {
+        outline: 2px solid $color-order-id;
+        outline-offset: -2px;
+    }
 }
 
 .order-id {
@@ -235,5 +263,104 @@ $radius-xl: 0.75rem;
         color: $color-button;
         cursor: default;
         }
+    }
+}
+
+@media (max-width: 1200px) {
+    .search-field {
+        flex: 1 1 13rem;
+        min-width: min(100%, 13rem);
+    }
+
+    .table-wrapper table,
+    .table-wrapper tbody {
+        display: block;
+        width: 100%;
+    }
+
+    .table-wrapper thead {
+        display: none;
+    }
+
+    .table-wrapper tr.trade-row {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        width: auto;
+        margin: 0.75rem;
+        border: 1px solid $border-dark;
+        border-radius: 0.5rem;
+        overflow: hidden;
+    }
+
+    .trade-log-table td {
+        display: flex;
+        min-width: 0;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 0.5rem;
+        padding: 0.7rem;
+        border-top: 1px solid $border-dark;
+        font-size: $font-table;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+    .trade-log-table td::before {
+        flex: 0 0 auto;
+        color: $color-header;
+        content: '';
+        font-size: $font-label;
+        text-transform: uppercase;
+    }
+
+    .trade-log-table td:nth-child(1)::before { content: 'Order ID'; }
+    .trade-log-table td:nth-child(2)::before { content: 'Client'; }
+    .trade-log-table td:nth-child(3)::before { content: 'Ticker'; }
+    .trade-log-table td:nth-child(4)::before { content: 'Side'; }
+    .trade-log-table td:nth-child(5)::before { content: 'Qty'; }
+    .trade-log-table td:nth-child(6)::before { content: 'Price'; }
+    .trade-log-table td:nth-child(7)::before { content: 'Value'; }
+    .trade-log-table td:nth-child(8)::before { content: 'Status'; }
+    .trade-log-table td:nth-child(9)::before { content: 'Order time'; }
+    .trade-log-table td:nth-child(10)::before { content: 'Fill time'; }
+
+    .trade-log-table .client {
+        flex-direction: row;
+        align-items: flex-start;
+        justify-content: space-between;
+    }
+
+    .trade-log-table .client small {
+        text-align: right;
+    }
+}
+
+@media (max-width: 600px) {
+    .table-wrapper tr.trade-row {
+        grid-template-columns: 1fr;
+    }
+
+    .trade-log-toolbar {
+        align-items: stretch;
+        gap: 0.5rem;
+        padding: 0.6rem;
+    }
+
+    .filter-group button {
+        padding: 0.35rem 0.5rem;
+        font-size: $font-control;
+    }
+
+    .filter-group {
+        flex-wrap: wrap;
+    }
+
+    .divider {
+        display: none;
+    }
+
+    .order-count {
+        width: 100%;
+        margin-left: 0;
     }
 }

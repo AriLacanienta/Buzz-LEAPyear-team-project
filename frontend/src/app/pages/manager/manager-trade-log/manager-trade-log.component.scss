@@ -1,4 +1,47 @@
 main {
-	max-width: 85%;
+	width: min(90%, 1400px);
 	margin: 0 auto;
+	min-width: 0;
+}
+
+.trade-log-layout {
+	display: flex;
+	justify-content: center;
+	align-items: flex-start;
+	transition: gap 220ms ease;
+}
+
+.trade-log-layout:not(.has-selection) app-trade-log-table {
+	width: min(100%, 1070px);
+}
+
+.trade-log-layout.has-selection {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(19rem, 25rem);
+	gap: 1rem;
+}
+
+.trade-log-layout.has-selection app-trade-log-table {
+	min-width: 0;
+	width: 100%;
+}
+
+@media (max-width: 1200px) {
+	.trade-log-layout.has-selection {
+		grid-template-columns: 1fr;
+	}
+
+	.trade-log-layout.has-selection app-trade-log-detail {
+		width: 100%;
+	}
+}
+
+@media (max-width: 700px) {
+	main {
+		width: 90%;
+	}
+
+	.trade-log-layout {
+		width: 100%;
+	}
 }
