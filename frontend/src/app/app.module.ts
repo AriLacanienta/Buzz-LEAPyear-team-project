@@ -29,13 +29,6 @@ import { AdminComponent } from './pages/admin/admin.component';
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
-  { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard] },
-  { path: 'account', component: AccountComponent, canActivate: [authGuard] },
-  { path: 'portfolio', component: DashboardComponent, canActivate: [authGuard] },
-  { path: 'trade', component: TradeComponent, canActivate: [authGuard] },
-  { path: 'markets', component: MarketsComponent, canActivate: [authGuard] },
-  { path: 'analyst', component: AnalystDashboardComponent, canActivate: [authGuard] },
-  { path: 'markets', component: MarketsComponent, canActivate: [authGuard]},
   { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard], data: { roles: ['CLIENT', 'MANAGER'] } },
   { path: 'account', component: AccountComponent, canActivate: [authGuard], data: { roles: ['CLIENT', 'MANAGER'] } },
   { path: 'portfolio', component: DashboardComponent, canActivate: [authGuard], data: { roles: ['CLIENT', 'MANAGER'] } },
@@ -67,7 +60,6 @@ const routes: Routes = [
     DashboardComponent,
     AnalystDashboardComponent,
     FundsComponent,
-    AnalystDashboardComponent,
     HighchartsChartModule
   ],
   providers: [

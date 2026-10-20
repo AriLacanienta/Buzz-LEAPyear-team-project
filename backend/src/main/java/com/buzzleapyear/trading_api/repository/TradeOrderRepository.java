@@ -5,7 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.EntityGraph;
 import com.buzzleapyear.trading_api.entity.TradeOrderStatus;
-import java.time.LocalDateTime;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
@@ -55,7 +54,6 @@ public interface TradeOrderRepository extends JpaRepository<TradeOrder, Long> {
             AND s.timeUpdated = (SELECT MAX(latest.timeUpdated)
                                  FROM TradeOrderStatus latest
                                  WHERE latest.tradeOrder = o)
-<<<<<<< HEAD
                 WHERE o.orderDate >= :fromDate AND o.orderDate < :toDate
                     AND (:search = '' OR
                              STR(o.id) LIKE CONCAT('%', :search, '%') OR
@@ -83,14 +81,5 @@ public interface TradeOrderRepository extends JpaRepository<TradeOrder, Long> {
         @Param("fromDate") LocalDateTime fromDate,
         @Param("toDate") LocalDateTime toDate,
                 @Param("search") String search,
-=======
-        WHERE o.orderDate >= :fromDate AND o.orderDate < :toDate
-        ORDER BY o.orderDate DESC, o.id DESC
-        """,
-        countQuery = "SELECT COUNT(o) FROM TradeOrder o WHERE o.orderDate >= :fromDate AND o.orderDate < :toDate")
-    Page<Object[]> findAnalystTrades(
-        @Param("fromDate") LocalDateTime fromDate,
-        @Param("toDate") LocalDateTime toDate,
->>>>>>> 6c2fa5f (created analyst dashboard)
         Pageable pageable);
 }
