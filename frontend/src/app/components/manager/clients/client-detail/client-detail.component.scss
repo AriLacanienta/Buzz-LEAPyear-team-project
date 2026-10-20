@@ -152,6 +152,65 @@ h3 {
     }
 }
 
+.notes-section {
+    margin-top: 1.25rem;
+}
+
+.notes-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: $muted-color;
+    font: 0.72rem 'DM Mono', monospace;
+    text-transform: uppercase;
+}
+
+textarea {
+    box-sizing: border-box;
+    display: block;
+    width: 100%;
+    min-height: 6rem;
+    resize: vertical;
+    border: 1px solid $border-color;
+    border-radius: 0.4rem;
+    padding: 0.75rem;
+    color: $color-white;
+    background: #0b111c;
+    font: 0.82rem/1.5 'DM Mono', monospace;
+
+    &:focus {
+        border-color: $color-blue;
+        outline: 2px solid rgba(81, 162, 255, 0.2);
+    }
+}
+
+.notes-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+}
+
+.notes-saved {
+    color: #00d492;
+    font: 0.72rem 'DM Mono', monospace;
+}
+
+.save-notes-button {
+    border: 1px solid $color-blue;
+    border-radius: 0.4rem;
+    padding: 0.5rem 0.75rem;
+    color: $color-blue;
+    background: transparent;
+    cursor: pointer;
+    font: 0.75rem 'DM Mono', monospace;
+
+    &:hover {
+        color: $color-white;
+        background: rgba(81, 162, 255, 0.15);
+    }
+}
+
 .empty-selection {
     display: grid;
     place-items: center;

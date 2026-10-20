@@ -64,6 +64,31 @@
 
     <p>Dispute records will appear here when they are assigned to this client.</p>
   </section>
+
+  <section class="detail-section notes-section">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">Client record</p>
+        <h3>Notes</h3>
+      </div>
+      <span>Internal</span>
+    </div>
+
+    <label class="notes-label" [attr.for]="'client-notes-' + selectedClient.id">
+      Add notes for {{ selectedClient.name }}
+    </label>
+    <textarea
+      [id]="'client-notes-' + selectedClient.id"
+      [(ngModel)]="draftNotes"
+      rows="4"
+      maxlength="2000"
+      placeholder="Record follow-ups, context, or review notes..."></textarea>
+
+    <div class="notes-actions">
+      <span *ngIf="notesSavedMessage" class="notes-saved" role="status">Notes saved</span>
+      <button type="button" class="save-notes-button" (click)="saveNotes()">Save notes</button>
+    </div>
+  </section>
 </section>
 
 <ng-template #noSelection>

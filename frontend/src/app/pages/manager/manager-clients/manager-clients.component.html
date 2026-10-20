@@ -9,5 +9,6 @@
 
   <app-client-detail
     [client]="selectedClient"
-    (refreshRequested)="loadClients()" />
+    (refreshRequested)="loadClients()"
+    (notesSaved)="saveClientNotes($event)" />
 </main>

@@ -10,4 +10,5 @@ export interface ManagerClient {
 	rejectedOrders: number;
 	orderTotal: number;
 	totalValue: number;
+	notes?: string;
 }

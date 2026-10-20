@@ -18,6 +18,7 @@ import { UserResponse, UserService } from '../../../services/user.service';
 export class ManagerClientsComponent implements OnInit {
   clients: ManagerClient[] = [];
   selectedClient: ManagerClient | null = null;
+  private readonly clientNotes = new Map<number, string>();
   searchTerm = '';
   loading = true;
   error = false;
@@ -80,6 +81,15 @@ export class ManagerClientsComponent implements OnInit {
     this.selectedClient = client;
   }
 
+  saveClientNotes(event: { clientId: number; notes: string }): void {
+    this.clientNotes.set(event.clientId, event.notes);
+    const client = this.clients.find(item => item.id === event.clientId);
+
+    if (client) {
+      client.notes = event.notes;
+    }
+  }
+
   trackByClientId(_index: number, client: ManagerClient): number {
     return client.id;
   }
@@ -128,7 +138,8 @@ export class ManagerClientsComponent implements OnInit {
         totalValue: validTrades.reduce(
           (total, trade) => total + (trade.side === 'BUY' ? trade.value : -trade.value),
           0
-        )
+        ),
+        notes: this.clientNotes.get(user.id) ?? ''
       };
     });
   }
