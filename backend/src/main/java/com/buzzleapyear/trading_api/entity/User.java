@@ -43,6 +43,11 @@ public class User {
 
     @Column(name = "token_version", nullable = false)
     private long tokenVersion = 0;
+    @Column(name = "failed_login_attempts", nullable = false)
+    private int failedLoginAttempts = 0;
+
+    @Column(name = "account_locked", nullable = false)
+    private boolean accountLocked = false;
     
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private java.util.List<UserRole> userRoles = new java.util.ArrayList<>();

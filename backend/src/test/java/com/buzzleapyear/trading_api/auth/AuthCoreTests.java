@@ -7,6 +7,7 @@ import com.buzzleapyear.trading_api.entity.User;
 import com.buzzleapyear.trading_api.entity.Role;
 import com.buzzleapyear.trading_api.repository.AccountRepository;
 import com.buzzleapyear.trading_api.repository.ClientRepository;
+import com.buzzleapyear.trading_api.repository.LoginAttemptRepository;
 import com.buzzleapyear.trading_api.repository.RoleRepository;
 import com.buzzleapyear.trading_api.repository.RefreshSessionRepository;
 import com.buzzleapyear.trading_api.repository.UserRepository;
@@ -35,6 +36,7 @@ class AuthCoreTests {
     @Mock ClientRepository clientRepository;
     @Mock RoleRepository roleRepository;
     @Mock RefreshSessionRepository refreshSessionRepository;
+    @Mock LoginAttemptRepository loginAttemptRepository;
     @Mock JwtTokenProvider tokenProvider;
     @Mock HttpServletRequest request;
     @InjectMocks AuthController controller;

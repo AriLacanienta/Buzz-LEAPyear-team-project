@@ -15,6 +15,7 @@ import com.buzzleapyear.trading_api.repository.AccountRepository;
 import com.buzzleapyear.trading_api.repository.ClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import com.buzzleapyear.trading_api.repository.LoginAttemptRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +23,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import com.buzzleapyear.trading_api.entity.Account;
 import com.buzzleapyear.trading_api.entity.Client;
+import com.buzzleapyear.trading_api.entity.LoginAttempt;
 
 import java.math.BigDecimal;
 import jakarta.servlet.http.HttpServletRequest;
@@ -66,13 +68,16 @@ public class AuthController {
 
     private JwtTokenProvider tokenProvider;
 
+    private LoginAttemptRepository loginAttemptRepository;
+
     public AuthController(
         AccountRepository accountRepository,
         ClientRepository clientRepository,
         UserRepository userRepository,
         RoleRepository roleRepository,
         PasswordEncoder passwordEncoder,
-        JwtTokenProvider tokenProvider
+        JwtTokenProvider tokenProvider,
+        LoginAttemptRepository loginAttemptRepository
     ) {
         this.accountRepository = accountRepository;
         this.clientRepository = clientRepository;
@@ -80,6 +85,7 @@ public class AuthController {
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.tokenProvider = tokenProvider;
+        this.loginAttemptRepository = loginAttemptRepository;
     }
 /**
      * POST /api/auth/login
@@ -108,15 +114,34 @@ public class AuthController {
 
             // Checking if user exists
             if (userOptional.isEmpty()) {
+                recordLoginAttempt(null, null, loginRequest.getEmail(), false, "USER_NOT_FOUND");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .body(new ErrorResponse("Invalid email or password"));
             }
 
             User user = userOptional.get();
 
+            if (user.isAccountLocked()) {
+                recordLoginAttempt(user, false, "ACCOUNT_LOCKED");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(new ErrorResponse("Account locked after 3 failed login attempts. Contact an administrator to unlock your account."));
+            }
+
             // Verifying password
             // passwordEncoder.matches() takes raw password and compares with hashed password from DB
             if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPasswordHash())) {
+                user.setFailedLoginAttempts(user.getFailedLoginAttempts() + 1);
+                if (user.getFailedLoginAttempts() >= 3) {
+                    user.setAccountLocked(true);
+                }
+                userRepository.save(user);
+
+                if (user.isAccountLocked()) {
+                    recordLoginAttempt(user, false, "ACCOUNT_LOCKED_AFTER_THREE_FAILURES");
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                            .body(new ErrorResponse("Account locked after 3 failed login attempts. Contact an administrator to unlock your account."));
+                }
+                recordLoginAttempt(user, false, "INVALID_PASSWORD");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .body(new ErrorResponse("Invalid email or password"));
             }
@@ -125,6 +150,12 @@ public class AuthController {
                 String accessToken = tokenProvider.generateAccessToken(
                     user.getUsername(), user.getTokenVersion());
             String refreshToken = createRefreshSession(user.getUsername());
+            if (user.getFailedLoginAttempts() > 0) {
+                user.setFailedLoginAttempts(0);
+                userRepository.save(user);
+            }
+
+            recordLoginAttempt(user, true, null);
 
                 //returning access token in body and refresh token in secure HttpOnly cookie
                 return ResponseEntity.ok()
@@ -136,6 +167,24 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(new ErrorResponse("Authentication failed: " + e.getMessage()));
         }
+    }
+
+    private void recordLoginAttempt(User user, boolean successful, String failureReason) {
+        recordLoginAttempt(user == null ? null : user.getId(),
+                user == null ? null : user.getUsername(),
+                user == null ? null : user.getEmail(), successful, failureReason);
+    }
+
+    private void recordLoginAttempt(Long userId, String username, String email, boolean successful,
+                                    String failureReason) {
+        LoginAttempt attempt = new LoginAttempt();
+        attempt.setUserId(userId);
+        attempt.setUsername(username);
+        attempt.setEmail(email);
+        attempt.setAttemptedAt(LocalDateTime.now());
+        attempt.setSuccessful(successful);
+        attempt.setFailureReason(failureReason);
+        loginAttemptRepository.save(attempt);
     }
 
     /**
