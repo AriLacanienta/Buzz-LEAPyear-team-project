@@ -10,6 +10,9 @@ services:
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - ANALYTICS_DATASOURCE_URL=jdbc:postgresql://analytics_db:5432/${ANALYTICS_DB}
+      - ANALYTICS_USER=${ANALYTICS_USER}
+      - ANALYTICS_PASSWORD=${ANALYTICS_PASSWORD}
     ports:
       - "${HOST_APP_PORT}:6767"
     healthcheck:
@@ -22,6 +25,7 @@ services:
     depends_on:
       - db
       - kafka
+      - analytics_db
   db:
     image: postgres:16-alpine
     environment:
@@ -33,7 +37,7 @@ services:
     ports:
      - "${POSTGRES_PORT}:5432"
     healthcheck:
-      test: ["CMD", "pg_isready", "-d", "${POSTGRES_DB}", "-U"," ${POSTGRES_USER}"]
+      test: ["CMD", "pg_isready", "-d", "${POSTGRES_DB}", "-U", "${POSTGRES_USER}"]
       interval: 2m
       timeout: 5s
       retries: 3
@@ -58,5 +62,24 @@ services:
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
 
+  analytics_db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${ANALYTICS_DB}
+      POSTGRES_USER: ${ANALYTICS_USER}
+      POSTGRES_PASSWORD: ${ANALYTICS_PASSWORD}
+    volumes:
+      - analytics_data:/var/lib/postgresql/data
+    ports:
+      - "${ANALYTICS_PORT}:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-d", "${ANALYTICS_DB}", "-U", "${ANALYTICS_USER}"]
+      interval: 2m
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+      start_interval: 3s
+
 volumes:
   postgres_data:
+  analytics_data:
