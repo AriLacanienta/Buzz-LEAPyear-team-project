@@ -112,6 +112,10 @@ export class ManagerClientsComponent implements OnInit {
         trade.status?.toUpperCase() === 'REJECTED'
       ).length;
 
+      const validTrades = userTrades.filter(trade =>
+        !['REJECTED', 'CANCELLED'].includes(trade.status?.toUpperCase() ?? '')
+      );
+
       return {
         id: user.id,
         name,
@@ -120,8 +124,9 @@ export class ManagerClientsComponent implements OnInit {
         initials: `${user.firstName[0] ?? ''}${user.lastName[0] ?? ''}`.toUpperCase(),
         trades: userTrades,
         rejectedOrders,
-        totalValue: userTrades.reduce(
-          (total, trade) => total + trade.value,
+        orderTotal: validTrades.reduce((total, trade) => total + trade.value, 0),
+        totalValue: validTrades.reduce(
+          (total, trade) => total + (trade.side === 'BUY' ? trade.value : -trade.value),
           0
         )
       };

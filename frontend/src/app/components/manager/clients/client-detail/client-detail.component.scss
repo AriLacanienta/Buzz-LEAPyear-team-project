@@ -1,11 +1,16 @@
 $color-white: #ffffff;
 $color-blue: #51a2ff;
 $box-background: #0f1622;
+$border-color: #22314a;
+$muted-color: #6f86a6;
+$danger-color: #ff6467;
+$avatar-color: #a9c9ed;
+$avatar-background: #18263b;
 
 
 .client-detail {
     min-width: 0;
-    padding: clamp(1.75rem, 3vw, 2.75rem);
+    padding: 0;
 }
 
 .detail-header {
@@ -13,7 +18,7 @@ $box-background: #0f1622;
     align-items: center;
     justify-content: space-between;
     background: $box-background;
-    border: 1px solid #22314a;
+    border: 1px solid $border-color;
     border-radius: 0.75rem;
     padding: clamp(1rem, 3vw, 2rem);
 }
@@ -26,7 +31,7 @@ $box-background: #0f1622;
 
 .detail-header {
     padding-bottom: 1.75rem;
-    border-bottom: 1px solid #22314a;
+    border-bottom: 1px solid $border-color;
 }
 
 .detail-identity {
@@ -36,7 +41,7 @@ $box-background: #0f1622;
 
     p:last-child {
         margin: 0.45rem 0 0;
-        color: #6f86a6;
+        color: $muted-color;
         font: 0.8rem 'DM Mono', monospace;
     }
 }
@@ -47,7 +52,7 @@ $box-background: #0f1622;
 
 .client-profile, .eyebrow {
     margin: 0 0 0.35rem;
-    color: #6f86a6;
+    color: $muted-color;
     font: 0.75rem 'DM Mono', monospace;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -60,6 +65,7 @@ h2 {
 
 h3 {
     font-size: 1rem;
+    color: $color-white;
 }
 
 .avatar {
@@ -68,16 +74,16 @@ h3 {
     place-items: center;
     width: 3rem;
     height: 3rem;
-    border: 1px solid #22314a;
+    border: 1px solid $border-color;
     border-radius: 0.65rem;
-    color: #a9c9ed;
-    background: #18263b;
+    color: $avatar-color;
+    background: $avatar-background;
     font: 0.9rem 'DM Mono', monospace;
     font-weight: 600;
 }
 
 .refresh-button {
-    border: 1px solid #22314a;
+    border: 1px solid $border-color;
     border-radius: 0.4rem;
     padding: 0.5rem 0.75rem;
     color: $color-blue;
@@ -88,38 +94,39 @@ h3 {
 
 .summary-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 0.75rem;
     padding: 1.25rem 0;
 }
 
 .summary-item {
     padding: 0.9rem 1rem;
-    border: 1px solid #22314a;
+    border: 1px solid $border-color;
     border-radius: 0.5rem;
     background: $box-background;
 
     span {
         display: block;
         margin-bottom: 0.45rem;
-        color: #6f86a6;
-        font: 0.65rem 'DM Mono', monospace;
+        color: $muted-color;
+        font: 0.75rem 'DM Mono', monospace;
         text-transform: uppercase;
     }
 
     strong {
         font-size: 1.05rem;
+        color: $color-white;
     }
 
     &.warning strong {
-        color: #ff6467;
+        color: $danger-color;
     }
 }
 
 .detail-section {
     padding: 1.25rem;
     background: $box-background;
-    border: 1px solid #22314a;
+    border: 1px solid $border-color;
     border-radius: 0.5rem;
 }
 
@@ -127,7 +134,7 @@ h3 {
     padding-bottom: 0.85rem;
 
     > span {
-        color: #6f86a6;
+        color: $muted-color;
         font: 0.68rem 'DM Mono', monospace;
     }
 }
@@ -135,12 +142,12 @@ h3 {
 .dispute-section {
     margin-top: 1.25rem;
     padding: 1rem;
-    border: 1px solid #22314a;
+    border: 1px solid $border-color;
     border-radius: 0.5rem;
 
     p {
         margin: 0;
-        color: #6f86a6;
+        color: $muted-color;
         font-size: 0.75rem;
     }
 }
@@ -149,14 +156,12 @@ h3 {
     display: grid;
     place-items: center;
     min-height: 20rem;
-    color: #6f86a6;
+    color: $muted-color;
     text-align: center;
 }
 
 @media (max-width: 680px) {
-    .client-detail {
-        padding: 1rem;
-    }
+
 
     .summary-grid {
         grid-template-columns: 1fr;

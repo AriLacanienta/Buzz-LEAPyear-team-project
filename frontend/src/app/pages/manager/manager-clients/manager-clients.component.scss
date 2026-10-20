@@ -1,3 +1,9 @@
+$sidebar-width: 19rem;
+$page-gap: 1.25rem;
+$page-width: 92%;
+$page-max-width: 90rem;
+$page-min-height: calc(100vh - 8rem);
+
 :host {
   display: block;
   min-height: calc(100vh - 5rem);
@@ -5,10 +11,10 @@
 
 .clients-page {
   display: grid;
-  grid-template-columns: 19rem minmax(0, 1fr);
-  gap: 1.25rem;
-  width: min(92%, 90rem);
-  min-height: calc(100vh - 8rem);
+  grid-template-columns: $sidebar-width minmax(0, 1fr);
+  gap: $page-gap;
+  width: min($page-width, $page-max-width);
+  min-height: $page-min-height;
   margin: 1.5rem auto;
 }
 

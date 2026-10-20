@@ -8,5 +8,6 @@ export interface ManagerClient {
 	initials: string;
 	trades: ManagerTradeLog[];
 	rejectedOrders: number;
+	orderTotal: number;
 	totalValue: number;
 }

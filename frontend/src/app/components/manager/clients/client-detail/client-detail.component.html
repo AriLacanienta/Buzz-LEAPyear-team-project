@@ -24,8 +24,12 @@
 
   <div class="summary-grid">
     <div class="summary-item">
-      <span>Total order value</span>
-      <strong>{{ tradeValue | currency:'USD':'symbol':'1.0-0' }}</strong>
+      <span>Portfolio total</span>
+      <strong>{{ selectedClient.totalValue | currency:'USD':'symbol':'1.0-0' }}</strong>
+    </div>
+    <div class="summary-item">
+      <span>Order total</span>
+      <strong>{{ selectedClient.orderTotal | currency:'USD':'symbol':'1.0-0' }}</strong>
     </div>
     <div class="summary-item">
       <span>Orders reviewed</span>

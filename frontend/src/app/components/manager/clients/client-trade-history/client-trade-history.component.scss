@@ -1,5 +1,11 @@
+$border-color: #22314a;
+$muted-color: #6f86a6;
+$buy-color: #00d492;
+$sell-color: #ff6467;
+$pending-color: #fbbf24;
+
 .trade-list {
-  border-top: 1px solid #22314a;
+  border-top: 1px solid $border-color;
 }
 
 .trade-row {
@@ -28,17 +34,17 @@
 .trade-quantity,
 .trade-value,
 .trade-row time {
-  color: #6f86a6;
+  color: $muted-color;
   font: 0.68rem 'DM Mono', monospace;
 }
 
 .trade-side {
-  color: #00d492;
+  color: $buy-color;
   font: 0.72rem 'DM Mono', monospace;
-  font-weight: 600;
+  font-weight: 700;
 
   &.sell {
-    color: #ff6467;
+    color: $sell-color;
   }
 }
 
@@ -46,18 +52,18 @@
   width: fit-content;
   padding: 0.25rem 0.45rem;
   border-radius: 999px;
-  color: #fbbf24;
+  color: $pending-color;
   background: rgba(251, 191, 36, 0.1);
   font: 0.65rem 'DM Mono', monospace;
 
   &.status-filled {
-    color: #00d492;
+    color: $buy-color;
     background: rgba(0, 212, 146, 0.1);
   }
 
   &.status-rejected,
   &.status-cancelled {
-    color: #ff6467;
+    color: $sell-color;
     background: rgba(255, 100, 103, 0.1);
   }
 }
@@ -66,9 +72,9 @@
   display: grid;
   place-items: center;
   min-height: 8rem;
-  border: 1px dashed #22314a;
+  border: 1px dashed $border-color;
   border-radius: 0.5rem;
-  color: #6f86a6;
+  color: $muted-color;
   text-align: center;
 }
 
