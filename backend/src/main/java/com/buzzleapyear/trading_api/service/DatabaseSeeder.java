@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Deprecated
 @Component
 @Profile("legacy-seeder")
 public class DatabaseSeeder implements CommandLineRunner {
