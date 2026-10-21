@@ -15,6 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -73,7 +74,7 @@ class AuthControllerTests {
         user.setPasswordHash("hashed-password");
         loginRequest = new LoginRequest("user@example.com", "wrong-password");
 
-        when(userRepository.findByEmail(loginRequest.getEmail())).thenReturn(Optional.of(user));
+        lenient().when(userRepository.findByEmail(loginRequest.getEmail())).thenReturn(Optional.of(user));
         lenient().when(request.isSecure()).thenReturn(false);
         lenient().when(request.getHeader("X-Forwarded-Proto")).thenReturn(null);
         ReflectionTestUtils.setField(authController, "refreshSessionRepository", refreshSessionRepository);
@@ -119,6 +120,20 @@ class AuthControllerTests {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(0, user.getFailedLoginAttempts());
         assertEquals(false, user.isAccountLocked());
+        verify(userRepository).save(user);
+    }
+
+    @Test
+    void logoutRevokesTheCurrentAccessToken() {
+        when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn("Bearer access-token");
+        when(tokenProvider.validateToken("access-token")).thenReturn(true);
+        when(tokenProvider.getUsernameFromJWT("access-token")).thenReturn("user");
+        when(userRepository.findByUsername("user")).thenReturn(Optional.of(user));
+
+        ResponseEntity<?> response = authController.logout(null, request);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(1, user.getTokenVersion());
         verify(userRepository).save(user);
     }
 

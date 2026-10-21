@@ -166,8 +166,18 @@ export class AuthService {
    * After logout, user must login again to access protected routes
    */
   logout(): void {
+    const token = this.accessToken;
+    const headers = token
+      ? { Authorization: `Bearer ${token}` }
+      : undefined;
+
     this.accessToken = null;
-    this.http.post(`${this.apiUrl}/logout`, {}, { withCredentials: true }).subscribe({
+    localStorage.removeItem('auth_roles');
+
+    this.http.post(`${this.apiUrl}/logout`, {}, {
+      withCredentials: true,
+      ...(headers ? { headers } : {})
+    }).subscribe({
       error: () => {
         // Ignore logout API errors; client-side token is already cleared.
       }
