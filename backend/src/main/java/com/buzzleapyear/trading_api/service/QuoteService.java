@@ -28,6 +28,7 @@ import com.buzzleapyear.trading_api.entity.Instrument.AssetType;
 import com.buzzleapyear.trading_api.entity.Quote;
 import com.buzzleapyear.trading_api.repository.InstrumentRepository;
 import com.buzzleapyear.trading_api.repository.QuoteRepository;
+import com.buzzleapyear.trading_api.service.MarketHoursService;
 
 import jakarta.annotation.PostConstruct;
 
@@ -64,10 +65,12 @@ public class QuoteService {
     private final InstrumentService instrumentService;
     private final QuoteRepository quoteRepository;
     private final InstrumentRepository instrumentRepository;
+    private final MarketHoursService marketHoursService;
     private final Map<Long, InstrumentQuoteState> latestQuotes = new ConcurrentHashMap<>();
 
     public QuoteService(InstrumentService instrumentService, QuoteRepository quoteRepository,
         InstrumentRepository instrumentRepository,
+        MarketHoursService marketHoursService,
         @Value("${QUOTE_MIN_VOLATILITY:0.0}") double minVolatility,
         @Value("${QUOTE_MAX_VOLATILITY:0.0}") double maxVolatility,
         @Value("${QUOTE_MIN_DRIFT:0.0}") double minDrift,
@@ -76,6 +79,7 @@ public class QuoteService {
         this.instrumentService = instrumentService;
         this.quoteRepository = quoteRepository;
         this.instrumentRepository = instrumentRepository;
+        this.marketHoursService = marketHoursService;
         this.MIN_VOLATILITY = minVolatility;
         this.MAX_VOLATILITY = maxVolatility;
         this.MIN_DRIFT = minDrift;
@@ -243,10 +247,16 @@ public class QuoteService {
         return Optional.of(new QuoteSnapshot(state.currentPrice, state.timestamp));
     }
 
-    public Page<InstrumentSearchResponseDto> getInstrumentSearchResults(String query, Pageable pageable) {
+    public Page<InstrumentSearchResponseDto> getInstrumentSearchResults(String query, List<AssetType> assetTypes, String currencyCode, Pageable pageable) {
         List<InstrumentSearchResponseDto> responses = new ArrayList<>();
 
         for (Instrument instrument : instrumentService.searchInstrumentsByQuery(query)) {
+            if (assetTypes != null && !assetTypes.isEmpty() && !assetTypes.contains(instrument.getAssetType())) {
+                continue;
+            }
+            if (currencyCode != null && !currencyCode.equals(instrument.getCurrencyCode())) {
+                continue;
+            }
             long instrumentId = instrument.getId();
             InstrumentQuoteState latestQuote = latestQuotes.get(instrumentId);
 
@@ -257,7 +267,13 @@ public class QuoteService {
                     instrument.getAssetType().name(),
                     instrument.getCurrencyCode(),
                     latestQuote.currentPrice,
-                    latestQuote.changePercent
+                    latestQuote.changePercent,
+                    instrument.getTradingSession().name(),
+                    marketHoursService.isOpen(instrument.getTradingSession()),
+                    instrument.isWholeSharesAllowed(),
+                    instrument.isFractionalAllowed(),
+                    instrument.getQuantityPrecision(),
+                    instrument.getMinOrderAmount()
                 ));
             }
         }

@@ -38,6 +38,13 @@ public class TradeOrder {
     
     @Column(name = "order_date", nullable = false)
     private LocalDateTime orderDate;
+
+    @Column(name = "quantity_mode", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private QuantityMode quantityMode = QuantityMode.SHARES;
+
+    @Column(name = "requested_amount")
+    private BigDecimal requestedAmount;
     
     @OneToMany(mappedBy = "tradeOrder", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TradeOrderStatus> statuses = new ArrayList<>();
@@ -61,8 +68,8 @@ public class TradeOrder {
     public BigDecimal getPrice() { return price; }
     public void setPrice(BigDecimal price) { this.price = price; }
     
-    public BigDecimal getValue() { return tradeValue; }
-    public void setValue(BigDecimal value) { this.tradeValue = value; }
+    public BigDecimal getTradeValue() { return tradeValue; }
+    public void setTradeValue(BigDecimal tradeValue) { this.tradeValue = tradeValue; }
     
     public LocalDateTime getOrderDate() { return orderDate; }
     public void setOrderDate(LocalDateTime orderDate) { this.orderDate = orderDate; }
@@ -71,7 +78,15 @@ public class TradeOrder {
     public void setStatuses(List<TradeOrderStatus> statuses) { this.statuses = statuses; }
     public void addStatus(TradeOrderStatus newStatus) { this.statuses.add(newStatus); }
 
-    
+    public QuantityMode getQuantityMode() { return quantityMode; }
+    public void setQuantityMode(QuantityMode quantityMode) { this.quantityMode = quantityMode; }
+
+    public BigDecimal getRequestedAmount() { return requestedAmount; }
+    public void setRequestedAmount(BigDecimal requestedAmount) { this.requestedAmount = requestedAmount; }
+
+    public enum QuantityMode {
+        SHARES, AMOUNT
+    }
     public enum OrderSide {
         BUY, SELL
     }

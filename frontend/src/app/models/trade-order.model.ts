@@ -1,10 +1,13 @@
 export type OrderSide = 'BUY' | 'SELL';
-export type OrderStatus = 'SUBMITTED' | 'ACCEPTED' | 'VALIDATED' | 'FILLED' | 'REJECTED';
+export type OrderStatus = 'SUBMITTED' | 'ACCEPTED' | 'FILLED' | 'REJECTED';
+export type QuantityMode = 'SHARES' | 'AMOUNT';
 
 export interface TradeOrderPreviewRequest {
     side: OrderSide;
     instrumentSymbol: string;
-    quantity: number;
+    quantityMode: QuantityMode;
+    quantity?: number;
+    amount?: number;
     accountId: string | number;
 }
 
@@ -15,7 +18,9 @@ export interface TradeOrderRequest extends TradeOrderPreviewRequest {
 export interface TradeOrderPreviewResponse {
     symbol: string;
     side: OrderSide;
+    quantityMode: QuantityMode;
     quantity: number;
+    requestedAmount: number | null;
     livePrice: number | null;
     estimatedValue: number | null;
     cashAvailable: number;

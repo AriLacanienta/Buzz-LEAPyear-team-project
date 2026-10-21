@@ -7,14 +7,18 @@
     </div>
 
     <div class="tag">
-        <button [class.selected]="selectedTag === 'All'" (click)="selectTag('All')">All</button>
         <button [class.selected]="selectedTag === 'Stock'" (click)="selectTag('Stock')">Stock</button>
         <button [class.selected]="selectedTag === 'Crypto'" (click)="selectTag('Crypto')">Crypto</button>
     </div>
 
-    <app-search (itemSelected)="onSearchItemSelected($event)"></app-search>
+    <app-search [assetTypes]="searchAssetTypes" (itemSelected)="onSearchItemSelected($event)"></app-search>
 
     <app-search-result-detail [selectedResult]="selectedResult"></app-search-result-detail>
+
+    <div class="tag quantity-mode">
+        <button [class.selected]="quantityMode === 'SHARES'">Shares</button>
+        <button [class.selected]="quantityMode === 'AMOUNT'">Amount</button>
+    </div>
 
     <div class="quantity-container">
         <label for="quantity">QUANTITY / SHARES</label>

@@ -38,13 +38,15 @@ public class QuoteController {
             .orElse(ResponseEntity.notFound().build());
     }
 
-    // GET /api/v1/quote/search?q={query}&page={page}&size={size}
+    // GET /api/v1/quote/search?q={query}&assetType={assetType}&assetType={assetType}&market={market}&page={page}&size={size}
     @GetMapping("/search")
     public ResponseEntity<Page<InstrumentSearchResponseDto>> getInstrumentSearchResults(
         @RequestParam("q") String query,
+        @RequestParam(name = "assetType", defaultValue = "EQUITY,ETF,BOND") AssetType assetTypes,
+        @RequestParam(defaultValue = "US") String market,
         Pageable pageable
     ) {
-        return ResponseEntity.ok(quoteService.getInstrumentSearchResults(query, pageable));
+        return ResponseEntity.ok(quoteService.getInstrumentSearchResults(query, assetTypes, toCurrencyCode(market), pageable));
     }
 
     // GET /api/v1/quote/market?assetType={assetType}&market={market}&page={page}&size={size}
@@ -56,18 +58,22 @@ public class QuoteController {
     ) {
         logger.info("Received request - assetType: {}, market: {}, page: {}, size: {}", assetType, market, pageable.getPageNumber(), pageable.getPageSize());
         
-        String currencyCode = null;
-        if (market != null && !market.isEmpty()) {
-            currencyCode = switch (market.toUpperCase()) {
-                case "US" -> "USD";
-                case "UK" -> "GBP";
-                case "INDIA", "INDIAN" -> "INR";
-                default -> null;
-            };
-        }
+        String currencyCode = toCurrencyCode(market);
         
         logger.info("Converted market: {} to currencyCode: {}", market, currencyCode);
         
         return ResponseEntity.ok(quoteService.getLatestMarketEquityQuotes(assetType, currencyCode, pageable));
+    }
+
+    private String toCurrencyCode(String market) {
+        if (market == null || market.isEmpty()) {
+            return null;
+        }
+        return switch (market.toUpperCase()) {
+            case "US" -> "USD";
+            case "UK" -> "GBP";
+            case "INDIA", "INDIAN" -> "INR";
+            default -> null;
+        };
     }
 }

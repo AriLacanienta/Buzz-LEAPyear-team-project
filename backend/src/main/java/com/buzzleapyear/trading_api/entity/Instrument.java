@@ -2,6 +2,7 @@ package com.buzzleapyear.trading_api.entity;
 
 import jakarta.persistence.*;
 import java.util.List;
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "instruments", uniqueConstraints = {
@@ -26,6 +27,22 @@ public class Instrument {
     
     @Column(name = "currency_code", nullable = false, length = 3)
     private String currencyCode;
+
+    @Column(name = "trading_session", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private TradingSession tradingSession;
+
+    @Column(name = "whole_shares_allowed", nullable = false)
+    private Boolean wholeSharesAllowed;
+
+    @Column(name = "fractional_allowed", nullable = false)
+    private Boolean fractionalAllowed;
+
+    @Column(name = "quantity_precision", nullable = false)
+    private Integer quantityPrecision;
+
+    @Column(name = "min_order_amount", nullable = false)
+    private BigDecimal minOrderAmount;
     
     @OneToMany(mappedBy = "instrument", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TradeOrder> tradeOrders;
@@ -39,6 +56,21 @@ public class Instrument {
     // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+
+    public TradingSession getTradingSession() { return tradingSession; }
+    public void setTradingSession(TradingSession tradingSession) { this.tradingSession = tradingSession; }
+
+    public Boolean getWholeSharesAllowed() { return wholeSharesAllowed; }
+    public void setWholeSharesAllowed(Boolean wholeSharesAllowed) { this.wholeSharesAllowed = wholeSharesAllowed; }
+
+    public Boolean getFractionalAllowed() { return fractionalAllowed; }
+    public void setFractionalAllowed(Boolean fractionalAllowed) { this.fractionalAllowed = fractionalAllowed; }
+
+    public Integer getQuantityPrecision() { return quantityPrecision; }
+    public void setQuantityPrecision(Integer quantityPrecision) { this.quantityPrecision = quantityPrecision; }
+
+    public BigDecimal getMinOrderAmount() { return minOrderAmount; }
+    public void setMinOrderAmount(BigDecimal minOrderAmount) { this.minOrderAmount = minOrderAmount; }
     
     public String getInstrumentName() { return instrumentName; }
     public void setInstrumentName(String instrumentName) { this.instrumentName = instrumentName; }
@@ -63,6 +95,27 @@ public class Instrument {
     
     public enum AssetType {
         EQUITY, BOND, FUND, CASH, CRYPTO, ETF
+    }
+
+    public enum TradingSession {
+        US_MARKET, UK_MARKET, INDIA_MARKET, ALWAYS_OPEN
+    }
+
+    @PrePersist
+    public void applyDefaultTradingRules() {
+        boolean crypto = assetType == AssetType.CRYPTO;
+        boolean bond = assetType == AssetType.BOND;
+        if (tradingSession == null) {
+            tradingSession = crypto ? TradingSession.ALWAYS_OPEN : switch (String.valueOf(currencyCode)) {
+                case "GBP" -> TradingSession.UK_MARKET;
+                case "INR" -> TradingSession.INDIA_MARKET;
+                default -> TradingSession.US_MARKET;
+            };
+        }
+        if (wholeSharesAllowed == null) wholeSharesAllowed = !crypto;
+        if (fractionalAllowed == null) fractionalAllowed = !bond;
+        if (quantityPrecision == null) quantityPrecision = crypto ? 0 : 6;
+        if (minOrderAmount == null) minOrderAmount = BigDecimal.ONE;
     }
 
     public String getMarket() {

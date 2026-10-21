@@ -1,7 +1,7 @@
-  import { Component, DestroyRef, HostListener, OnInit } from '@angular/core';
+  import { Component, DestroyRef, HostListener, OnInit, ViewChild } from '@angular/core';
 import { HoldingService } from '@app/services/holding.service';
 import { TradeOrderService } from '@app/services/trade-order.service';
-import { TradeOrderPreviewRequest, TradeOrderPreviewResponse } from '@app/models/trade-order.model';
+import { QuantityMode, TradeOrderPreviewRequest, TradeOrderPreviewResponse } from '@app/models/trade-order.model';
 import { SearchComponent } from '../search/search.component';
 import { SearchResultDetailComponent } from '../search-result-detail/search-result-detail.component';
 import { CommonModule, CurrencyPipe } from '@angular/common';
@@ -12,6 +12,12 @@ import { catchError, debounceTime, filter, finalize, take, tap } from 'rxjs/oper
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 type OrderType = 'BUY' | 'SELL';
+type AssetTag = 'Stock' | 'Crypto';
+
+const TAG_ASSET_TYPES: Record<AssetTag, string[]> = {
+  Stock: ['EQUITY', 'ETF', 'BOND'],
+  Crypto: ['CRYPTO']
+};
 
 const PREVIEW_POLL_INTERVAL_MS = 3000;
 const SUCCESS_MESSAGE_TIMEOUT = 2000;
@@ -26,9 +32,11 @@ const SUCCESS_MESSAGE_TIMEOUT = 2000;
 export class BuySellComponent implements OnInit {
   isBuy: boolean = true;
   quantity: number = 0;
+  amount: number = 0;
+  quantityMode: QuantityMode = 'SHARES';
   successMessage: string = '';
   errorMessage: string = '';
-  selectedTag: string = 'All';
+  selectedTag: AssetTag = 'Stock';
   selectedResult: InstrumentSearchResponse | null = null;
   instruments: InstrumentSearchResponse[] | null = null;
   preview: TradeOrderPreviewResponse | null = null;
@@ -39,6 +47,8 @@ export class BuySellComponent implements OnInit {
   private accountId: string | null = null;
   private ownsSelected: boolean | null = null;
   private previewTrigger$ = new Subject<void>();
+
+  @ViewChild(SearchComponent) private searchComponent?: SearchComponent;
 
   constructor(
     private accountService: AccountService, 
@@ -84,8 +94,33 @@ export class BuySellComponent implements OnInit {
     this.requestPreview();
   }
 
-  selectTag(tag: string): void {
+  selectTag(tag: AssetTag): void {
+    if (tag === this.selectedTag) {
+      return;
+    }
     this.selectedTag = tag;
+    this.searchComponent?.onSearchClear();
+    this.applyQuantityModeConstraints(tag === 'Crypto' ? 'AMOUNT' : 'SHARES');
+  }
+
+  setQuantityMode(mode: QuantityMode): void {
+    if ((mode === 'SHARES' && !this.canTradeWholeShares) || (mode === 'AMOUNT' && !this.canTradeByAmount)) {
+      return;
+    }
+    this.applyQuantityModeConstraints(mode);
+  }
+
+  onAmountInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const [whole, ...fraction] = input.value.replace(/[^0-9.]/g, '').split('.');
+    let value = fraction.length ? `${whole}.${fraction.join('').slice(0, 2)}` : whole;
+    value = value.replace(/^0+(?=\d)/, '');
+    input.value = value;
+
+    this.amount = parseFloat(input.value) || 0;
+    this.errorMessage = '';
+    this.successMessage = '';
+    this.requestPreview();
   }
 
   onQuantityInput(event: Event): void {
@@ -110,6 +145,7 @@ export class BuySellComponent implements OnInit {
       this.successMessage = '';
       this.errorMessage = '';
       this.checkOwnership();
+      this.applyQuantityModeConstraints(this.quantityMode);
     }
     this.requestPreview();
   }
@@ -123,7 +159,12 @@ export class BuySellComponent implements OnInit {
       return;
     }
 
-    if (!Number.isInteger(this.quantity) || this.quantity <= 0) {
+    if (this.quantityMode === 'AMOUNT') {
+      if (!(this.amount > 0)) {
+        this.errorMessage = 'Please enter a valid amount greater than 0.';
+        return;
+      }
+    } else if (!Number.isInteger(this.quantity) || this.quantity <= 0) {
       this.errorMessage = 'Please enter a valid quantity greater than 0.';
       return;
     }
@@ -162,14 +203,18 @@ export class BuySellComponent implements OnInit {
       return;
     }
     const symbol = this.selectedResult?.instrumentSymbol;
+    const quantityMode = this.quantityMode;
     const quantity = this.quantity;
+    const amount = this.amount;
     const price = confirmedPrice ?? this.preview?.livePrice ?? this.selectedResult.currentPrice;
+    const orderLabel = quantityMode === 'AMOUNT' ? `${this.formatUsd(amount)} of ${symbol}` : `${quantity} ${symbol}`;
 
     this.isSubmitting = true;
     this.tradeOrderService.submitOrder({
       side,
       instrumentSymbol: symbol,
-      quantity,
+      quantityMode,
+      ...(quantityMode === 'AMOUNT' ? { amount } : { quantity }),
       price,
       accountId: this.accountId
     }).pipe(
@@ -178,15 +223,16 @@ export class BuySellComponent implements OnInit {
     ).subscribe({
       next: response => {
         this.quantity = 0;
+        this.amount = 0;
         this.successMessage = `Order #${response.orderId} submitted`;
         this.tradeOrderService.notifyOrderplaced();
-        this.watchOrderCompletion(response.orderId, side, quantity, symbol);
+        this.watchOrderCompletion(response.orderId, side, orderLabel);
       },
       error: () => this.errorMessage = 'Order could not be submitted'
     });
   }
 
-  private watchOrderCompletion(orderId: number, side: 'BUY' | 'SELL', quantity: number, symbol: string): void {
+  private watchOrderCompletion(orderId: number, side: 'BUY' | 'SELL', orderLabel: string): void {
     timer(0, 300).pipe(
       switchMap(() => this.tradeOrderService.getOrderStatus(orderId).pipe(catchError(() => of(null)))),
       tap(status => {
@@ -208,7 +254,7 @@ export class BuySellComponent implements OnInit {
       this.requestPreview();
 
       if (status.status === 'FILLED') {
-        this.successMessage = `${side === 'BUY' ? 'Bought' : 'Sold'} ${quantity} ${symbol} (order #${orderId})`;
+        this.successMessage = `${side === 'BUY' ? 'Bought' : 'Sold'} ${orderLabel} (order #${orderId})`;
         setTimeout(() => {
           this.successMessage = '';
         }, SUCCESS_MESSAGE_TIMEOUT);
@@ -244,7 +290,10 @@ export class BuySellComponent implements OnInit {
     const matchesInput = preview
       && preview.side === side
       && preview.symbol === this.selectedResult?.instrumentSymbol
-      && Number(preview.quantity) === this.quantity;
+      && preview.quantityMode === this.quantityMode
+      && (this.quantityMode === 'AMOUNT'
+        ? Number(preview.requestedAmount) === this.amount
+        : Number(preview.quantity) === this.quantity);
 
     if (preview && matchesInput && !preview.valid) {
       this.errorMessage = preview.reason ?? 'Order is not valid.';
@@ -258,16 +307,67 @@ export class BuySellComponent implements OnInit {
   }
 
   private buildPreviewRequest(): TradeOrderPreviewRequest | null {
-    if (!this.accountId || !this.selectedResult || this.quantity <= 0) {
+    if (!this.accountId || !this.selectedResult || !this.hasOrderInput) {
       return null;
     }
 
     return {
       side: this.isBuy ? 'BUY' : 'SELL',
       instrumentSymbol: this.selectedResult.instrumentSymbol,
-      quantity: this.quantity,
+      quantityMode: this.quantityMode,
+      ...(this.quantityMode === 'AMOUNT' ? { amount: this.amount } : { quantity: this.quantity }),
       accountId: this.accountId
     };
+  }
+
+  private applyQuantityModeConstraints(requested: QuantityMode): void {
+    let mode = requested;
+    if (mode === 'SHARES' && !this.canTradeWholeShares) {
+      mode = 'AMOUNT';
+    }
+    else if (mode === 'AMOUNT' && !this.canTradeByAmount) {
+      mode = 'SHARES';
+    }
+    if (mode === this.quantityMode) {
+      return;
+    }
+    this.quantityMode = mode;
+    this.quantity = 0;
+    this.amount = 0;
+    this.preview = null;
+    this.errorMessage = '';
+    this.requestPreview();
+  }
+
+  private formatUsd(value: number): string {
+    return value.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+  }
+
+  get searchAssetTypes(): string[] {
+    return TAG_ASSET_TYPES[this.selectedTag];
+  }
+
+  get canTradeWholeShares(): boolean {
+    return this.selectedTag !== 'Crypto' && (this.selectedResult?.wholeSharesAllowed ?? true);
+  }
+
+  get canTradeByAmount(): boolean {
+    return this.selectedResult?.fractionalAllowed ?? true;
+  }
+
+  get hasOrderInput(): boolean {
+    return this.quantityMode === 'AMOUNT' ? this.amount > 0 : this.quantity > 0;
+  }
+
+  get estimatedQuantity(): number | null {
+    if (this.quantityMode === 'SHARES') {
+      return this.quantity || null;
+    }
+    return this.preview?.quantity ?? null;
+  }
+
+  get isMarketClosed(): boolean {
+    return this.selectedResult?.marketOpen === false;
   }
 
   private loadCashAvailable(): void {
@@ -285,6 +385,9 @@ export class BuySellComponent implements OnInit {
   get estimatedTotal(): number | null {
     if (this.preview?.estimatedValue != null) {
       return this.preview.estimatedValue;
+    }
+    if (this.quantityMode === 'AMOUNT') {
+      return this.amount > 0 ? this.amount : null;
     }
     return this.selectedResult && this.quantity > 0 ? this.selectedResult.currentPrice * this.quantity : null;
   }

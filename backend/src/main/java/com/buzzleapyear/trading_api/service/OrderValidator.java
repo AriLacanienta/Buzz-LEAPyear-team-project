@@ -12,6 +12,7 @@ import com.buzzleapyear.trading_api.entity.Account;
 import com.buzzleapyear.trading_api.entity.Holding;
 import com.buzzleapyear.trading_api.entity.Instrument;
 import com.buzzleapyear.trading_api.entity.TradeOrder;
+import com.buzzleapyear.trading_api.service.MarketHoursService;
 
 /**
  * OrderValidator
@@ -28,8 +29,43 @@ public class OrderValidator {
     private final double MODERATE_LIMIT = 10_000;
     // AGGRESSIVE_LIMIT is unlimited
 
+    private final MarketHoursService marketHoursService;
 
-    public OrderValidator(){}
+    public OrderValidator(MarketHoursService marketHoursService){
+        this.marketHoursService = marketHoursService;
+    }
+
+    public boolean validateMarketOpen(Instrument instrument) {
+        return instrument != null && marketHoursService.isOpen(instrument.getTradingSession());
+    }
+
+    public String validateInstrumentRules(TradeOrder order) {
+        Instrument instrument = order.getInstrument();
+        String symbol = instrument.getInstrumentSymbol();
+        BigDecimal quantity = order.getQuantity();
+
+        if (order.getQuantityMode() != TradeOrder.QuantityMode.AMOUNT) {
+            if (!instrument.isWholeSharesAllowed()) {
+                return symbol + " can only be traded by dollar amount";
+            }
+            if (quantity != null && quantity.stripTrailingZeros().scale() > 0) {
+                return "Share orders must be for a whole number of shares";
+            }
+        }
+
+        if (!instrument.isFractionalAllowed()) {
+            return symbol + " does not support dollar-amount orders";
+        }
+        BigDecimal amount = order.getRequestedAmount();
+        if (amount == null || amount.compareTo(instrument.getMinOrderAmount()) < 0) {
+            return String.format("Minimum order amount for %s is $%.2f", symbol, instrument.getMinOrderAmount());
+        }
+        if (quantity != null && quantity.stripTrailingZeros().scale() > instrument.getQuantityPrecision()) {
+            return String.format("%s quantity cannot have more than %d decimal places", symbol, instrument.getQuantityPrecision());
+        }
+
+        return null;
+    }
 
     /**
      * Validate that order quantity is positive
@@ -124,6 +160,18 @@ public class OrderValidator {
      * @return ValidationResult with success status and reason for failure
      */
     public ValidationResult validate(TradeOrder order, Account account) {
+        if (!validateMarketOpen(order.getInstrument())) {
+            String reason = marketHoursService.closedReason(order.getInstrument().getTradingSession());
+            logger.warn("Order ID: {} failed validation: {}", order.getId(), reason);
+            return new ValidationResult(false, reason);
+        }
+
+        String ruleViolation = validateInstrumentRules(order);
+        if (ruleViolation != null) {
+            logger.warn("Order ID: {} failed validation: {}", order.getId(), ruleViolation);
+            return new ValidationResult(false, ruleViolation);
+        }
+
         // Check quantity
         if (!validateOrderQuantity(order.getQuantity())) {
             String reason = "Invalid quantity: must be greater than 0";
@@ -171,8 +219,8 @@ public class OrderValidator {
                     .findFirst()
                     .orElse(null);
                 BigDecimal available = holding != null ? holding.getQuantity() : BigDecimal.ZERO;
-                String reason = String.format("Insufficient quantity: need %.4f, have %.4f", 
-                    order.getQuantity(), available);
+                String reason = String.format("Insufficient quantity: need %s, have %s", 
+                    order.getQuantity().stripTrailingZeroes().toPlainString(), available.stripTrailingZeroes().toPlainString());
                 logger.warn("Order ID: {} failed validation: {}", order.getId(), reason);
                 return new ValidationResult(false, reason);
             }

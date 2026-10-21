@@ -15,6 +15,7 @@ import com.buzzleapyear.trading_api.repository.HoldingRepository;
 import com.buzzleapyear.trading_api.entity.Account;
 import com.buzzleapyear.trading_api.entity.TradeOrder;
 import com.buzzleapyear.trading_api.entity.TradeOrder.OrderSide;
+import com.buzzleapyear.trading_api.entity.TradeOrder.QuantityMode;
 import com.buzzleapyear.trading_api.entity.TradeOrderStatus;
 import com.buzzleapyear.trading_api.entity.TradeOrderStatus.OrderStatus;
 import com.buzzleapyear.trading_api.repository.AccountRepository;
@@ -49,6 +50,7 @@ public class OrderProcessor {
     // Maximum allowed drift between quoted price and the live price
     private static final BigDecimal PRICE_TOLERANCE = new BigDecimal("0.01");
     private static final Duration MAX_QUOTE_AGE = Duration.ofSeconds(10);
+    private static final BigDecimal ONE_CENT = new BigDecimal("0.01");
 
     @Value("${ORDER_EXECUTION_DELAY_MS:1000}")
     private long orderExecutionDelayMs;
@@ -108,6 +110,17 @@ public class OrderProcessor {
             }
 
             order.setPrice(marketPrice);
+            if (order.getQuantityMode() == QuantityMode.AMOUNT) {
+                BigDecimal resolvedQuantity = resolveQuantity(order.getInstrument(), QuantityMode.AMOUNT, order.getQuantity(),
+                    order.getRequestedAmount(), marketPrice, order.getSide(), getHeldQuantity(account, order.getInstrument()));
+                if (resolvedQuantity == null || resolvedQuantity.signum() <= 0) {
+                    String reason = "Order amount is too small to buy any quantity at the current price";
+                    logOrderStatus(order, OrderStatus.REJECTED, reason);
+                    logger.warn("Order ID: {} rejected: {}", order.getId(), reason);
+                    return;
+                }
+                order.setQuantity(resolvedQuantity);
+            }
             order.setValue(marketPrice.multiply(order.getQuantity()).setScale(2, RoundingMode.HALF_UP));
             tradeOrderRepository.save(order);
 
@@ -121,7 +134,7 @@ public class OrderProcessor {
 
             // Step 3: Reserve buy cash before acceptance
             logger.info("Order ID: {} passed validation", order.getId());
-            
+
             if (order.getSide() == OrderSide.BUY) {
                 BigDecimal requiredCash = order.getPrice().multiply(order.getQuantity());
                 account.setCashAvailable(account.getCashAvailable().subtract(requiredCash));
@@ -153,7 +166,31 @@ public class OrderProcessor {
         executeValidOrder(order, account, acceptedPrice);
     }
 
-    public TradeOrderPreviewResponseDto previewOrder(Account account, Instrument instrument, OrderSide side, BigDecimal quantity) {
+    public BigDecimal resolveQuantity(Instrument instrument, QuantityMode mode, BigDecimal quantity, BigDecimal amount, BigDecimal price, OrderSide side, BigDecimal heldQuantity) {
+        if (mode != QuantityMode.QUANTITY) {
+            return quantity;
+        }
+        if (amount == null || price == null || price.signum() <= 0) {
+            return null;
+        }
+        BigDecimal resolved = amount.divide(price, instrument.getQuantityPrecision(), RoundingMode.DOWN);
+        if(side == OrderSide.SELL && heldQuantity != null && heldQuantity.signum() > 0) {
+            BigDecimal heldValue = heldQuantity.multiply(price).setScale(2, RoundingMode.CEILING);
+            if (heldValue.subtract(amount).abs().compareTo(ONE_CENT) <= 0) {
+                resolved = heldQuantity;
+            }
+        }
+        return resolved;
+    }
+
+    private BigDecimal getHeldQuantity(Account account, Instrument instrument) {
+        return holdingRepository.findByAccountIdAndInstrumentId(account.getId(), instrument.getId())
+            .map(Holding::getQuantity)
+            .orElse(BigDecimal.ZERO);
+    }
+
+    public TradeOrderPreviewResponseDto previewOrder(Account account, Instrument instrument, OrderSide side, 
+            QuantityMode mode, BigDecimal requestedQuantity, BigDecimal requestedAmount) {
         Holding holding = holdingRepository.findByAccountIdAndInstrumentId(account.getId(), instrument.getId()).orElse(null);
 
         BigDecimal heldQuantity = holding != null ? holding.getQuantity() : BigDecimal.ZERO;
@@ -165,7 +202,9 @@ public class OrderProcessor {
             return new TradeOrderPreviewResponseDto(
                 instrument.getInstrumentSymbol(),
                 side,
-                quantity,
+                mode,
+                requestedQuantity,
+                requestedAmount,
                 null,
                 null,
                 cashAvailable,
@@ -178,12 +217,18 @@ public class OrderProcessor {
                 "No market quote available for " + instrument.getInstrumentSymbol());
         }
 
+        BigDecimal quantity = resolveQuantity(instrument, mode, requestedQuantity, requestedAmount, livePrice, side, heldQuantity);
+        if (quantity == null) {
+            quantity = BigDecimal.ZERO;
+        }
         BigDecimal estimatedValue = livePrice.multiply(quantity).setScale(2, RoundingMode.HALF_UP);
 
         TradeOrder draft = new TradeOrder();
         draft.setAccount(account);
         draft.setInstrument(instrument);
         draft.setSide(side);
+        draft.setQuantityMode(mode);
+        draft.setRequestedAmount(requestedAmount);
         draft.setQuantity(quantity);
         draft.setPrice(livePrice);
         
@@ -197,7 +242,9 @@ public class OrderProcessor {
         if (side == OrderSide.BUY) {
             cashAfter = cashAvailable.subtract(estimatedValue);
             holdingQuantityAfter = heldQuantity.add(quantity);
-            averageCostAfter = heldCost.add(estimatedValue).divide(holdingQuantityAfter, 4, RoundingMode.HALF_UP);
+            if (holdingQuantityAfter.signum() > 0) {
+                averageCostAfter = heldCost.add(estimatedValue).divide(holdingQuantityAfter, 4, RoundingMode.HALF_UP);
+            }
         } 
         else {
             cashAfter = cashAvailable.add(estimatedValue);
@@ -212,7 +259,9 @@ public class OrderProcessor {
         return new TradeOrderPreviewResponseDto(
             instrument.getInstrumentSymbol(),
             side,
+            mode,
             quantity,
+            requestedAmount,
             livePrice,
             estimatedValue,
             cashAvailable,
