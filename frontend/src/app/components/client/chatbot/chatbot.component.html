@@ -1,0 +1,104 @@
+<button
+  *ngIf="!isOpen"
+  class="chatbot-launcher"
+  type="button"
+  aria-label="Open Buzz helper"
+  (click)="toggleChatbot()"
+>
+  <span aria-hidden="true">⚡︎</span>
+</button>
+
+<section *ngIf="isOpen" class="chatbot">
+  <header>
+    <h2>BUZZ Helper</h2>
+    <button
+      type="button"
+      class="close-button"
+      aria-label="Minimize Buzz helper"
+      (click)="toggleChatbot()"
+    >
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </header>
+
+  <div #messagesContainer class="messages">
+    <div
+      *ngFor="let message of messages"
+      [class.user]="message.role === 'user'"
+      [class.assistant]="message.role === 'assistant'"
+    >
+      <p>{{ message.text }}</p>
+
+      <div *ngIf="message.preview as preview" class="preview">
+        <strong>{{ preview.side }} {{ preview.quantity }} {{ preview.instrumentSymbol }}</strong>
+        <span>Estimated value: {{ preview.estimatedValue }}</span>
+        <span>Cash after: {{ preview.cashAfter }}</span>
+        <span *ngIf="!preview.valid">{{ preview.reason }}</span>
+      </div>
+
+      <div *ngIf="message.portfolio as portfolio" class="portfolio-summary">
+        <span>Portfolio value: {{ portfolio.portfolioValue | currency }}</span>
+        <span>Cost basis: {{ portfolio.totalCostBasis | currency }}</span>
+        <span>Today: {{ portfolio.todayChange | currency }} ({{ portfolio.todayChangePercent }}%)</span>
+        <span>All time: {{ portfolio.allTimeChange | currency }} ({{ portfolio.allTimeChangePercent }}%)</span>
+      </div>
+
+      <div *ngIf="message.marketMovers as movers" class="market-movers">
+        <section *ngIf="movers.topGainers.length">
+          <strong>Top gainers</strong>
+          <div *ngFor="let mover of movers.topGainers; let i = index">
+            <span>{{ i + 1 }}. {{ mover.symbol }}</span>
+            <span class="positive">+{{ mover.changePercent }}%</span>
+          </div>
+        </section>
+        <section *ngIf="movers.topLosers.length">
+          <strong>Top losers</strong>
+          <div *ngFor="let mover of movers.topLosers; let i = index">
+            <span>{{ i + 1 }}. {{ mover.symbol }}</span>
+            <span class="negative">{{ mover.changePercent }}%</span>
+          </div>
+        </section>
+      </div>
+
+      <div *ngIf="message.comparison as comparison" class="comparison">
+        <div>
+          <strong>{{ comparison.first.symbol }}</strong>
+          <span>{{ comparison.first.price | currency }}</span>
+          <span [class.positive]="comparison.first.changePercent >= 0" [class.negative]="comparison.first.changePercent < 0">
+            {{ comparison.first.changePercent >= 0 ? '+' : '' }}{{ comparison.first.changePercent }}%
+          </span>
+        </div>
+        <div>
+          <strong>{{ comparison.second.symbol }}</strong>
+          <span>{{ comparison.second.price | currency }}</span>
+          <span [class.positive]="comparison.second.changePercent >= 0" [class.negative]="comparison.second.changePercent < 0">
+            {{ comparison.second.changePercent >= 0 ? '+' : '' }}{{ comparison.second.changePercent }}%
+          </span>
+        </div>
+      </div>
+
+      <button
+        *ngIf="message.action === 'VIEW_TRADE'"
+        type="button"
+        (click)="openAction(message.action, message.preview)"
+      >
+        Review
+      </button>
+    </div>
+
+    <p *ngIf="loading">Checking...</p>
+  </div>
+
+  <form (ngSubmit)="sendMessage()">
+    <input
+      name="message"
+      [(ngModel)]="message"
+      placeholder="Ask about your account"
+      autocomplete="off"
+    />
+
+    <button type="submit" [disabled]="loading || !message.trim()">
+      Send
+    </button>
+  </form>
+</section>

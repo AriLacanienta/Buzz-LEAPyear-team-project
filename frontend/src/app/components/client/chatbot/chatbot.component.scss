@@ -1,0 +1,209 @@
+.chatbot-launcher,
+.chatbot {
+  position: fixed;
+  right: 1.5rem;
+  bottom: 1.5rem;
+  z-index: 1000;
+}
+
+.chatbot-launcher {
+  display: grid;
+  width: 3.5rem;
+  height: 3.5rem;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  color: #ffffff;
+  background: var(--primary-color);
+  box-shadow: 0 0.75rem 2rem rgb(0 0 0 / 35%);
+  cursor: pointer;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.chatbot {
+  width: min(22rem, calc(100vw - 2rem));
+  max-height: 34rem;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #263852;
+  border-radius: 0.75rem;
+  background: var(--bg-dark);
+  box-shadow: 0 0.75rem 2rem rgb(0 0 0 / 35%);
+}
+
+.chatbot header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 1rem;
+  background: var(--primary-dark);
+}
+
+.close-button {
+  display: grid;
+  width: 1.75rem;
+  height: 1.75rem;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  color: #ffffff;
+  background: transparent;
+  cursor: pointer;
+  font-size: 1.25rem;
+}
+
+.close-button:hover,
+.close-button:focus-visible,
+.chatbot-launcher:hover,
+.chatbot-launcher:focus-visible {
+  background: #2563c7;
+}
+
+.chatbot h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.messages {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.65rem;
+  max-height: 25rem;
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+.messages > div {
+  max-width: 90%;
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.6rem;
+  background: #1e2d45;
+}
+
+.messages > div.user {
+  align-self: flex-end;
+  background: var(--primary-color);
+}
+
+.messages p {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  white-space: pre-line;
+}
+
+.preview {
+  display: grid;
+  gap: 0.25rem;
+  margin-top: 0.65rem;
+  font-size: 0.85rem;
+}
+
+.portfolio-summary {
+  display: grid;
+  gap: 0.25rem;
+  margin-top: 0.65rem;
+  font-size: 0.85rem;
+}
+
+.market-movers {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.65rem;
+  font-size: 0.8rem;
+}
+
+.market-movers section {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.market-movers section > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.market-movers .positive {
+  color: #22c55e;
+}
+
+.market-movers .negative {
+  color: #f87171;
+}
+
+.comparison {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 0.65rem;
+  font-size: 0.85rem;
+}
+
+.comparison > div {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 0.75rem;
+}
+
+.comparison .positive {
+  color: #22c55e;
+}
+
+.comparison .negative {
+  color: #f87171;
+}
+
+.messages button {
+  margin-top: 0.65rem;
+  padding: 0.45rem 0.7rem;
+  border: 0;
+  border-radius: 0.35rem;
+  background: var(--primary-color);
+  cursor: pointer;
+}
+
+.chatbot form {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border-top: 1px solid #263852;
+}
+
+.chatbot input {
+  min-width: 0;
+  flex: 1;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid #263852;
+  border-radius: 0.35rem;
+  color: #ffffff;
+  background: #151e2c;
+}
+
+.chatbot form button {
+  padding: 0.6rem 0.8rem;
+  border: 0;
+  border-radius: 0.35rem;
+  color: #ffffff;
+  background: var(--primary-color);
+  cursor: pointer;
+}
+
+.chatbot button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+@media (max-width: 600px) {
+  .chatbot-launcher {
+    right: 1rem;
+    bottom: 1rem;
+  }
+
+  .chatbot {
+    right: 1rem;
+    bottom: 1rem;
+  }
+}
