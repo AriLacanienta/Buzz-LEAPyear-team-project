@@ -1,0 +1,55 @@
+<section class="client-directory" aria-label="Client directory">
+  <header class="directory-header">
+    <div>
+      <p class="eyebrow">Manager workspace</p>
+      <h1>Clients</h1>
+    </div>
+
+    <span class="client-count">{{ clients.length }}</span>
+  </header>
+
+  <label class="search-field">
+    <span aria-hidden="true">⌕</span>
+    <input
+      type="search"
+      placeholder="Search clients..."
+      aria-label="Search clients"
+      [(ngModel)]="searchTerm" />
+  </label>
+
+  <p class="directory-message" *ngIf="loading">Loading clients...</p>
+
+  <div class="directory-message error-state" *ngIf="error">
+    <p>Unable to load clients.</p>
+    <button type="button" (click)="retryRequested.emit()">Try again</button>
+  </div>
+
+  <div class="client-list" *ngIf="!loading && !error">
+    <button
+      class="client-row"
+      *ngFor="let client of filteredClients; trackBy: trackByClientId"
+      type="button"
+      [class.selected]="selectedClient?.id === client.id"
+      (click)="clientSelected.emit(client)">
+      <span class="avatar">{{ client.initials }}</span>
+
+      <span class="client-copy">
+        <strong>{{ client.name }}</strong>
+        <small>{{ client.reference }}</small>
+        <span class="client-meta">
+          {{ client.trades.length }} orders
+          <span aria-hidden="true">&middot;</span>
+          {{ client.totalValue | currency:'USD':'symbol':'1.0-0' }}
+        </span>
+      </span>
+
+      <span class="alert-count" *ngIf="client.rejectedOrders > 0">
+        {{ client.rejectedOrders }}
+      </span>
+    </button>
+
+    <p class="directory-message" *ngIf="filteredClients.length === 0">
+      No clients match your search.
+    </p>
+  </div>
+</section>

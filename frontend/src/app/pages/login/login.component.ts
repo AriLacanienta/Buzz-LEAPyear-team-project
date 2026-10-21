@@ -52,7 +52,7 @@ export class LoginComponent {
         console.log('Login successful!', response);
 
         const landingPage = this.authService.hasRole('MANAGER')
-          ? '/admin'
+          ? '/manager'
           : '/dashboard';
         this.router.navigate([landingPage]);
       },
