@@ -62,9 +62,10 @@ public class ManagerTradeLogService {
             .max(Comparator.comparing(TradeOrderStatus::getTimeUpdated))
             .orElse(null);
 
-        String clientName = user == null
-            ? ""
-            : (user.getFirstName() + " " + user.getLastName()).trim();
+        String clientName = "";
+        if (user != null) {
+            clientName = (user.getFirstName() + " " + user.getLastName()).trim();
+        }
 
         return new ManagerTradeLogResponseDTO(
             order.getId(),
