@@ -1,0 +1,244 @@
+$bg-dark: #0f1520;
+$border-dark: #1e2d45;
+$color-white: #ffffff;
+$color-slate-300: #cbd5e1;
+$color-slate-400: #64748b;
+$color-slate-500: #64748b;
+$color-emerald-400: #34d399;
+$color-red-400: #f87171;
+$radius-xl: 0.75rem;
+$radius-full: 9999px;
+$font-weight-semibold: 600;
+$text-xs: 0.75rem;
+$text-sm: 0.875rem;
+$text-sm-line-height: 1.25rem;
+$transition-timing: ease-in-out;
+$transition-duration: 200ms;
+
+:host {
+  display: block;
+  height: clamp(20rem, 35vw, 30rem);
+  box-sizing: border-box;
+}
+
+.recent-orders-container {
+  height: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  background-color: $bg-dark;
+  border: 1px solid $border-dark;
+  border-radius: $radius-xl;
+  overflow: hidden;
+}
+
+.recent-orders-header {
+  padding-left: clamp(0.75rem, 2vw, 1.25rem);
+  padding-right: clamp(0.75rem, 2vw, 1.25rem);
+  padding-top: clamp(0.6rem, 1.5vw, 1rem);
+  padding-bottom: clamp(0.6rem, 1.5vw, 1rem);
+  border-bottom: 1px solid $border-dark;
+
+  h3 {
+    font-size: clamp(0.8rem, 1.2vw, $text-sm);
+    font-weight: $font-weight-semibold;
+    color: $color-white;
+    line-height: $text-sm-line-height;
+    margin: 0;
+  }
+}
+
+.recent-orders-body {
+  overflow: auto;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.recent-orders-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: clamp(0.25rem, 0.8vw, 0.5rem);
+  padding: clamp(0.3rem, 1vw, 0.5rem) clamp(0.5rem, 1.5vw, 0.75rem);
+  border-top: 1px solid $border-dark;
+  color: $color-slate-300;
+  font-size: clamp(0.65rem, 1vw, $text-xs);
+
+  .pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: clamp(0.25rem, 0.8vw, 0.5rem);
+  }
+
+  button {
+    border: 1px solid $border-dark;
+    border-radius: 4px;
+    padding: clamp(0.15rem, 0.5vw, 0.25rem) clamp(0.3rem, 1vw, 0.5rem);
+    background: transparent;
+    color: $color-white;
+    cursor: pointer;
+    font-size: clamp(0.6rem, 0.9vw, 10px);
+
+    &:disabled {
+      color: $color-slate-500;
+      cursor: default;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .recent-orders-pagination {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+table {
+  width: 100%;
+  font-size: clamp(0.7rem, 1.1vw, $text-xs);
+  border-collapse: collapse;
+}
+
+thead {
+  border-bottom: 1px solid $border-dark;
+}
+
+th {
+  padding-left: clamp(0.6rem, 1.5vw, 1rem);
+  padding-right: clamp(0.6rem, 1.5vw, 1rem);
+  padding-top: clamp(0.4rem, 1vw, 0.625rem);
+  padding-bottom: clamp(0.4rem, 1vw, 0.625rem);
+  text-align: left;
+  font-size: clamp(0.65rem, 1vw, 10px);
+  color: $color-slate-500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: $font-weight-semibold;
+  white-space: nowrap;
+}
+
+tbody {
+  tr {
+    border-bottom: 1px solid $border-dark;
+    transition-property: background-color;
+    transition-timing-function: $transition-timing;
+    transition-duration: $transition-duration;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.02);
+    }
+
+    td {
+      padding-left: clamp(0.5rem, 1.2vw, 1rem);
+      padding-right: clamp(0.5rem, 1.2vw, 1rem);
+      padding-top: clamp(0.4rem, 1vw, 0.75rem);
+      padding-bottom: clamp(0.4rem, 1vw, 0.75rem);
+      font-family: monospace;
+      font-size: clamp(0.65rem, 0.95vw, $text-xs);
+
+      &.side {
+        span {
+          font-family: monospace;
+          font-weight: $font-weight-semibold;
+          font-size: clamp(0.65rem, 0.95vw, 10px);
+          text-transform: uppercase;
+
+          &.buy {
+            color: $color-emerald-400;
+          }
+
+          &.sell {
+            color: $color-red-400;
+          }
+        }
+      }
+
+      &.instrument {
+        color: $color-white;
+        font-weight: $font-weight-semibold;
+      }
+
+      &.quantity,
+      &.price {
+        color: $color-slate-300;
+      }
+
+      &.total {
+        color: $color-white;
+      }
+
+      &.time {
+        color: $color-slate-500;
+        white-space: nowrap;
+      }
+
+      &.status {
+        .status-badge {
+          font-family: monospace;
+          font-size: clamp(0.6rem, 0.9vw, 10px);
+          padding-left: clamp(0.3rem, 0.8vw, 0.5rem);
+          padding-right: clamp(0.3rem, 0.8vw, 0.5rem);
+          padding-top: clamp(0.08rem, 0.5vw, 0.125rem);
+          padding-bottom: clamp(0.08rem, 0.5vw, 0.125rem);
+          border-radius: $radius-full;
+          font-weight: $font-weight-semibold;
+
+          &.status-submitted,
+          &.status-accepted,
+          &.status-validated {
+            color: #fbbf24;
+            background-color: rgba(251, 191, 36, 0.1);
+          }
+
+          &.status-filled {
+            color: $color-emerald-400;
+            background-color: rgba(16, 185, 129, 0.1);
+            box-shadow: 0 0 8px rgba(16, 185, 129, 0.3);
+          }
+
+          &.status-pending {
+            color: #fbbf24;
+            background-color: rgba(251, 191, 36, 0.1);
+            box-shadow: 0 0 8px rgba(251, 191, 36, 0.2);
+          }
+
+          &.status-cancelled {
+            color: $color-red-400;
+            background-color: rgba(239, 68, 68, 0.1);
+          }
+
+          &.status-rejected {
+            color: $color-red-400;
+            background-color: rgba(239, 68, 68, 0.1);
+            box-shadow: 0 0 8px rgba(239, 68, 68, 0.3);
+          }
+        }
+      }
+    }
+  }
+}
+
+.no-orders {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1rem, 3vw, 2.5rem);
+  color: $color-slate-500;
+  font-size: 1rem;
+  text-align: center;
+  min-height: clamp(150px, 30vh, 200px);
+
+  p {
+    margin: 0;
+  }
+}

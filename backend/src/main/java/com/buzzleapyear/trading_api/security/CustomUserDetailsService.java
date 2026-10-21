@@ -4,14 +4,17 @@ import com.buzzleapyear.trading_api.entity.User;
 import com.buzzleapyear.trading_api.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.stream.Collectors;
 //This acts as a user database lookup service
 //when spring security needs to authenticate a user by username, it will use this service to load user details
 @Service
@@ -23,6 +26,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     //load user by username for authentication
     @Override
+    @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<User> user = userRepository.findByUsername(username);
         //check if user exists in the database
@@ -32,12 +36,10 @@ public class CustomUserDetailsService implements UserDetailsService {
         }
 
         User appUser = user.get();
-        //create a collection to hold the user's authorities (roles/permissions)
-        //check if this is a feautre we want maybe for admin users
-        //for now, we are not assigning any specific roles or authorities to the user
-        //initialize the authorities collection as an empty list
-        //todo: need to add roles like ROLE_USER, ROLE_ADMIN, etc
-        Collection<GrantedAuthority> authorities = new ArrayList<>();
+        Collection<GrantedAuthority> authorities = appUser.getUserRoles().stream()
+            .map(userRole -> new SimpleGrantedAuthority(
+                "ROLE_" + userRole.getRole().getRoleName().name()))
+            .collect(Collectors.toList());
 
         //return a UserDetails object containing the username, hashed password, and authorities
         return org.springframework.security.core.userdetails.User.builder()

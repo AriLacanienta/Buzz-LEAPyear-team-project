@@ -1,14 +1,18 @@
 package com.buzzleapyear.trading_api.entity;
 
-import jakarta.persistence.*;
 import java.time.LocalDateTime;
-import java.util.List;
+
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name = "users", uniqueConstraints = {
     @UniqueConstraint(columnNames = "username"),
     @UniqueConstraint(columnNames = "email"),
 })
+@Getter
+@Setter
 public class User {
     
     @Id
@@ -30,27 +34,23 @@ public class User {
     
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
-    
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
     
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    @Column(name = "token_version", nullable = false)
+    private long tokenVersion = 0;
+    @Column(name = "failed_login_attempts", nullable = false)
+    private int failedLoginAttempts = 0;
+
+    @Column(name = "account_locked", nullable = false)
+    private boolean accountLocked = false;
     
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Client> clients;
-    
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Compliance> compliance;
-    
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Operation> operations;
-    
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Analyst> analysts;
-    
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Report> reports;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private java.util.List<UserRole> userRoles = new java.util.ArrayList<>();
     
     @PrePersist
     protected void onCreate() {
@@ -87,19 +87,8 @@ public class User {
     
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+
+    public long getTokenVersion() { return tokenVersion; }
+    public void revokeAccessTokens() { tokenVersion++; }
     
-    public List<Client> getClients() { return clients; }
-    public void setClients(List<Client> clients) { this.clients = clients; }
-    
-    public List<Compliance> getCompliance() { return compliance; }
-    public void setCompliance(List<Compliance> compliance) { this.compliance = compliance; }
-    
-    public List<Operation> getOperations() { return operations; }
-    public void setOperations(List<Operation> operations) { this.operations = operations; }
-    
-    public List<Analyst> getAnalysts() { return analysts; }
-    public void setAnalysts(List<Analyst> analysts) { this.analysts = analysts; }
-    
-    public List<Report> getReports() { return reports; }
-    public void setReports(List<Report> reports) { this.reports = reports; }
 }

@@ -31,4 +31,8 @@ public class InstrumentService {
     public Optional<Instrument> getInstrumentBySymbol(String symbol) {
         return instrumentRepository.findByInstrumentSymbol(symbol);
     }
+
+    public List<Instrument> searchInstrumentsByQuery(String query) {
+        return instrumentRepository.findByInstrumentNameContainingIgnoreCaseOrInstrumentSymbolContainingIgnoreCase(query, query);
+    }
 }

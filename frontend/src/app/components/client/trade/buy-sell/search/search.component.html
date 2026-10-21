@@ -1,0 +1,20 @@
+<div class="search-container">
+    <div class="search-input">
+        <svg class="search-icon" width="12" height="12" viewBox="0 0 16 16" fill="none"><circle cx="6.5" cy="6.5" r="5.5" stroke="currentColor" stroke-width="1.5"></circle><path d="M11 11L15 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg>
+        <input type="text" 
+               class="search-input-field" 
+               placeholder="Search stocks, forex, crypto..."
+               [value]="searchInput"
+               (input)="onSearchInput($event)"
+               (focus)="onSearchBoxFocus()"
+               (blur)="onSearchBoxBlur()">
+        <button *ngIf="isItemSelected" (mousedown)="onSearchClear()" class="search-clear-btn">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 2L10 10M10 2L2 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg>
+        </button>
+    </div>
+    <app-search-list
+        *ngIf="isSearchBoxFocused && searchResults.length > 0"
+        [results]="searchResults"
+        (itemSelected)="onResultSelected($event)">
+    </app-search-list>
+</div>

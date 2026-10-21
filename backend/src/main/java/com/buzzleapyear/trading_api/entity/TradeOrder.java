@@ -2,8 +2,8 @@ package com.buzzleapyear.trading_api.entity;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -40,7 +40,7 @@ public class TradeOrder {
     private LocalDateTime orderDate;
     
     @OneToMany(mappedBy = "tradeOrder", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<TradeOrderStatus> statuses;
+    private List<TradeOrderStatus> statuses = new ArrayList<>();
 
     // Getters and Setters
     public Long getId() { return id; }
@@ -69,6 +69,8 @@ public class TradeOrder {
     
     public List<TradeOrderStatus> getStatuses() { return statuses; }
     public void setStatuses(List<TradeOrderStatus> statuses) { this.statuses = statuses; }
+    public void addStatus(TradeOrderStatus newStatus) { this.statuses.add(newStatus); }
+
     
     public enum OrderSide {
         BUY, SELL

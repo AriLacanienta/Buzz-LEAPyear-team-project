@@ -1,0 +1,10 @@
+<button class="container">
+    <div>
+        <span>{{ item.instrumentSymbol }}</span>
+        <span>{{ item.instrumentName }}</span>
+    </div>
+    <div>
+        <span>${{ item.currentPrice.toFixed(2) }}</span>
+        <span [class.negative]="item.percentChange < 0">{{ item.percentChange > 0 ? '+' : '' }}{{ item.percentChange.toFixed(2) }}%</span>
+    </div>
+</button>

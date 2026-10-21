@@ -39,7 +39,7 @@ import jakarta.persistence.EntityManager;
 class CsvImportServiceTests {
 
 	private ImportCSVService testService;
-	
+
 	@Mock
 	private InstrumentRepository mockInstrumentRepository;
 
@@ -57,11 +57,11 @@ class CsvImportServiceTests {
 
         @Test
         void testHappyPath() {
-            final String TEST_LINE = "T0001,2026-01-05,C001,Alice Chen,J. Okafor,AAPL,Equity,BUY,120,185.32,USD,22238.40\r\n";
+            final String TEST_LINE = "T0001,2026-01-05,C001,Joanna Smith,J. Okafor,AAPL,Equity,BUY,120,185.32,USD,22238.40\r\n";
             LineValues result = testService.parseLine(TEST_LINE);
 
             Assertions.assertAll("parsed values",
-                () -> Assertions.assertEquals("Alice Chen", result.client_name),
+                () -> Assertions.assertEquals("Joanna Smith", result.client_name),
                 () -> Assertions.assertEquals("J. Okafor", result.advisor),
                 () -> Assertions.assertEquals("T0001", result.trade_id),
                 () -> Assertions.assertEquals("C001", result.client_id),
@@ -76,14 +76,14 @@ class CsvImportServiceTests {
             Assertions.assertTrue(result.side == OrderSide.BUY || result.side == OrderSide.SELL,
                 "Side should be either BUY or SELL");
         }
-        
+
         @Test
         void testParseLineWithSellOrder() {
             final String TEST_LINE = "T0002,2026-01-10,C002,Bob Smith,Jane Doe,GOOGL,Equity,SELL,50,2800.00,USD,140000.00";
             LineValues result = testService.parseLine(TEST_LINE);
 
             Assertions.assertAll("parsed SELL order",
-                () -> Assertions.assertTrue(result.side == OrderSide.BUY || result.side == OrderSide.SELL, 
+                () -> Assertions.assertTrue(result.side == OrderSide.BUY || result.side == OrderSide.SELL,
                     "Side should be BUY or SELL"),
                 () -> Assertions.assertEquals("Bob Smith", result.client_name),
                 () -> Assertions.assertEquals(50.0, result.quantity, 0.01),
@@ -106,7 +106,7 @@ class CsvImportServiceTests {
 
     @Nested
     class EntityPersistenceTests {
-        
+
         private ImportCSVService service;
         @Mock
         private EntityManager mockEntityManager;
@@ -130,7 +130,7 @@ class CsvImportServiceTests {
         @Test
         void testSingleRowImportCreatesAllRequiredEntities() throws IOException {
             String csvContent = "trade_id,trade_date,client_id,client_name,advisor,instrument,asset_class,side,quantity,price,currency,value\n" +
-                    "T0001,2026-01-05,C001,Alice Chen,J. Okafor,AAPL,Equity,BUY,120,185.32,USD,22238.40";
+                    "T0001,2026-01-05,C001,Joanna Smith,J. Okafor,AAPL,Equity,BUY,120,185.32,USD,22238.40";
 
             ByteArrayInputStream inputStream = new ByteArrayInputStream(csvContent.getBytes());
 
@@ -176,7 +176,7 @@ class CsvImportServiceTests {
         @Test
         void testUserDataIsPersisted() throws IOException {
             String csvContent = "trade_id,trade_date,client_id,client_name,advisor,instrument,asset_class,side,quantity,price,currency,value\n" +
-                    "T0001,2026-01-05,C001,Alice Chen,J. Okafor,AAPL,Equity,BUY,120,185.32,USD,22238.40";
+                    "T0001,2026-01-05,C001,Joanna Smith,J. Okafor,AAPL,Equity,BUY,120,185.32,USD,22238.40";
 
             ByteArrayInputStream inputStream = new ByteArrayInputStream(csvContent.getBytes());
 
@@ -201,12 +201,12 @@ class CsvImportServiceTests {
 
             User persistedUser = userCaptor.getValue();
             Assertions.assertAll("User entity data validation",
-                () -> Assertions.assertEquals("Alice", persistedUser.getFirstName()),
-                () -> Assertions.assertEquals("Chen", persistedUser.getLastName()),
+                () -> Assertions.assertEquals("Joanna", persistedUser.getFirstName()),
+                () -> Assertions.assertEquals("Smith", persistedUser.getLastName()),
                 () -> Assertions.assertNotNull(persistedUser.getUsername()),
                 () -> Assertions.assertTrue(persistedUser.getUsername().contains("C001")),
-                () -> Assertions.assertEquals("C001@trading.local", persistedUser.getEmail()),
-                () -> Assertions.assertEquals("hashed_password", persistedUser.getPasswordHash()),
+                () -> Assertions.assertEquals("C001@trading.demo", persistedUser.getEmail()),
+                () -> Assertions.assertEquals("$2a$10$QEG13Tgr8.fgIP4n1.CxVeEoUhKYjWF7S2HK4mwhWh9V0zz80GUzi", persistedUser.getPasswordHash()),
                 () -> Assertions.assertNotNull(persistedUser.getCreatedAt()),
                 () -> Assertions.assertNotNull(persistedUser.getUpdatedAt())
             );
@@ -215,7 +215,7 @@ class CsvImportServiceTests {
         @Test
         void testClientDataIsPersisted() throws IOException {
             String csvContent = "trade_id,trade_date,client_id,client_name,advisor,instrument,asset_class,side,quantity,price,currency,value\n" +
-                    "T0001,2026-01-05,C001,Alice Chen,J. Okafor,AAPL,Equity,BUY,120,185.32,USD,22238.40";
+                    "T0001,2026-01-05,C001,Joanna Smith,J. Okafor,AAPL,Equity,BUY,120,185.32,USD,22238.40";
 
             ByteArrayInputStream inputStream = new ByteArrayInputStream(csvContent.getBytes());
 
@@ -261,7 +261,7 @@ class CsvImportServiceTests {
         @Test
         void testInstrumentDataIsPersisted() throws IOException {
             String csvContent = "trade_id,trade_date,client_id,client_name,advisor,instrument,asset_class,side,quantity,price,currency,value\n" +
-                    "T0001,2026-01-05,C001,Alice Chen,J. Okafor,AAPL,Equity,BUY,120,185.32,USD,22238.40";
+                    "T0001,2026-01-05,C001,Joanna Smith,J. Okafor,AAPL,Equity,BUY,120,185.32,USD,22238.40";
 
             ByteArrayInputStream inputStream = new ByteArrayInputStream(csvContent.getBytes());
 
@@ -290,7 +290,7 @@ class CsvImportServiceTests {
         @Test
         void testAccountDataIsPersisted() throws IOException {
             String csvContent = "trade_id,trade_date,client_id,client_name,advisor,instrument,asset_class,side,quantity,price,currency,value\n" +
-                    "T0001,2026-01-05,C001,Alice Chen,J. Okafor,AAPL,Equity,BUY,120,185.32,USD,22238.40";
+                    "T0001,2026-01-05,C001,Joanna Smith,J. Okafor,AAPL,Equity,BUY,120,185.32,USD,22238.40";
 
             ByteArrayInputStream inputStream = new ByteArrayInputStream(csvContent.getBytes());
 
@@ -327,7 +327,7 @@ class CsvImportServiceTests {
         @Test
         void testTradeOrderDataIsPersisted() throws IOException {
             String csvContent = "trade_id,trade_date,client_id,client_name,advisor,instrument,asset_class,side,quantity,price,currency,value\n" +
-                    "T0001,2026-01-05,C001,Alice Chen,J. Okafor,AAPL,Equity,BUY,120,185.32,USD,22238.40";
+                    "T0001,2026-01-05,C001,Joanna Smith,J. Okafor,AAPL,Equity,BUY,120,185.32,USD,22238.40";
 
             ByteArrayInputStream inputStream = new ByteArrayInputStream(csvContent.getBytes());
 
@@ -356,7 +356,7 @@ class CsvImportServiceTests {
             Assertions.assertAll("TradeOrder entity data validation",
                 () -> Assertions.assertNotNull(persistedTradeOrder.getAccount(), "TradeOrder should have Account relationship"),
                 () -> Assertions.assertNotNull(persistedTradeOrder.getInstrument(), "TradeOrder should have Instrument relationship"),
-                () -> Assertions.assertTrue(persistedTradeOrder.getSide() == OrderSide.BUY || persistedTradeOrder.getSide() == OrderSide.SELL, 
+                () -> Assertions.assertTrue(persistedTradeOrder.getSide() == OrderSide.BUY || persistedTradeOrder.getSide() == OrderSide.SELL,
                     "TradeOrder side should be BUY or SELL"),
                 () -> Assertions.assertEquals(new BigDecimal("120"), persistedTradeOrder.getQuantity().setScale(0)),
                 () -> Assertions.assertEquals(new BigDecimal("185.32").setScale(2), persistedTradeOrder.getPrice().setScale(2)),
@@ -368,8 +368,8 @@ class CsvImportServiceTests {
         @Test
         void testCachingBehaviorForSameUser() throws IOException {
             String csvContent = "trade_id,trade_date,client_id,client_name,advisor,instrument,asset_class,side,quantity,price,currency,value\n" +
-                    "T0001,2026-01-05,C001,Alice Chen,J. Okafor,AAPL,Equity,BUY,120,185.32,USD,22238.40\n" +
-                    "T0002,2026-01-06,C001,Alice Chen,J. Okafor,GOOGL,Equity,BUY,50,2800.00,USD,140000.00";
+                    "T0001,2026-01-05,C001,Joanna Smith,J. Okafor,AAPL,Equity,BUY,120,185.32,USD,22238.40\n" +
+                    "T0002,2026-01-06,C001,Joanna Smith,J. Okafor,GOOGL,Equity,BUY,50,2800.00,USD,140000.00";
 
             ByteArrayInputStream inputStream = new ByteArrayInputStream(csvContent.getBytes());
 
@@ -394,14 +394,14 @@ class CsvImportServiceTests {
             ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
             verify(mockEntityManager, times(1)).persist(userCaptor.capture());
 
-            Assertions.assertEquals(1L, userCaptor.getAllValues().size(), 
+            Assertions.assertEquals(1L, userCaptor.getAllValues().size(),
                 "Only ONE User should be persisted (cached for second row)");
         }
 
         @Test
         void testCachingBehaviorForSameInstrument() throws IOException {
             String csvContent = "trade_id,trade_date,client_id,client_name,advisor,instrument,asset_class,side,quantity,price,currency,value\n" +
-                    "T0001,2026-01-05,C001,Alice Chen,J. Okafor,AAPL,Equity,BUY,120,185.32,USD,22238.40\n" +
+                    "T0001,2026-01-05,C001,Joanna Smith,J. Okafor,AAPL,Equity,BUY,120,185.32,USD,22238.40\n" +
                     "T0002,2026-01-06,C002,Bob Smith,Jane Doe,AAPL,Equity,SELL,50,186.00,USD,9300.00";
 
             ByteArrayInputStream inputStream = new ByteArrayInputStream(csvContent.getBytes());
@@ -427,14 +427,14 @@ class CsvImportServiceTests {
             ArgumentCaptor<Instrument> instrumentCaptor = ArgumentCaptor.forClass(Instrument.class);
             verify(mockEntityManager, times(1)).persist(instrumentCaptor.capture());
 
-            Assertions.assertEquals(1L, instrumentCaptor.getAllValues().size(), 
+            Assertions.assertEquals(1L, instrumentCaptor.getAllValues().size(),
                 "Only ONE Instrument should be persisted (cached for second row)");
         }
 
         @Test
         void testMultipleClientsFromDifferentAdvisors() throws IOException {
             String csvContent = "trade_id,trade_date,client_id,client_name,advisor,instrument,asset_class,side,quantity,price,currency,value\n" +
-                    "T0001,2026-01-05,C001,Alice Chen,J. Okafor,AAPL,Equity,BUY,120,185.32,USD,22238.40\n" +
+                    "T0001,2026-01-05,C001,Joanna Smith,J. Okafor,AAPL,Equity,BUY,120,185.32,USD,22238.40\n" +
                     "T0002,2026-01-06,C002,Bob Smith,Jane Doe,GOOGL,Equity,BUY,50,2800.00,USD,140000.00";
 
             ByteArrayInputStream inputStream = new ByteArrayInputStream(csvContent.getBytes());
@@ -460,14 +460,14 @@ class CsvImportServiceTests {
             ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
             verify(mockEntityManager, times(2)).persist(userCaptor.capture());
 
-            Assertions.assertEquals(2L, userCaptor.getAllValues().size(), 
+            Assertions.assertEquals(2L, userCaptor.getAllValues().size(),
                 "TWO Users should be persisted for different clients");
         }
 
         @Test
         void testTransactionFlushCalls() throws IOException {
             String csvContent = "trade_id,trade_date,client_id,client_name,advisor,instrument,asset_class,side,quantity,price,currency,value\n" +
-                    "T0001,2026-01-05,C001,Alice Chen,J. Okafor,AAPL,Equity,BUY,120,185.32,USD,22238.40";
+                    "T0001,2026-01-05,C001,Joanna Smith,J. Okafor,AAPL,Equity,BUY,120,185.32,USD,22238.40";
 
             ByteArrayInputStream inputStream = new ByteArrayInputStream(csvContent.getBytes());
 

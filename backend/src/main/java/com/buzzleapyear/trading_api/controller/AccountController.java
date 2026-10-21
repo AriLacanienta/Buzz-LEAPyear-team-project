@@ -1,0 +1,71 @@
+package com.buzzleapyear.trading_api.controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.data.domain.Page;
+import java.util.List;
+import org.springframework.security.core.Authentication;
+import org.springframework.http.ResponseEntity;
+import com.buzzleapyear.trading_api.dto.AccountValueResponseDto;
+import com.buzzleapyear.trading_api.dto.PortfolioSummaryResponseDto;
+import com.buzzleapyear.trading_api.dto.CurrentAccountResponseDto;
+import com.buzzleapyear.trading_api.dto.FundsRequestDto;
+import com.buzzleapyear.trading_api.dto.RecentTradeOrderResponseDto;
+import com.buzzleapyear.trading_api.service.AccountService;
+
+@RestController
+@RequestMapping("/api/v1/accounts") 
+public class AccountController {
+    private final AccountService accountService;
+
+    public AccountController(AccountService accountService) {
+        this.accountService = accountService;
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<CurrentAccountResponseDto> getCurrentAccount(Authentication authentication) {
+        return ResponseEntity.ok(accountService.getCurrentAccount(authentication.getName()));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<AccountValueResponseDto> getAccountValue(@PathVariable String id, Authentication authentication) {
+        return accountService.getAccountValue(id, authentication.getName())
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/{id}/portfolio-summary")
+    public ResponseEntity<PortfolioSummaryResponseDto> getPortfolioSummary(@PathVariable Long id, Authentication authentication) {
+        return accountService.getPortfolioSummary(id, authentication.getName())
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping("/{id}/funds")
+    public ResponseEntity<Void> updateFunds(
+        @PathVariable Long id,
+        @RequestBody FundsRequestDto request,
+        Authentication authentication) {
+            accountService.updateFunds(id, request, authentication.getName());
+            return ResponseEntity.noContent().build();
+        }
+
+    @GetMapping("/{id}/tradeorders")
+    public ResponseEntity<Page<RecentTradeOrderResponseDto>> getRecentTradeOrders(
+        @PathVariable("id") Long accountId,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size,
+        Authentication authentication) {
+            if (page < 0 || size < 1 || size > 100) {
+                return ResponseEntity.badRequest().build();
+            }
+
+            return accountService.getRecentTradeOrders(accountId, authentication.getName(), page, size)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+        }
+}

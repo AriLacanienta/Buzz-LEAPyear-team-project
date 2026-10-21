@@ -1,0 +1,28 @@
+.balance-container {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  padding: 16px;
+  background-color: #0f1520;
+  border: 1px solid #1e2d45;
+  border-radius: 12px;
+  color: #e8eaf0;
+}
+
+h2 {
+  font-family: Inter, sans-serif;
+  text-transform: uppercase;
+  color: #64748b;
+  letter-spacing: 0.1em;
+  font-size: 10px;
+  margin: 0;
+}
+
+p {
+  color: #ffffff;
+  font-weight: 500;
+  font-size: 1.125rem;
+  line-height: 1.75;
+  margin-top: 0.125rem;
+  font-family: DM Mono, monospace;
+}

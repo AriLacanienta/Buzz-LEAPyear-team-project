@@ -1,14 +1,23 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { environment } from '@environments/environment';
+
+interface AuthApiResponse {
+  token?: string;
+  accessToken?: string;
+  type?: string;
+  username?: string;
+  email?: string;
+  roles?: string[];
+}
 
 /**
  * AuthService - Handles all authentication logic
  * 
  * Responsibilities:
  * - Call backend login/register endpoints
- * - Store/retrieve JWT token from localStorage
+ * -switch to keep access token in memory only
  * - Check if user is logged in
  * - Logout user
  */
@@ -19,6 +28,7 @@ export class AuthService {
 
   // Backend API endpoint for authentication
   private apiUrl = `${environment.apiUrl}/auth`;
+  private accessToken: string | null = null;
 
   constructor(private http: HttpClient) { }
 
@@ -40,8 +50,10 @@ export class AuthService {
    *   "email": "john@example.com"
    * }
    */
-  login(email: string, password: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/login`, { email, password });
+  login(email: string, password: string): Observable<AuthApiResponse> {
+    return this.http.post<AuthApiResponse>(`${this.apiUrl}/login`, { email, password }, {
+      withCredentials: true
+    }).pipe(tap(response => this.storeAuthResponse(response)));
   }
 
   /**
@@ -58,15 +70,24 @@ export class AuthService {
    * @param password - User's password
    * @returns Observable<any> - Response with token, username, email
    */
-  register(username: string, email: string, firstName: string, 
-           lastName: string, password: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/register`, {
+  register(username: string, email: string, firstName: string,
+           lastName: string, password: string): Observable<AuthApiResponse> {
+    return this.http.post<AuthApiResponse>(`${this.apiUrl}/register`, {
       username, email, firstName, lastName, password
+    }, {
+      withCredentials: true
+    }).pipe(tap(response => this.storeAuthResponse(response)));
+  }
+
+  //Exchanging refresh cookie for a new access token.
+  refreshAccessToken(): Observable<AuthApiResponse> {
+    return this.http.post<AuthApiResponse>(`${this.apiUrl}/refresh`, {}, {
+      withCredentials: true
     });
   }
 
   /**
-   * Store JWT token in browser's localStorage
+  * Store access token in memory for the current tab session
    * 
    * Called after successful login/register
    * Token is persisted even after browser closes
@@ -74,11 +95,25 @@ export class AuthService {
    * @param token - JWT token from backend
    */
   storeToken(token: string): void {
-    localStorage.setItem('jwt_token', token);
+    this.accessToken = token;
+  }
+
+  //Extracting token fields from auth response and persist them in memory
+  setAuthSessionFromResponse(response: AuthApiResponse): void {
+    const accessToken = response.accessToken || response.token;
+    if (!accessToken) {
+      return;
+    }
+    this.storeToken(accessToken);
+  }
+
+  storeAuthResponse(response: AuthApiResponse): void {
+    this.setAuthSessionFromResponse(response);
+    localStorage.setItem('auth_roles', JSON.stringify(response.roles ?? []));
   }
 
   /**
-   * Retrieve JWT token from localStorage
+  * Retrieve access token from in-memory session state
    * 
    * Called when making authenticated requests
    * Returns null if token doesn't exist (user not logged in)
@@ -86,30 +121,67 @@ export class AuthService {
    * @returns JWT token string or null
    */
   getToken(): string | null {
-    return localStorage.getItem('jwt_token');
+    return this.getAccessToken();
+  }
+
+  getAccessToken(): string | null {
+    return this.accessToken;
+  }
+
+  getRoles(): string[] {
+    const storedRoles = localStorage.getItem('auth_roles');
+    if (!storedRoles) {
+      return [];
+    }
+
+    try {
+      const roles = JSON.parse(storedRoles);
+      return Array.isArray(roles) ? roles : [];
+    } catch {
+      return [];
+    }
+  }
+
+  hasRole(role: string): boolean {
+    return this.getRoles().includes(role);
   }
 
   /**
    * Check if user is currently logged in
    * 
-   * Simply checks if token exists in localStorage
+  * Checks whether an in-memory access token exists
    * Used by AuthGuard to protect routes
    * 
    * @returns true if token exists, false otherwise
    */
   isLoggedIn(): boolean {
-    return this.getToken() !== null;
+    return this.getAccessToken() !== null;
   }
 
   /**
    * Logout user
    * 
-   * Removes JWT token from localStorage
+  * Clears in-memory access token
    * Called when user clicks logout button or session expires
    * After logout, user must login again to access protected routes
    */
   logout(): void {
-    localStorage.removeItem('jwt_token');
+    const token = this.accessToken;
+    const headers = token
+      ? { Authorization: `Bearer ${token}` }
+      : undefined;
+
+    this.accessToken = null;
+    localStorage.removeItem('auth_roles');
+
+    this.http.post(`${this.apiUrl}/logout`, {}, {
+      withCredentials: true,
+      ...(headers ? { headers } : {})
+    }).subscribe({
+      error: () => {
+        // Ignore logout API errors; client-side token is already cleared.
+      }
+    });
   }
 
   /**
@@ -121,7 +193,7 @@ export class AuthService {
    * @returns Observable<any> - Response with valid status and username
    */
   validateToken(): Observable<any> {
-    const token = this.getToken();
+    const token = this.getAccessToken();
     if (!token) {
       throw new Error('No token found');
     }

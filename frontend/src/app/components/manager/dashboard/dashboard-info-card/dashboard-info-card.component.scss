@@ -1,0 +1,58 @@
+$border-dark: #1e2d45;
+$bg-dark: #0F1520;
+$radius-lg: 0.75rem;
+$text-color: #62748E;
+
+$spacing-sm: 0.5rem;
+
+.data-item {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: $spacing-sm;
+}
+
+.dashboard-info-card {
+    display: flex;
+    width: 100%;
+    height: clamp(6rem, 18vh, 22rem);
+    box-sizing: border-box;
+    padding: 1rem;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: clamp(0.55rem, 1.8vw, 1rem);
+    align-items: center;
+    flex-shrink: 0;
+    border-bottom: 0.1rem solid $border-dark;
+    border-radius: $radius-lg;
+    border: 0.1rem solid $border-dark;
+    background: $bg-dark;
+}
+
+.dashboard-info-card mat-card-content {
+    width: 100%;
+    padding: 0;
+    margin: 0;
+}
+
+.data-wrapper {
+    font-weight: 700;
+    color: white;
+    font-size: clamp(1.5rem, 2vw, 2.25rem);
+}
+
+.header-wrapper {
+    font-weight: 400;
+    color: $text-color;
+    min-width: 0;
+    font-size: clamp(0.65rem, 1vw, 0.85rem);
+    line-height: 1.2;
+}
+
+.info-wrapper {
+    font-weight: 400;
+    color: $text-color;
+    min-width: 0;
+    font-size: clamp(0.55rem, 0.9vw, 0.75rem);
+    line-height: 1.25;
+}

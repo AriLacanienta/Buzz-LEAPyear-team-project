@@ -1,0 +1,51 @@
+.container {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  max-width: 85%;
+  margin-inline: auto;
+  padding-block: 24px;
+  padding-inline: 24px;
+  gap: 24px;
+  font-family: Inter, sans-serif;
+  color: #e8eaf0;
+}
+
+@media (min-width: 64rem) {
+  .container {
+    grid-template-columns: 1fr 1.5fr;
+  }
+}
+
+main {
+  display: contents;
+}
+
+.left-column,
+.right-column {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.trade-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.trade-content h2 {
+  color: #e8eaf0;
+  font-size: 1.875rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.trade-content p {
+  color: #e8eaf0;
+  font-size: 1rem;
+  margin: 0;
+}
+
+app-balance {
+  width: 100%;
+}

@@ -1,0 +1,24 @@
+<mat-card class="market-info">
+    <mat-card-content>
+        <div class="market-info-content">
+            <div class="market-info-header">
+                <div class="header-accent" [ngClass]="getColorClass()"></div>
+                <h2 class="card-title">{{ title }}</h2>
+            </div>
+            <div *ngIf="data.length > 0" class="data-list">
+                <div *ngFor="let item of data" class="data-item">
+                    <span class="symbol-avatar" [ngClass]="getAvatarClass()">{{ getSymbolFirstLetter(item.symbol) }}</span>
+                    <div class="symbol-details">
+                        <span class="symbol">{{ item.symbol }}</span>
+                        <span class="name">{{ item.name }}</span>
+                    </div>
+                    <span class="price">${{ item.price.toFixed(2) }}</span>
+                    <span class="change" [ngClass]="getChangeClass(item.changePercent)">
+                        {{ formatChangePercent(item.changePercent) }}
+                    </span>
+                </div>
+            </div>
+            <p *ngIf="data.length === 0">{{ content }}</p>
+        </div>
+    </mat-card-content>
+</mat-card>

@@ -1,0 +1,32 @@
+$color-white: #ffffff;
+$font-weight-semibold: 600;
+$text-lg: 1.5rem;
+$spacing-xs: 0.5rem;
+$radius-sm: 0.5rem;
+$spacing-md: 1rem;
+$spacing-lg: 2.5rem;
+
+h2 {
+  font-size: 1rem;
+  font-weight: $font-weight-semibold;
+  margin-bottom: $spacing-xs;
+  color: $color-white;
+  font-family: Inter, sans-serif;
+}
+
+.loading-state,
+.empty-state {
+  padding: $spacing-lg $spacing-md;
+  text-align: center;
+  border-radius: $radius-sm;
+  color: $color-white;
+  font-family: Inter, sans-serif;
+}
+
+.holdings-column {
+  display: flex;
+  flex-direction: row;
+  gap: $spacing-md;
+  flex-wrap: nowrap;
+  max-width: 100%;
+}

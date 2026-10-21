@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AccountService, UserProfile } from '../../services/account.service';
 import { AuthService } from '../../services/auth.service';
+import { CurrentAccountResponse } from '@app/models/current-account-response.model';
 
 @Component({
   selector: 'app-account',
@@ -9,6 +10,7 @@ import { AuthService } from '../../services/auth.service';
 })
 export class AccountComponent implements OnInit {
   userProfile: UserProfile | null = null;
+  accountInfo: CurrentAccountResponse | null = null;
   loading = true;
   errorMessage = '';
 
@@ -72,5 +74,9 @@ export class AccountComponent implements OnInit {
       this.errorMessage = 'Error processing token';
       console.error('Error:', error);
     }
+    this.accountService.getMyAccount().subscribe(account => {
+      this.accountInfo = account;
+      this.accountService.setAccountName(account.accountName);
+    });
   }
 }
