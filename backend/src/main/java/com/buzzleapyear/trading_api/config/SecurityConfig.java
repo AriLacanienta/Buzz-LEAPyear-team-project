@@ -48,6 +48,7 @@ public class SecurityConfig {
                 // RESTRICTED (RBAC)
                 .requestMatchers("/api/v1/accounts/**").authenticated()
                 .requestMatchers("/api/v1/holdings/**").authenticated()
+                .requestMatchers("/api/v1/tradeorders/**").hasAnyRole(ROLE_MANAGER, ROLE_CLIENT, ROLE_ANALYST)
                 .requestMatchers("/api/v1/instruments/**").authenticated()
                 .requestMatchers("/api/v1/quote/**").authenticated()
 

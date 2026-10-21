@@ -72,7 +72,8 @@
         />
         <div *ngIf="submitted && f['password'].errors" class="error-text">
           <small *ngIf="f['password'].errors['required']">Password is required</small>
-          <small *ngIf="f['password'].errors['minlength']">Password must be at least 6 characters</small>
+          <small *ngIf="f['password'].errors['minlength']">Password must be at least 8 characters</small>
+          <small *ngIf="f['password'].errors['pattern']">Password must include uppercase, lowercase, number, and a special character.</small>
         </div>
       </div>
 
