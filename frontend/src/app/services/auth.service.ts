@@ -114,10 +114,6 @@ export class AuthService {
     return this.getRoles().includes(role);
   }
 
-  isAdmin(): boolean {
-    return this.hasRole('MANAGER');
-  }
-
   /**
    * Check if user is currently logged in
    * 
