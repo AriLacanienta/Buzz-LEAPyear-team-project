@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { Router, NavigationEnd } from '@angular/router';
 import { AccountService } from './services/account.service';
 import { AuthService } from './services/auth.service';
 import { filter } from 'rxjs/operators';
+import { NavigationEnd, Router } from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -32,7 +32,5 @@ export class AppComponent implements OnInit {
       .subscribe((event: any) => {
         this.showNavbar = !event.urlAfterRedirects.includes('/login') && !event.urlAfterRedirects.includes('/register');
       });
- 
-    this.showNavbar = !this.router.url.includes('/login') && !this.router.url.includes('/register');
   }
 }

@@ -52,9 +52,12 @@ export class LoginComponent {
         this.authService.setAuthSessionFromResponse(response);
         
         this.loading = false;
-        
-        //redirecting to dashboard
-        this.router.navigate(['/dashboard']);
+        console.log('Login successful!', response);
+
+        const landingPage = this.authService.hasRole('MANAGER')
+          ? '/manager'
+          : '/dashboard';
+        this.router.navigate([landingPage]);
       },
       //error response
       (error) => {

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Deprecated
 @Component
 @Profile("legacy-seeder")
 public class DatabaseSeeder implements CommandLineRunner {
@@ -26,6 +27,7 @@ public class DatabaseSeeder implements CommandLineRunner {
         try {
             importCSVService.importFromInstrumentsCSV(new ClassPathResource("instruments.csv").getInputStream());
             importCSVService.importFromTradesCSV(new ClassPathResource("trades.csv").getInputStream());
+            importCSVService.importFromOperationsCSV(new ClassPathResource("operations.csv").getInputStream());
             importCSVService.importFromQuotesCSV(new ClassPathResource("quotes.csv").getInputStream());
 
             // Reinitialize quotes after CSV import completes
