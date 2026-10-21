@@ -5,10 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.EntityGraph;
 import com.buzzleapyear.trading_api.entity.TradeOrderStatus;
-<<<<<<< HEAD
-=======
-import java.time.LocalDateTime;
->>>>>>> feature/kafka
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
@@ -23,7 +19,14 @@ import java.time.LocalDateTime;
 public interface TradeOrderRepository extends JpaRepository<TradeOrder, Long> {
     List<TradeOrder> findByAccountId(Long accountId);
 
-    @EntityGraph(attributePaths = {"account", "account.holdings", "account.holdings.instrument", "instrument"})
+    @EntityGraph(attributePaths = {
+        "account",
+        "account.client",
+        "account.client.user",
+        "account.holdings",
+        "account.holdings.instrument",
+        "instrument"
+    })
     @Query("SELECT DISTINCT o FROM TradeOrder o WHERE o.id = :orderId")
     Optional<TradeOrder> findByIdForProcessing(@Param("orderId") Long orderId);
     

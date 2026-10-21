@@ -5,7 +5,10 @@
       <h1>Analyst trade activity</h1>
       <p class="subheading">All client orders from the trading database, refreshed every two seconds.</p>
     </div>
-    <div class="live-state"><span class="pulse"></span> LIVE <small *ngIf="lastUpdated">{{ lastUpdated | date:'HH:mm:ss' }}</small></div>
+    <div class="heading-actions">
+      <div class="live-state"><span class="pulse"></span> LIVE <small *ngIf="lastUpdated">{{ lastUpdated | date:'HH:mm:ss' }}</small></div>
+      <button class="reset-layout" type="button" (click)="resetWidgetOrder()">Reset layout</button>
+    </div>
   </section>
 
   <section class="toolbar">
@@ -34,7 +37,11 @@
     <button class="clear-button" *ngIf="searchTerm" (click)="clearSearch()">Clear</button>
   </section>
 
-  <section class="summary-grid" *ngIf="!errorMessage && (!isLoading || trades.length)">
+  <div class="dashboard-grid" cdkDropList cdkDropListOrientation="vertical" [cdkDropListData]="widgetOrder" (cdkDropListDropped)="dropWidget($event)">
+  <section class="dashboard-widget" cdkDrag [style.order]="widgetPosition('summary')" *ngIf="!errorMessage && (!isLoading || trades.length)">
+    <div class="widget-drag-bar" cdkDragHandle><span class="drag-grip">⋮⋮</span> Summary</div>
+    <div class="widget-content">
+    <section class="summary-grid">
     <article class="summary-card buy-card">
       <div class="summary-label">Buy orders</div>
       <div class="summary-value">{{ buyCount | number }}</div>
@@ -55,9 +62,14 @@
       <div class="summary-value">{{ totalQuantity | number:'1.0-2' }}</div>
       <div class="summary-detail">Loaded live results</div>
     </article>
+    </section>
+    </div>
   </section>
 
-  <section class="insight-grid" *ngIf="!errorMessage && (!isLoading || trades.length)">
+  <section class="dashboard-widget" cdkDrag [style.order]="widgetPosition('market-insights')" *ngIf="!errorMessage && (!isLoading || trades.length)">
+    <div class="widget-drag-bar" cdkDragHandle><span class="drag-grip">⋮⋮</span> Market insights</div>
+    <div class="widget-content">
+    <section class="insight-grid">
     <article class="insight-panel">
       <div class="panel-heading"><div><p class="panel-kicker">Market concentration</p><h2>Most traded stocks</h2></div><span class="panel-period">{{ fromDate === toDate ? 'TODAY' : 'RANGE' }}</span></div>
       <div class="stock-list" *ngIf="mostTradedStocks.length; else noStocks">
@@ -75,12 +87,47 @@
       <div class="flow-legend"><span><i class="buy-dot"></i> Buys <strong>{{ buyCount }}</strong></span><span><i class="sell-dot"></i> Sells <strong>{{ sellCount }}</strong></span></div>
       <p class="panel-note">Calculated from the live results currently loaded for this filter.</p>
     </article>
+    </section>
+    </div>
+  </section>
+
+  <section class="dashboard-widget" cdkDrag [style.order]="widgetPosition('charts')" *ngIf="!errorMessage && (!isLoading || trades.length)">
+    <div class="widget-drag-bar" cdkDragHandle><span class="drag-grip">⋮⋮</span> Charts</div>
+    <div class="widget-content">
+    <section class="chart-grid">
+    <article class="insight-panel chart-panel">
+      <div class="panel-heading">
+        <div><p class="panel-kicker">Asset allocation</p><h2>Trade mix by asset</h2></div>
+        <span class="panel-period">{{ fromDate === toDate ? 'TODAY' : 'RANGE' }}</span>
+      </div>
+      <highcharts-chart
+        [Highcharts]="Highcharts"
+        [options]="assetMixChartOptions"
+        class="insight-chart">
+      </highcharts-chart>
+    </article>
+    <article class="insight-panel chart-panel">
+      <div class="panel-heading">
+        <div><p class="panel-kicker">Execution pace</p><h2>Buys vs sells over time</h2></div>
+        <span class="panel-period">LIVE</span>
+      </div>
+      <highcharts-chart
+        [Highcharts]="Highcharts"
+        [options]="orderFlowChartOptions"
+        class="insight-chart">
+      </highcharts-chart>
+    </article>
+    </section>
+    </div>
   </section>
 
   <div class="error-state" *ngIf="errorMessage">{{ errorMessage }}</div>
   <div class="loading-state" *ngIf="isLoading && !trades.length">Loading live trades...</div>
 
-  <section class="table-shell" *ngIf="!errorMessage && (!isLoading || trades.length)">
+  <section class="dashboard-widget" cdkDrag [style.order]="widgetPosition('trades')" *ngIf="!errorMessage && (!isLoading || trades.length)">
+    <div class="widget-drag-bar" cdkDragHandle><span class="drag-grip">⋮⋮</span> Trade history</div>
+    <div class="widget-content">
+  <section class="table-shell">
     <div class="table-meta">
       <span><strong>{{ page?.totalElements || 0 }}</strong> trades in range</span>
       <span *ngIf="page">Page {{ page.number + 1 }} of {{ page.totalPages || 1 }}</span>
@@ -97,8 +144,8 @@
         <tbody>
           <tr *ngFor="let trade of trades; trackBy: trackByOrderId">
             <td class="order-id">#{{ trade.orderId }}</td>
-            <td><strong>{{ trade.clientName }}</strong><small>{{ trade.accountName }} · {{ trade.accountId }}</small></td>
-            <td><strong>{{ trade.instrumentSymbol }}</strong><small>{{ trade.assetType }} · {{ trade.currencyCode }}</small></td>
+            <td><strong>{{ trade.clientName || 'Unknown client' }}</strong><small>{{ trade.accountName || 'Unknown account' }} · {{ trade.accountId }}</small></td>
+            <td><strong>{{ trade.instrumentSymbol }}</strong><small>{{ trade.assetType }} · {{ trade.currencyCode || 'USD' }}</small></td>
             <td><span class="side" [class.sell]="trade.side === 'SELL'">{{ trade.side }}</span></td>
             <td>{{ trade.quantity | number:'1.0-4' }}</td>
             <td>{{ formatMoney(trade.price, trade.currencyCode) }}</td>
@@ -116,4 +163,7 @@
       <button (click)="nextPage()" [disabled]="!page || page.last">Next</button>
     </div>
   </section>
+    </div>
+  </section>
+  </div>
 </main>

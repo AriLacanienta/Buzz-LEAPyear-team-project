@@ -21,12 +21,9 @@ export const authGuard: CanActivateFn = (route, state) => {
     map(response => {
       // Token is valid
       console.log('Token validated successfully');
-<<<<<<< HEAD
       if (authService.hasRole('ANALYST') && !authService.hasRole('MANAGER') && state.url !== '/analyst') {
         return router.createUrlTree(['/analyst']);
       }
-=======
->>>>>>> feature/kafka
       if (!requiredRoles?.length || requiredRoles.some(role => authService.hasRole(role))) {
         return true;
       }

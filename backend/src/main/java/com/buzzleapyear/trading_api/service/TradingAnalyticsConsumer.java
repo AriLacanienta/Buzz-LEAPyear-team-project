@@ -31,9 +31,10 @@ public class TradingAnalyticsConsumer {
         analyticsJdbcTemplate.update("""
             INSERT INTO analytics_trade_events (
             event_id, event_type, order_id, account_id, client_id, instrument_id,
-            instrument_symbol, asset_type, side, quantity, price, trade_value,
+            client_name, account_name, instrument_symbol, asset_type, currency_code,
+            side, quantity, price, trade_value,
             order_date, status, status_time, reason)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT (event_id) DO NOTHING
                 """,
             event.eventId(),
@@ -42,8 +43,11 @@ public class TradingAnalyticsConsumer {
             event.accountId(),
             event.clientId(),
             event.instrumentId(),
+            event.clientName(),
+            event.accountName(),
             event.instrumentSymbol(),
             event.assetType(),
+            event.currencyCode(),
             event.side(),
             event.quantity(),
             event.price(),

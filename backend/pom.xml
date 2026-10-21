@@ -125,13 +125,10 @@
 			<scope>runtime</scope>
 		</dependency>
 
-<<<<<<< HEAD
-=======
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-kafka</artifactId>
 		</dependency>
->>>>>>> feature/kafka
 	</dependencies>
 
 	<build>
