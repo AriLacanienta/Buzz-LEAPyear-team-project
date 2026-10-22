@@ -21,13 +21,88 @@
     </button>
   </header>
 
+  <div class="chatbot-shortcuts">
+    <button type="button" (click)="openDisputeForm()" [disabled]="loading">
+      {{ activeDispute ? 'View current dispute' : 'Raise a dispute' }}
+    </button>
+    <button type="button" class="portfolio-summary-shortcut" (click)="sendMessage('portfolio summary')" [disabled]="loading">
+      Portfolio summary
+    </button>
+  </div>
+
   <div #messagesContainer class="messages">
     <div
-      *ngFor="let message of messages"
+      *ngFor="let message of messages; let messageIndex = index"
       [class.user]="message.role === 'user'"
       [class.assistant]="message.role === 'assistant'"
     >
       <p>{{ message.text }}</p>
+
+      <section *ngIf="message.dispute as dispute" class="dispute-card" aria-label="Trade dispute"
+        [attr.data-active-dispute]="dispute === activeDispute ? 'true' : null">
+        <form *ngIf="dispute.state === 'draft'" class="dispute-form" (ngSubmit)="reviewDispute(dispute)" ngNativeValidate>
+          <label [for]="'dispute-order-' + messageIndex">Order to dispute</label>
+          <select [id]="'dispute-order-' + messageIndex" name="selectedOrder" required
+            [(ngModel)]="dispute.selectedOrder" (ngModelChange)="dispute.error = ''"
+            [disabled]="dispute.ordersLoading || !dispute.orders.length">
+            <option [ngValue]="undefined" disabled>Select an executed order</option>
+            <option *ngFor="let order of dispute.orders; trackBy: trackDisputeOrder" [ngValue]="order">
+              #{{ order.orderId }} · {{ order.instrumentSymbol }} · {{ order.side }} {{ order.quantity }} · {{ order.orderDate | date: 'MMM d, yyyy HH:mm' }}
+            </option>
+          </select>
+          <span *ngIf="dispute.ordersLoading" role="status">Loading your orders…</span>
+          <div *ngIf="dispute.ordersError" role="alert" class="dispute-error">
+            {{ dispute.ordersError }}
+            <button type="button" [disabled]="dispute.ordersLoading" (click)="loadDisputeOrders(dispute, dispute.pageIndex)">Retry loading orders</button>
+          </div>
+          <small *ngIf="!dispute.ordersLoading && !dispute.ordersError && !dispute.pageOrderCount">
+            {{ dispute.totalPages ? 'No executed orders on this page. Try another page.' : 'No orders found. Place a trade before raising a dispute.' }}
+          </small>
+          <div *ngIf="dispute.totalPages > 1" class="dispute-pagination" aria-label="Order history pages">
+            <button type="button" [disabled]="dispute.ordersLoading || dispute.pageIndex === 0"
+              (click)="loadDisputeOrders(dispute, dispute.pageIndex - 1)">Newer</button>
+            <small>Page {{ dispute.pageIndex + 1 }} of {{ dispute.totalPages }}</small>
+            <button type="button" [disabled]="dispute.ordersLoading || dispute.pageIndex + 1 >= dispute.totalPages"
+              (click)="loadDisputeOrders(dispute, dispute.pageIndex + 1)">Older</button>
+          </div>
+          <div *ngIf="dispute.selectedOrder as order" class="dispute-order-summary">
+            <strong>Order #{{ order.orderId }} · {{ order.instrumentSymbol }}</strong>
+            <span>{{ order.side }} {{ order.quantity }} at {{ order.price | currency }}</span>
+            <span>{{ order.orderDate | date: 'MMM d, yyyy HH:mm:ss' }}</span>
+          </div>
+          <label [for]="'dispute-description-' + messageIndex">What went wrong?</label>
+          <textarea [id]="'dispute-description-' + messageIndex" name="description" rows="4" required
+            maxlength="2000" [(ngModel)]="dispute.description" [attr.aria-describedby]="'dispute-count-' + messageIndex"></textarea>
+          <small [id]="'dispute-count-' + messageIndex">{{ dispute.description.length }}/2,000 characters</small>
+          <div class="dispute-actions">
+            <button type="submit" [disabled]="dispute.ordersLoading || !dispute.selectedOrder">Review dispute</button>
+            <button type="button" class="secondary" (click)="cancelDispute(dispute)">Cancel</button>
+          </div>
+        </form>
+        <div *ngIf="dispute.state === 'review' || dispute.state === 'submitting'" class="dispute-review">
+          <strong>Review your dispute</strong>
+          <div *ngIf="dispute.selectedOrder as order" class="dispute-order-summary">
+            <strong>Order #{{ order.orderId }} · {{ order.instrumentSymbol }}</strong>
+            <span>{{ order.side }} {{ order.quantity }} at {{ order.price | currency }}</span>
+            <span>{{ order.orderDate | date: 'MMM d, yyyy HH:mm:ss' }}</span>
+          </div>
+          <p>{{ dispute.description }}</p>
+          <small>This will be submitted for your signed-in account.</small>
+          <div class="dispute-actions">
+            <button type="button" [disabled]="dispute.state === 'submitting'" (click)="confirmDispute(dispute)">
+              {{ dispute.state === 'submitting' ? 'Submitting…' : 'Confirm dispute' }}
+            </button>
+            <button type="button" class="secondary" [disabled]="dispute.state === 'submitting'" (click)="editDispute(dispute)">Edit</button>
+            <button type="button" class="secondary" [disabled]="dispute.state === 'submitting'" (click)="cancelDispute(dispute)">Cancel</button>
+          </div>
+        </div>
+        <p *ngIf="dispute.error" class="dispute-error" role="alert">{{ dispute.error }}</p>
+        <p *ngIf="dispute.state === 'succeeded' && dispute.result as result" role="status" class="dispute-success">
+          Dispute #{{ result.id }} created for order #{{ result.tradeOrderId }}. Status: {{ result.status }}.
+        </p>
+        <p *ngIf="dispute.state === 'cancelled'" role="status">Dispute cancelled. Nothing was submitted.</p>
+        <span *ngIf="dispute.state === 'submitting'" role="status">Submitting your dispute…</span>
+      </section>
 
       <div *ngIf="message.preview as preview" class="preview">
         <strong>{{ preview.side }} {{ preview.quantity }} {{ preview.instrumentSymbol }}</strong>

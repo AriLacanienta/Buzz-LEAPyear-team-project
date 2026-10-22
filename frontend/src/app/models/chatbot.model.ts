@@ -1,5 +1,6 @@
 import { TradeOrderPreviewResponse } from './trade-order.model';
 import { PortfolioSummaryResponse } from './portfolio-summary-response.model';
+import { DisputeCard } from './dispute.model';
 
 export interface MarketMover {
   symbol: string;
@@ -41,5 +42,6 @@ export interface ChatMessage {
   portfolio?: PortfolioSummaryResponse;
   marketMovers?: TopMoversResponse;
   comparison?: StockComparisonResponse;
+  dispute?: DisputeCard;
   action?: string | null;
 }

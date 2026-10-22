@@ -196,6 +196,97 @@
   opacity: 0.55;
 }
 
+.dispute-card {
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+  overflow-wrap: anywhere;
+}
+
+.chatbot-shortcuts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid #263852;
+}
+
+.chatbot-shortcuts button {
+  padding: 0.4rem 0.7rem;
+  border: 1px solid #5a7091;
+  border-radius: 1rem;
+  color: #fff;
+  background: #1e2d45;
+  cursor: pointer;
+}
+
+.chatbot .dispute-form,
+.dispute-review {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0;
+  border: 0;
+}
+
+.dispute-form textarea,
+.dispute-form select {
+  box-sizing: border-box;
+  width: 100%;
+  resize: vertical;
+  padding: 0.6rem;
+  border: 1px solid #5a7091;
+  border-radius: 0.35rem;
+  color: #fff;
+  background: #151e2c;
+  font: inherit;
+}
+
+.dispute-form select {
+  min-width: 0;
+}
+
+.dispute-order-summary {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.5rem;
+  border-left: 2px solid #93c5fd;
+  background: #151e2c;
+}
+
+.dispute-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.25rem;
+}
+
+.dispute-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.chatbot .dispute-actions .secondary {
+  background: #344762;
+}
+
+.dispute-error {
+  color: #ffb4b4;
+  margin-top: 0.5rem !important;
+}
+
+.dispute-success {
+  color: #86efac;
+}
+
+.chatbot :is(input, textarea, select, button):focus-visible {
+  outline: 2px solid #93c5fd;
+  outline-offset: 2px;
+}
+
+.chatbot {
+  max-height: min(34rem, calc(100dvh - 3rem));
+}
+
 @media (max-width: 600px) {
   .chatbot-launcher {
     right: 1rem;

@@ -6,6 +6,7 @@
         <table *ngIf="orders && orders.length > 0; else noOrders">
             <thead>
                 <tr>
+                    <th>Order reference</th>
                     <th>Date</th>
                     <th>Side</th>
                     <th>Instrument</th>
@@ -13,10 +14,12 @@
                     <th>Price</th>
                     <th>Total</th>
                     <th>Status</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
                 <tr *ngFor="let order of orders; trackBy: trackByOrderId">
+                    <td class="order-reference">#{{ order.orderId }}</td>
                     <td class="time">{{ order.orderDate | date: 'MMM d, yyyy HH:mm:ss' }}</td>
                     <td class="side">
                         <span [class.buy]="order.side === 'BUY'" [class.sell]="order.side === 'SELL'">
@@ -32,6 +35,16 @@
                             [attr.title]="order.reasonText">
                             {{ order.status ?? 'UNKNOWN' }}
                         </span>
+                    </td>
+                    <td>
+                        <button *ngIf="order.status === 'FILLED'; else disputeUnavailable"
+                            class="raise-dispute" type="button" (click)="raiseDispute(order)"
+                            [attr.aria-label]="'Raise dispute for order #' + order.orderId + ' ' + order.instrumentSymbol">
+                            Raise dispute
+                        </button>
+                        <ng-template #disputeUnavailable>
+                            <span class="dispute-unavailable" title="Only successfully executed orders can be disputed">—</span>
+                        </ng-template>
                     </td>
                 </tr>
             </tbody>
