@@ -82,7 +82,7 @@ public class ManagerTradeLogService {
             order.getSide() == null ? "" : order.getSide().name(),
             order.getQuantity(),
             order.getPrice(),
-            order.getValue(),
+            order.getTradeValue(),
             latestStatus == null ? null : latestStatus.getStatus(),
             latestStatus == null ? null : latestStatus.getTimeUpdated(),
             latestStatus == null ? null : latestStatus.getReasonText(),
