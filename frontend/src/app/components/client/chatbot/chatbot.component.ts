@@ -25,7 +25,7 @@ export class ChatbotComponent implements AfterViewChecked {
   messages: ChatMessage[] = [
     {
       role: 'assistant',
-      text: "Hi, I'm Buzz. I'm here to help with anything related to your account.\n\nI can help with:\n- Portfolio summaries\n- Stock comparisons (e.g., AAPL vs MSFT)\n- Top gainers/losers\n- Quotes (e.g., quote AAPL)\n- Trade (e.g., buy 5 AAPL)"
+      text: "Hi, I'm Buzz. I'm here to help with anything related to your account.\n\nI can help with:\n- Portfolio summaries\n- Stock comparisons (e.g., AAPL vs MSFT)\n- Top gainers/losers\n- Quotes (e.g., quote AAPL)\n- Trade (e.g., buy 5 shares of AAPL)"
     }
   ];
 

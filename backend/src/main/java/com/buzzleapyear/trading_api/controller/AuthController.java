@@ -161,7 +161,7 @@ public class AuthController {
                 //returning access token in body and refresh token in secure HttpOnly cookie
                 return ResponseEntity.ok()
                     .header(HttpHeaders.SET_COOKIE, buildRefreshCookie(refreshToken, request).toString())
-                    .body(buildAuthResponse(user, accessToken));
+                    .body(createAuthResponse(accessToken, user));
 
         } catch (Exception e) {
             // If any unexpected error occurs, return 401 Unauthorized
@@ -268,7 +268,7 @@ public class AuthController {
                 //returning access token in body and refresh token in secure HttpOnly cookie
             return ResponseEntity.status(HttpStatus.CREATED)
                     .header(HttpHeaders.SET_COOKIE, buildRefreshCookie(refreshToken, request).toString())
-                    .body(buildAuthResponse(savedUser, accessToken));
+                    .body(createAuthResponse(accessToken, savedUser));
 
         } catch (Exception e) {
             // If any error occurs during registration, return 400 Bad Request
@@ -317,18 +317,18 @@ public class AuthController {
 
             return ResponseEntity.ok()
                     .header(HttpHeaders.SET_COOKIE, buildRefreshCookie(newRefreshToken, request).toString())
-                    .body(buildAuthResponse(user, newAccessToken));
+                    .body(createAuthResponse(newAccessToken, user));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(new ErrorResponse("Refresh failed: " + e.getMessage()));
         }
     }
 
-    private AuthResponse buildAuthResponse(User user, String accessToken) {
-        var roles = user.getUserRoles().stream()
-                .map(userRole -> userRole.getRole().getRoleName().name())
-                .collect(Collectors.toList());
-        return new AuthResponse(accessToken, user.getUsername(), user.getEmail(), roles);
+    private AuthResponse createAuthResponse(String accessToken, User user) {
+        return new AuthResponse(accessToken, user.getUsername(), user.getEmail(),
+                user.getUserRoles().stream()
+                        .map(userRole -> userRole.getRole().getRoleName().name())
+                        .toList());
     }
 
     @PostMapping("/logout")

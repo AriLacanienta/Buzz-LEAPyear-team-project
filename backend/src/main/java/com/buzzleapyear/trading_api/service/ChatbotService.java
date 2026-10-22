@@ -85,7 +85,7 @@ public class ChatbotService {
             return new ChatResponse(
                 "HELP",
                     "You can ask about your portfolio, quotes, stock comparisons (e.g., compare AAPL and MSFT), top gainers/losers, or trade previews. "
-                        + "Try: compare AAPL and MSFT, quote AAPL, or buy 5 AAPL.",
+                        + "Try: compare AAPL and MSFT, quote AAPL, or buy 5 shares of AAPL.",
                 null,
                 null
             );
@@ -189,7 +189,7 @@ public class ChatbotService {
 
         return new ChatResponse(
             "UNKNOWN",
-                "I can help with:\n- Portfolio summaries\n- Stock comparisons (e.g., AAPL vs MSFT)\n- Top gainers/losers\n- Quotes (e.g., quote AAPL)\n- Trade (e.g., buy 5 AAPL)",
+                "I can help with:\n- Portfolio summaries\n- Stock comparisons (e.g., AAPL vs MSFT)\n- Top gainers/losers\n- Quotes (e.g., quote AAPL)\n- Trade (e.g., buy 5 shares of AAPL)",
             null,
             null
         );
