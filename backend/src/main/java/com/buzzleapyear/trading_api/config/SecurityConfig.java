@@ -40,8 +40,8 @@ public class SecurityConfig {
                 (request, response, authException) -> response.sendError(HttpStatus.UNAUTHORIZED.value())
             ))
             .authorizeHttpRequests(authorize -> authorize
-                // PUBLIC
-                .requestMatchers("/error").permitAll()
+                // PUBLIC 
+                .requestMatchers(HttpMethod.POST, "/api/v1/auth/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/auth/validate").authenticated()
                 .requestMatchers(HttpMethod.POST, "/api/v1/auth/**").permitAll()
 
@@ -61,6 +61,18 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/test").hasRole(ROLE_MANAGER)
                 .requestMatchers("/api/v1/user/allUsers").hasRole(ROLE_MANAGER)
                 .requestMatchers("/api/v1/user/**").authenticated()
+
+                
+
+                // RESTRICTED (RBAC)
+                .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/v1/test").hasRole("ADMIN")
+                // The analyst dashboard is currently available to authenticated users
+                // until the application has a role-management flow for assigning analysts.
+                .requestMatchers("/api/v1/analyst/**").authenticated()
+                .requestMatchers("/api/v1/compliance/**").hasAnyRole("ADMIN", "COMPLIANCE")
+                .requestMatchers("/api/v1/client/**").hasAnyRole("ADMIN","CLIENT","ANALYST")
+
                 // HEALTHCHECK (internal only - docker-compose, kubernetes, etc.)
                 .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
                 .requestMatchers("/actuator/**").denyAll()
@@ -73,3 +85,4 @@ public class SecurityConfig {
         return http.build();
     }
 }
+

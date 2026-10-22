@@ -8,18 +8,15 @@ import { AnalystTrade, AnalystTradePage } from '../../models/analyst-trade.model
 import { AnalystTradeService } from '../../services/analyst-trade.service';
 import { HighchartsChartModule } from 'highcharts-angular';
 import * as Highcharts from 'highcharts';
-import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-analyst-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, HighchartsChartModule, DragDropModule],
+  imports: [CommonModule, FormsModule, HighchartsChartModule],
   templateUrl: './analyst-dashboard.component.html',
   styleUrls: ['./analyst-dashboard.component.scss']
 })
 export class AnalystDashboardComponent implements OnInit, OnDestroy {
-  readonly defaultWidgetOrder = ['summary', 'market-insights', 'charts', 'trades'];
-  widgetOrder = [...this.defaultWidgetOrder];
   Highcharts: typeof Highcharts = Highcharts;
   assetMixChartOptions: Highcharts.Options = {};
   orderFlowChartOptions: Highcharts.Options = {};
@@ -40,67 +37,6 @@ export class AnalystDashboardComponent implements OnInit, OnDestroy {
 
   constructor(private analystTradeService: AnalystTradeService) {}
 
-  ngOnInit(): void {
-    this.loadWidgetOrder();
-    merge(interval(2000), this.refresh$).pipe(
-      startWith(0),
-      map(() => ++this.requestVersion),
-      switchMap(requestVersion => this.analystTradeService.getTrades(this.fromDate, this.toDate, this.searchTerm, this.pageIndex, this.pageSize).pipe(
-        catchError((error: HttpErrorResponse) => {
-          if (requestVersion !== this.requestVersion) {
-            return of(null);
-          }
-          this.errorMessage = error.status === 403
-            ? 'Analyst access is required to view this page.'
-            : 'Unable to load trade activity. Check that the API is running.';
-          this.isLoading = false;
-          return of(null);
-        })
-      )),
-      takeUntil(this.destroy$)
-    ).subscribe(response => {
-      if (response && response.content && response.number === this.pageIndex) {
-        this.page = response;
-        this.trades = response.content;
-        this.updateInsightCharts();
-        this.errorMessage = '';
-        this.lastUpdated = new Date();
-        this.isLoading = false;
-      }
-    });
-  }
-
-  dropWidget(event: CdkDragDrop<string[]>): void {
-    if (event.previousIndex === event.currentIndex) {
-      return;
-    }
-    moveItemInArray(this.widgetOrder, event.previousIndex, event.currentIndex);
-    localStorage.setItem('analyst-dashboard-widget-order', JSON.stringify(this.widgetOrder));
-  }
-
-  resetWidgetOrder(): void {
-    this.widgetOrder = [...this.defaultWidgetOrder];
-    localStorage.removeItem('analyst-dashboard-widget-order');
-  }
-
-  widgetPosition(widget: string): number {
-    return this.widgetOrder.indexOf(widget);
-  }
-
-  trackByWidget(_: number, widget: string): string {
-    return widget;
-  }
-
-  private loadWidgetOrder(): void {
-    try {
-      const saved = JSON.parse(localStorage.getItem('analyst-dashboard-widget-order') || 'null');
-      if (Array.isArray(saved) && this.defaultWidgetOrder.every(widget => saved.includes(widget))) {
-        this.widgetOrder = saved;
-      }
-    } catch {
-      this.widgetOrder = [...this.defaultWidgetOrder];
-    }
-  }
   get buyCount(): number {
     return this.trades.filter(trade => trade.side === 'BUY').length;
   }
@@ -132,6 +68,34 @@ export class AnalystDashboardComponent implements OnInit, OnDestroy {
     return this.mostTradedStocks[0]?.trades || 1;
   }
 
+  ngOnInit(): void {
+    merge(interval(2000), this.refresh$).pipe(
+      startWith(0),
+      map(() => ++this.requestVersion),
+      switchMap(requestVersion => this.analystTradeService.getTrades(this.fromDate, this.toDate, this.searchTerm, this.pageIndex, this.pageSize).pipe(
+        catchError((error: HttpErrorResponse) => {
+          if (requestVersion !== this.requestVersion) {
+            return of(null);
+          }
+          this.errorMessage = error.status === 403
+            ? 'Analyst access is required to view this page.'
+            : 'Unable to load trade activity. Check that the API is running.';
+          this.isLoading = false;
+          return of(null);
+        })
+      )),
+      takeUntil(this.destroy$)
+    ).subscribe(response => {
+      if (response && response.content && response.number === this.pageIndex) {
+        this.page = response;
+        this.trades = response.content;
+        this.updateInsightCharts();
+        this.errorMessage = '';
+        this.lastUpdated = new Date();
+        this.isLoading = false;
+      }
+    });
+  }
 
   choosePreset(preset: string): void {
     this.selectedPreset = preset;
