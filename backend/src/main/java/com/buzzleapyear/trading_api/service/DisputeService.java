@@ -18,12 +18,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDateTime;
 
 @Service
 public class DisputeService {
-    private static final BigDecimal CRITICAL_TRADE_VALUE = new BigDecimal("10000.00");
     private final DisputeRepository disputeRepository;
     private final TradeOrderRepository tradeOrderRepository;
 
@@ -148,10 +146,7 @@ public class DisputeService {
             || order.getQuantity().signum() <= 0 || order.getPrice().signum() <= 0) {
             throw error(HttpStatus.INTERNAL_SERVER_ERROR, "Order execution quantity and price must be positive");
         }
-        BigDecimal executionValue = order.getQuantity().multiply(order.getPrice())
-            .setScale(2, RoundingMode.HALF_UP);
-        return executionValue.compareTo(CRITICAL_TRADE_VALUE) >= 0
-            ? DisputeSeverity.CRITICAL : DisputeSeverity.NORMAL;
+        return DisputeSeverityPolicy.severity(order.getQuantity(), order.getPrice());
     }
 
     private ResponseStatusException error(HttpStatus status, String message) {

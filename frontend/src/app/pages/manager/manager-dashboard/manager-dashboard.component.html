@@ -1,28 +1,40 @@
 <main>
+	<div class="dashboard-status" aria-live="polite">
+		<span *ngIf="loading && !summary">Loading dashboard...</span>
+		<span *ngIf="error" role="alert">
+			{{ summary ? 'Refresh failed. Displayed values are stale.' : 'Unable to load dashboard.' }}
+		</span>
+		<span *ngIf="summary">
+			{{ summary.businessDate }} ({{ summary.timeZone }}) &middot;
+			Last updated {{ summary.asOf | date:'mediumTime' }}
+		</span>
+		<button *ngIf="error" type="button" (click)="retry()" [disabled]="loading">Retry</button>
+	</div>
 	<div class="dashboard-info-cards">
 		<app-dashboard-info-card
 			header="ORDERS TODAY"
-			data="57"
-			info="+12 vs yesterday">
+			[data]="summary ? (summary.ordersToday | number:'1.0-0')! : '--'"
+			[info]="ordersComparison">
 		</app-dashboard-info-card>
 		<app-dashboard-info-card
 			header="FILL RATE"
-			data="95%"
-			info="54 filled">
+			[data]="summary ? (summary.fillRatePercent | number:'1.1-1') + '%' : '--'"
+			[info]="summary ? (summary.filledOrdersToday | number:'1.0-0') + ' filled' : ''">
 		</app-dashboard-info-card>
 		<app-dashboard-info-card
 			header="OPEN DISPUTES"
-			data="5"
-			info="2 critical">
+			[data]="summary ? (summary.openDisputes | number:'1.0-0')! : '--'"
+			[info]="summary ? (summary.criticalOpenDisputes | number:'1.0-0') + ' critical' : ''">
 		</app-dashboard-info-card>
 		<app-dashboard-info-card
 			header="ACTIVE CLIENTS"
-			data="13"
+			[data]="summary ? (summary.activeClientsToday | number:'1.0-0')! : '--'"
 			info="Today">
 		</app-dashboard-info-card>
 		<app-dashboard-info-card
-			header="GROSS REVENUE"
-			data="$64K"
+			header="ASSETS MOVED"
+			[data]="summary ? 'No executions' : '--'"
+			[dataLines]="currencyTotals"
 			info="Executed Today">
 		</app-dashboard-info-card>
 	</div>
