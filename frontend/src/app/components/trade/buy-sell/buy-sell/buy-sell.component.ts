@@ -17,7 +17,7 @@ import { SearchResultDetailComponent } from "../search-result-detail/search-resu
 import { CommonModule, CurrencyPipe } from "@angular/common";
 import { InstrumentSearchResponse } from "@app/models/instrument-search-response.model";
 import { AccountService } from "@app/services/account.service";
-import { merge, switchMap, timer, of, Subject } from "rxjs";
+import { merge, switchMap, timer, of, Subject, Subscription } from "rxjs";
 import {
   catchError,
   debounceTime,
@@ -39,7 +39,7 @@ const TAG_ASSET_TYPES: Record<AssetTag, string[]> = {
 
 const PREVIEW_POLL_INTERVAL_MS = 3000;
 const SUCCESS_MESSAGE_TIMEOUT = 2000;
-const SHARE_QUANTITY_DECIMAL_PLACES = 3;
+const ERROR_MESSAGE_TIMEOUT = 5000;
 
 @Component({
   selector: "app-buy-sell",
@@ -72,6 +72,7 @@ export class BuySellComponent implements OnInit {
   private accountId: string | null = null;
   private ownsSelected: boolean | null = null;
   private previewTrigger$ = new Subject<void>();
+  private errorDismissal?: Subscription;
 
   @ViewChild(SearchComponent) private searchComponent?: SearchComponent;
 
@@ -120,6 +121,7 @@ export class BuySellComponent implements OnInit {
   }
 
   toggleOrderType(side: OrderType): void {
+    this.clearErrorMessage();
     this.isBuy = side === "BUY";
     this.requestPreview();
   }
@@ -129,6 +131,7 @@ export class BuySellComponent implements OnInit {
       return;
     }
     this.selectedTag = tag;
+    this.clearErrorMessage();
     this.searchComponent?.onSearchClear();
     this.applyQuantityModeConstraints(tag === "Crypto" ? "AMOUNT" : "SHARES");
   }
@@ -162,7 +165,7 @@ export class BuySellComponent implements OnInit {
     this.amount = parseFloat(input.value) || 0;
     this.amountInputValid =
       /^\d+(?:\.\d{1,2})?$/.test(value) && this.amount > 0;
-    this.errorMessage = "";
+    this.clearErrorMessage();
     this.successMessage = "";
     this.requestPreview();
   }
@@ -176,7 +179,7 @@ export class BuySellComponent implements OnInit {
 
     this.quantity = parseInt(input.value, 10) || 0;
     // Clear error and success messages when user changes quantity
-    this.errorMessage = "";
+    this.clearErrorMessage();
     this.successMessage = "";
     this.requestPreview();
   }
@@ -188,7 +191,7 @@ export class BuySellComponent implements OnInit {
 
     if (symbolChanged || item === null) {
       this.successMessage = "";
-      this.errorMessage = "";
+      this.clearErrorMessage();
       this.checkOwnership();
       this.applyQuantityModeConstraints(this.quantityMode);
     }
@@ -196,7 +199,7 @@ export class BuySellComponent implements OnInit {
   }
 
   onPlaceOrder(): void {
-    this.errorMessage = "";
+    this.clearErrorMessage();
     this.successMessage = "";
 
     if (!this.selectedResult) {
@@ -285,7 +288,7 @@ export class BuySellComponent implements OnInit {
           this.tradeOrderService.notifyOrderplaced();
           this.watchOrderCompletion(response.orderId, side, orderLabel);
         },
-        error: () => (this.errorMessage = "Order could not be submitted"),
+        error: () => this.showOrderError("Order could not be submitted"),
       });
   }
 
@@ -332,10 +335,24 @@ export class BuySellComponent implements OnInit {
         } else {
           // Clear the submitted message and show the error
           this.successMessage = "";
-          this.errorMessage =
-            this.formatErrorMessage(status.reasonText) || "Order was rejected.";
+          this.showOrderError(
+            this.formatErrorMessage(status.reasonText) || "Order was rejected.",
+          );
         }
       });
+  }
+
+  private clearErrorMessage(): void {
+    this.errorDismissal?.unsubscribe();
+    this.errorMessage = "";
+  }
+
+  private showOrderError(message: string): void {
+    this.clearErrorMessage();
+    this.errorMessage = message;
+    this.errorDismissal = timer(ERROR_MESSAGE_TIMEOUT)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => (this.errorMessage = ""));
   }
 
   private checkOwnership(): void {
@@ -371,6 +388,15 @@ export class BuySellComponent implements OnInit {
         : Number(preview.quantity) === this.quantity);
 
     if (preview && matchesInput && !preview.valid) {
+      const reason = preview.reason ?? "";
+      if (
+        (side === "BUY" && reason.startsWith("Insufficient cash available:")) ||
+        (side === "SELL" &&
+          (reason.startsWith("Insufficient quantity:") ||
+            reason.startsWith("Account does not hold ")))
+      ) {
+        return false;
+      }
       this.errorMessage = preview.reason ?? "Order is not valid.";
       return true;
     }
@@ -412,7 +438,7 @@ export class BuySellComponent implements OnInit {
     this.amount = 0;
     this.amountInputValid = false;
     this.preview = null;
-    this.errorMessage = "";
+    this.clearErrorMessage();
     this.requestPreview();
   }
 
@@ -455,7 +481,7 @@ export class BuySellComponent implements OnInit {
     if (!this.isPreviewForCurrentInput() || this.preview?.quantity == null) {
       return null;
     }
-    return Number(this.preview.quantity.toFixed(SHARE_QUANTITY_DECIMAL_PLACES));
+    return this.preview.quantity;
   }
 
   private isPreviewForCurrentInput(): boolean {
@@ -510,12 +536,6 @@ export class BuySellComponent implements OnInit {
 
   get isNotHeld(): boolean {
     return !this.isBuy && this.ownsSelected === false;
-  }
-
-  get isInsufficientCash(): boolean {
-    return (
-      this.isBuy && this.buyingPowerValue != null && this.buyingPowerValue < 0
-    );
   }
 
   get buyingPowerLabel(): string {

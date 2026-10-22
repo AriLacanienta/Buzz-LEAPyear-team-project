@@ -62,14 +62,12 @@
           step="1"
           placeholder="0"
           [value]="quantity || ''"
-          [disabled]="isNotHeld"
           (input)="onQuantityInput($event)"
         />
         <select
           class="quantity-mode-select"
           aria-label="Order quantity type"
           [value]="quantityMode"
-          [disabled]="isNotHeld"
           (change)="onQuantityModeChange($event)"
         >
           <option value="SHARES" [disabled]="!canTradeWholeShares">
@@ -92,14 +90,12 @@
           class="quantity-input"
           placeholder="$0.00"
           [value]="amount || ''"
-          [disabled]="isNotHeld"
           (input)="onAmountInput($event)"
         />
         <select
           class="quantity-mode-select"
           aria-label="Order quantity type"
           [value]="quantityMode"
-          [disabled]="isNotHeld"
           (change)="onQuantityModeChange($event)"
         >
           <option value="SHARES" [disabled]="!canTradeWholeShares">
@@ -118,10 +114,10 @@
   </div>
 
   <div *ngIf="selectedResult" class="price-summary">
-    <div *ngIf="isNotHeld; else summaryRows" class="not-held-notice">
+    <div *ngIf="isNotHeld" class="not-held-notice">
       You don't own any shares of {{ selectedResult.instrumentSymbol }}.
     </div>
-    <ng-template #summaryRows>
+    <ng-container>
       <div class="price-summary-row">
         <span class="price-label">Indicative price</span>
         <span class="price-value">{{ indicativePrice | currency:selectedCurrency }}</span>
@@ -150,7 +146,7 @@
       <div *ngIf="!isBuy && preview" class="price-summary-row">
         <span class="price-label">Shares held</span>
         <span class="price-value">{{
-          preview.holdingQuantity | number: "1.0-3"
+          preview.holdingQuantity | number: "1.0-8"
         }}</span>
       </div>
       <div
@@ -166,7 +162,7 @@
           estimatedTotal != null ? (estimatedTotal | currency:"USD") : "--"
         }}</span>
       </div>
-    </ng-template>
+    </ng-container>
   </div>
 
   <div class="buying-power">
@@ -178,29 +174,6 @@
         buyingPowerValue != null ? (buyingPowerValue | currency) : "--"
       }}</span
     >
-  </div>
-
-  <div
-    *ngIf="isInsufficientCash && !errorMessage"
-    role="alert"
-    class="error-container"
-  >
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-      <circle
-        cx="6"
-        cy="6"
-        r="5.5"
-        stroke="currentColor"
-        stroke-width="1"
-      ></circle>
-      <path
-        d="M6 3.5V6.5M6 8.5V8.6"
-        stroke="currentColor"
-        stroke-width="1.2"
-        stroke-linecap="round"
-      ></path>
-    </svg>
-    <span>Insufficient cash for this order.</span>
   </div>
 
   <div
@@ -256,7 +229,7 @@
     class="place-order-btn"
     [class.sell]="!isBuy"
     [disabled]="
-      isSubmitting || isNotHeld || isInsufficientCash || successMessage
+      isSubmitting || isNotHeld || successMessage
     "
     (click)="onPlaceOrder()"
   >

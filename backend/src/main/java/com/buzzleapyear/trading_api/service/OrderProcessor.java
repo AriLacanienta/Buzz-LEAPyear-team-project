@@ -36,7 +36,6 @@ import org.springframework.beans.factory.annotation.Value;
  */
 @Service
 public class OrderProcessor {
-    private static final int SHARE_QUANTITY_SCALE = 3;
     
     private static final Logger logger = LoggerFactory.getLogger(OrderProcessor.class);
     
@@ -182,7 +181,8 @@ public class OrderProcessor {
             return null;
         }
         BigDecimal usdPrice = price.multiply(exchangeRateService.getToUsdRate(instrument.getCurrencyCode()));
-        BigDecimal resolved = amount.divide(usdPrice, SHARE_QUANTITY_SCALE, RoundingMode.DOWN);
+        int quantityPrecision = instrument.getQuantityPrecision();
+        BigDecimal resolved = amount.divide(usdPrice, quantityPrecision, RoundingMode.DOWN);
         if(side == OrderSide.SELL && heldQuantity != null && heldQuantity.signum() > 0) {
             BigDecimal heldValue = exchangeRateService.toUsd(
                 heldQuantity.multiply(price), instrument.getCurrencyCode());
@@ -190,7 +190,7 @@ public class OrderProcessor {
                 resolved = heldQuantity;
             }
         }
-        return resolved.setScale(SHARE_QUANTITY_SCALE, RoundingMode.DOWN);
+        return resolved.setScale(quantityPrecision, RoundingMode.DOWN);
     }
 
     private BigDecimal getHeldQuantity(Account account, Instrument instrument) {
@@ -235,7 +235,6 @@ public class OrderProcessor {
             quantity = BigDecimal.ZERO;
         }
         BigDecimal nativeValue = livePrice.multiply(quantity);
-        BigDecimal estimatedNativeValue = nativeValue.setScale(2, RoundingMode.HALF_UP);
         BigDecimal exchangeRate = exchangeRateService.getToUsdRate(instrument.getCurrencyCode());
         BigDecimal estimatedValue = nativeValue.multiply(exchangeRate).setScale(2, RoundingMode.HALF_UP);
 
@@ -248,7 +247,7 @@ public class OrderProcessor {
         draft.setQuantity(quantity);
         draft.setPrice(livePrice);
         
-        OrderValidator.ValidationResult result = orderValidator.validate(draft, account);
+        OrderValidator.ValidationResult result = orderValidator.validatePreview(draft, account);
 
         BigDecimal cashAfter;
         BigDecimal holdingQuantityAfter;
@@ -290,7 +289,7 @@ public class OrderProcessor {
             result.getReason(),
             instrument.getCurrencyCode(),
             exchangeRate,
-            estimatedNativeValue
+            nativeValue
         );
     }
 

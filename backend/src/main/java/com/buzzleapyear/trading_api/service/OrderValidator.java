@@ -22,7 +22,6 @@ import com.buzzleapyear.trading_api.service.MarketHoursService;
  */
 @Component 
 public class OrderValidator {
-    private static final int AMOUNT_ORDER_QUANTITY_SCALE = 3;
     
     private static final Logger logger = LoggerFactory.getLogger(OrderValidator.class);
 
@@ -60,8 +59,9 @@ public class OrderValidator {
             if (amount == null || amount.compareTo(instrument.getMinOrderAmount()) < 0) {
                 return String.format("Minimum order amount for %s is $%.2f", symbol, instrument.getMinOrderAmount());
             }
-            if (quantity != null && quantity.stripTrailingZeros().scale() > AMOUNT_ORDER_QUANTITY_SCALE) {
-                return String.format("%s quantity cannot have more than %d decimal places", symbol, AMOUNT_ORDER_QUANTITY_SCALE);
+            int quantityPrecision = instrument.getQuantityPrecision();
+            if (quantity != null && quantity.stripTrailingZeros().scale() > quantityPrecision) {
+                return String.format("%s quantity cannot have more than %d decimal places", symbol, quantityPrecision);
             }
         }
 
@@ -161,22 +161,30 @@ public class OrderValidator {
      * @return ValidationResult with success status and reason for failure
      */
     public ValidationResult validate(TradeOrder order, Account account) {
+        return validate(order, account, false);
+    }
+
+    public ValidationResult validatePreview(TradeOrder order, Account account) {
+        return validate(order, account, true);
+    }
+
+    private ValidationResult validate(TradeOrder order, Account account, boolean preview) {
         if (!validateMarketOpen(order.getInstrument())) {
             String reason = marketHoursService.closedReason(order.getInstrument().getTradingSession());
-            logger.warn("Order ID: {} failed validation: {}", order.getId(), reason);
+            logValidationFailure(order, reason, preview);
             return new ValidationResult(false, reason);
         }
 
         String ruleViolation = validateInstrumentRules(order);
         if (ruleViolation != null) {
-            logger.warn("Order ID: {} failed validation: {}", order.getId(), ruleViolation);
+            logValidationFailure(order, ruleViolation, preview);
             return new ValidationResult(false, ruleViolation);
         }
 
         // Check quantity
         if (!validateOrderQuantity(order.getQuantity())) {
             String reason = "Invalid quantity: must be greater than 0";
-            logger.warn("Order ID: {} failed validation: {}", order.getId(), reason);
+            logValidationFailure(order, reason, preview);
             return new ValidationResult(false, reason);
         }
         /*
@@ -203,7 +211,7 @@ public class OrderValidator {
             if (!validateAccountHasSufficientCash(account, requiredCash)) {
                 String reason = String.format("Insufficient cash available: need $%.2f, have $%.2f", 
                     requiredCash, account.getCashAvailable());
-                logger.warn("Order ID: {} failed validation: {}", order.getId(), reason);
+                logValidationFailure(order, reason, preview);
                 return new ValidationResult(false, reason);
             }
         } 
@@ -211,7 +219,7 @@ public class OrderValidator {
         else {  
             if (!validateAccountHasInstrument(account, order.getInstrument())) {
                 String reason = "Account does not hold " + order.getInstrument().getInstrumentSymbol();
-                logger.warn("Order ID: {} failed validation: {}", order.getId(), reason);
+                logValidationFailure(order, reason, preview);
                 return new ValidationResult(false, reason);
             }
             if (!validateAccountHasSufficientQuantity(account, order.getInstrument(), order.getQuantity())) {
@@ -222,14 +230,26 @@ public class OrderValidator {
                 BigDecimal available = holding != null ? holding.getQuantity() : BigDecimal.ZERO;
                 String reason = String.format("Insufficient quantity: need %s, have %s", 
                     order.getQuantity().stripTrailingZeros().toPlainString(), available.stripTrailingZeros().toPlainString());
-                logger.warn("Order ID: {} failed validation: {}", order.getId(), reason);
+                logValidationFailure(order, reason, preview);
                 return new ValidationResult(false, reason);
             }
         }
         
         // Validation passed
-        logger.info("Order ID: {} passed all validation checks", order.getId());
+        if (preview) {
+            logger.debug("Order preview for {} passed all validation checks", order.getInstrument().getInstrumentSymbol());
+        } else {
+            logger.info("Order ID: {} passed all validation checks", order.getId());
+        }
         return new ValidationResult(true, null);
+    }
+
+    private void logValidationFailure(TradeOrder order, String reason, boolean preview) {
+        if (preview) {
+            logger.debug("Order preview for {} failed validation: {}", order.getInstrument().getInstrumentSymbol(), reason);
+        } else {
+            logger.warn("Order ID: {} failed validation: {}", order.getId(), reason);
+        }
     }
 
     /**

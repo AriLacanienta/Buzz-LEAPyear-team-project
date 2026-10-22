@@ -114,7 +114,7 @@ public class Instrument {
         }
         if (wholeSharesAllowed == null) wholeSharesAllowed = !crypto;
         if (fractionalAllowed == null) fractionalAllowed = !bond;
-        if (quantityPrecision == null) quantityPrecision = crypto ? 0 : 6;
+        if (quantityPrecision == null) quantityPrecision = crypto ? 8 : bond ? 0 : 6;
         if (minOrderAmount == null) minOrderAmount = BigDecimal.ONE;
     }
 
