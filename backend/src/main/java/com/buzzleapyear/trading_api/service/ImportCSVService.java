@@ -19,12 +19,14 @@ import com.buzzleapyear.trading_api.entity.Client;
 import com.buzzleapyear.trading_api.entity.Holding;
 import com.buzzleapyear.trading_api.entity.Instrument;
 import com.buzzleapyear.trading_api.entity.Instrument.AssetType;
+import com.buzzleapyear.trading_api.entity.Role;
 import com.buzzleapyear.trading_api.entity.TradeOrderStatus.OrderStatus;
 import com.buzzleapyear.trading_api.entity.TradeOrderStatus;
 import com.buzzleapyear.trading_api.entity.Quote;
 import com.buzzleapyear.trading_api.entity.TradeOrder;
 import com.buzzleapyear.trading_api.entity.TradeOrder.OrderSide;
 import com.buzzleapyear.trading_api.entity.User;
+import com.buzzleapyear.trading_api.entity.UserRole;
 import com.buzzleapyear.trading_api.repository.HoldingRepository;
 import com.buzzleapyear.trading_api.repository.InstrumentRepository;
 
@@ -32,6 +34,14 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 
+/**
+ * These methods were once used by DatabaseSeeder to seed the
+ * database at startup. DatabaseSeeder has been deprecated,
+ * but this class is being kept around in case we need to
+ * support batch import in the future
+ *
+ * ImportCSVService
+ */
 @Service
 public class ImportCSVService {
 
@@ -185,6 +195,73 @@ public class ImportCSVService {
         } catch (IOException e) {
             System.err.println("Error reading CSV file: " + e.getMessage());
             e.printStackTrace();
+        }
+    }
+
+    @Transactional
+    public void importFromOperationsCSV(InputStream csvInputStream) throws IOException {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(csvInputStream))) {
+            String line;
+            boolean isFirstLine = true;
+
+            while ((line = br.readLine()) != null) {
+                if (isFirstLine) {
+                    isFirstLine = false;
+                    continue;
+                }
+                if (line.isBlank()) {
+                    continue;
+                }
+
+                String[] values = line.split(",", -1);
+                if (values.length != 6) {
+                    throw new IllegalArgumentException("Operations CSV rows require 6 columns");
+                }
+
+                String username = values[0].trim();
+                String email = values[1].trim();
+                String firstName = values[2].trim();
+                String lastName = values[3].trim();
+                String passwordHash = values[4].trim();
+                String operationName = values[5].trim();
+                Role.RoleName roleName = Role.RoleName.valueOf(operationName.toUpperCase());
+
+                User user = em.createQuery(
+                        "select u from User u where u.username = :username", User.class)
+                        .setParameter("username", username)
+                        .getResultStream()
+                        .findFirst()
+                        .orElseGet(() -> {
+                            User newUser = new User();
+                            newUser.setUsername(username);
+                            newUser.setEmail(email);
+                            newUser.setFirstName(firstName);
+                            newUser.setLastName(lastName);
+                            newUser.setPasswordHash(passwordHash);
+                            newUser.setCreatedAt(LocalDateTime.now());
+                            newUser.setUpdatedAt(LocalDateTime.now());
+                            em.persist(newUser);
+                            return newUser;
+                        });
+
+                Role role = em.createQuery(
+                    "select r from Role r where r.roleName = :roleName", Role.class)
+                    .setParameter("roleName", roleName)
+                    .getResultStream()
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("Role not found: " + roleName));
+
+                boolean roleExists = !em.createQuery(
+                    "select ur from UserRole ur where ur.user = :user and ur.role = :role", UserRole.class)
+                    .setParameter("user", user)
+                    .setParameter("role", role)
+                        .getResultList()
+                        .isEmpty();
+
+                if (!roleExists) {
+                    em.persist(new UserRole(user, role, "csv-import"));
+                }
+            }
         }
     }
 

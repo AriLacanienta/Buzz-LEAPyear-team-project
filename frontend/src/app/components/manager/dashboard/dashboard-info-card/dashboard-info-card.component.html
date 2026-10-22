@@ -1,0 +1,17 @@
+<mat-card class="dashboard-info-card">
+  <mat-card-content>
+    <div class="dashboard-info-card-content">
+      <div class="data-item">
+        <div class="header-wrapper">
+          <span class="header">{{ header }}</span>
+        </div>
+        <div class="data-wrapper">
+          <span class="data" [style.color]="header === 'FILL RATE' ? getFillRateColor() : header === 'OPEN DISPUTES' ? getOpenDisputesColor() : null">{{ data }}</span>
+        </div>
+        <div class="info-wrapper">
+          <span class="info">{{ info }}</span>
+        </div>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>

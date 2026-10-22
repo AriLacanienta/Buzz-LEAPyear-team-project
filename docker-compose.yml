@@ -13,6 +13,7 @@ services:
       - ANALYTICS_DATASOURCE_URL=jdbc:postgresql://analytics_db:5432/${ANALYTICS_DB}
       - ANALYTICS_USER=${ANALYTICS_USER}
       - ANALYTICS_PASSWORD=${ANALYTICS_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
     ports:
       - "${HOST_APP_PORT}:6767"
     healthcheck:

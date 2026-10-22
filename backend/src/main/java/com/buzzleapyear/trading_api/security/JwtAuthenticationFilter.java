@@ -1,6 +1,7 @@
 package com.buzzleapyear.trading_api.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import com.buzzleapyear.trading_api.repository.UserRepository;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,6 +26,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Autowired
     private UserDetailsService userDetailsService;
 
+    @Autowired
+    private UserRepository userRepository;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
@@ -32,7 +36,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
 
             String token = getJwtFromRequest(request);
-            if (StringUtils.hasText(token) && jwtTokenProvider.validateToken(token)) {
+                if (StringUtils.hasText(token) && jwtTokenProvider.validateToken(token)
+                    && !isRevoked(token)) {
                 String username = jwtTokenProvider.getUsernameFromJWT(token);
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
@@ -46,6 +51,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private boolean isRevoked(String token) {
+        String username = jwtTokenProvider.getUsernameFromJWT(token);
+        return userRepository.findByUsername(username)
+                .map(user -> jwtTokenProvider.getTokenVersionFromJWT(token) != user.getTokenVersion())
+                .orElse(true);
     }
 
     private String getJwtFromRequest(HttpServletRequest request) {

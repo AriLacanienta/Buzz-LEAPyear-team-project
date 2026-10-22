@@ -10,6 +10,7 @@ import java.util.List;
 @Repository
 public interface TradeOrderStatusRepository extends JpaRepository<TradeOrderStatus, Long> {
     List<TradeOrderStatus> findByTradeOrderId(Long tradeOrderId);
+    List<TradeOrderStatus> findByTradeOrderIdOrderByTimeUpdatedAscIdAsc(Long tradeOrderId);
 
     TradeOrderStatus findFirstByTradeOrderIdOrderByTimeUpdatedDesc(Long tradeOrderId);
 

@@ -1,0 +1,2 @@
+username,email,first_name,last_name,password_hash,operation_name
+admin,admin@trading.demo,David,User,$2a$10$uc.0dr1ztqT9Euz7Ow3eH.qquuPh3D8JtumdvD8LrGGaDHOCUDYkq,MANAGER

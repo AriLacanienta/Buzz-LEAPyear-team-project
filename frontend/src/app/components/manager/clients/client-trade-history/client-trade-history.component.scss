@@ -1,0 +1,89 @@
+$border-color: #22314a;
+$muted-color: #6f86a6;
+$buy-color: #00d492;
+$sell-color: #ff6467;
+$pending-color: #fbbf24;
+
+.trade-list {
+  border-top: 1px solid $border-color;
+}
+
+.trade-row {
+  display: grid;
+  grid-template-columns: 1.3fr 3.5rem 1fr 1fr 5.5rem 8rem;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.9rem 0;
+  border-bottom: 1px solid rgba(34, 49, 74, 0.8);
+}
+
+.trade-instrument {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 0.2rem;
+}
+
+.trade-instrument strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trade-instrument small,
+.trade-quantity,
+.trade-value,
+.trade-row time {
+  color: $muted-color;
+  font: 0.68rem 'DM Mono', monospace;
+}
+
+.trade-side {
+  color: $buy-color;
+  font: 0.72rem 'DM Mono', monospace;
+  font-weight: 700;
+
+  &.sell {
+    color: $sell-color;
+  }
+}
+
+.status-badge {
+  width: fit-content;
+  padding: 0.25rem 0.45rem;
+  border-radius: 999px;
+  color: $pending-color;
+  background: rgba(251, 191, 36, 0.1);
+  font: 0.65rem 'DM Mono', monospace;
+
+  &.status-filled {
+    color: $buy-color;
+    background: rgba(0, 212, 146, 0.1);
+  }
+
+  &.status-rejected,
+  &.status-cancelled {
+    color: $sell-color;
+    background: rgba(255, 100, 103, 0.1);
+  }
+}
+
+.empty-detail {
+  display: grid;
+  place-items: center;
+  min-height: 8rem;
+  border: 1px dashed $border-color;
+  border-radius: 0.5rem;
+  color: $muted-color;
+  text-align: center;
+}
+
+@media (max-width: 680px) {
+  .trade-row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .trade-row time {
+    grid-column: 1 / -1;
+  }
+}
