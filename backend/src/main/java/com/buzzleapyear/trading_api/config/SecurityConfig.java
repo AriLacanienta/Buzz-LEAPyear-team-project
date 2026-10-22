@@ -52,6 +52,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/client/**").hasAnyRole(ROLE_MANAGER, ROLE_CLIENT, ROLE_ANALYST)
                 .requestMatchers("/api/v1/compliance/**").hasRole(ROLE_MANAGER)
                 .requestMatchers(HttpMethod.GET, "/api/v1/dispute/search").hasAnyRole(ROLE_MANAGER, ROLE_CLIENT)
+                .requestMatchers(HttpMethod.GET, "/api/v1/dispute/summary").hasRole(ROLE_MANAGER)
                 .requestMatchers(HttpMethod.PATCH, "/api/v1/dispute/*/resolve").hasRole(ROLE_MANAGER)
                 .requestMatchers("/api/v1/dispute/**").authenticated()
                 .requestMatchers("/api/v1/holdings/**").authenticated()

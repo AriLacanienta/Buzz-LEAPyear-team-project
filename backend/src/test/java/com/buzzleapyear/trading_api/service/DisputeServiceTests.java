@@ -7,16 +7,23 @@ import com.buzzleapyear.trading_api.repository.DisputeRepository;
 import com.buzzleapyear.trading_api.repository.TradeOrderRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -29,6 +36,98 @@ class DisputeServiceTests {
     private TradeOrderRepository tradeOrderRepository;
     @InjectMocks
     private DisputeService disputeService;
+
+    @ParameterizedTest
+    @CsvSource({
+        "1, 9999.99, NORMAL",
+        "1, 10000.00, CRITICAL",
+        "1, 10000.01, CRITICAL",
+        "999.9994, 10.00, NORMAL",
+        "999.9995, 10.00, CRITICAL",
+        "100.0000, 100.00, CRITICAL"
+    })
+    void createClassifiesRoundedExecutionValue(String quantity, String price, DisputeSeverity severity) {
+        TradeOrder order = orderOwnedBy("owner");
+        order.setQuantity(new BigDecimal(quantity));
+        order.setPrice(new BigDecimal(price));
+        when(tradeOrderRepository.findById(7L)).thenReturn(Optional.of(order));
+        when(disputeRepository.save(any(Dispute.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        var response = disputeService.create(new CreateDisputeRequest(7L, null), "owner");
+
+        assertEquals(severity, response.severity());
+        assertEquals(DisputeStatus.OPEN, response.status());
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = TradeOrderStatus.OrderStatus.class, names = "FILLED", mode = EnumSource.Mode.EXCLUDE)
+    void createRejectsOrdersWithoutSuccessfulExecution(TradeOrderStatus.OrderStatus status) {
+        TradeOrder order = orderOwnedBy("owner");
+        order.getStatuses().get(0).setStatus(status);
+        when(tradeOrderRepository.findById(7L)).thenReturn(Optional.of(order));
+
+        var exception = assertThrows(ResponseStatusException.class,
+            () -> disputeService.create(new CreateDisputeRequest(7L, null), "owner"));
+
+        assertEquals(409, exception.getStatusCode().value());
+        verify(disputeRepository, never()).save(any());
+    }
+
+    @Test
+    void createRejectsOrdersWithoutStatusHistory() {
+        TradeOrder order = orderOwnedBy("owner");
+        order.getStatuses().clear();
+        when(tradeOrderRepository.findById(7L)).thenReturn(Optional.of(order));
+
+        assertThrows(ResponseStatusException.class,
+            () -> disputeService.create(new CreateDisputeRequest(7L, null), "owner"));
+        verify(disputeRepository, never()).save(any());
+    }
+
+    @ParameterizedTest
+    @EnumSource(TradeOrder.OrderSide.class)
+    void allReadAndResolvePathsReflectCurrentExecutionValue(TradeOrder.OrderSide side) {
+        Dispute dispute = disputeFor("owner", DisputeStatus.OPEN);
+        TradeOrder order = dispute.getTradeOrder();
+        order.setSide(side);
+        when(disputeRepository.findById(4L)).thenReturn(Optional.of(dispute));
+        assertEquals(DisputeSeverity.NORMAL, disputeService.get(4L, "owner", false).severity());
+
+        order.setQuantity(new BigDecimal("100"));
+        order.setPrice(new BigDecimal("100.00"));
+        assertEquals(DisputeSeverity.CRITICAL, disputeService.get(4L, "owner", false).severity());
+
+        PageRequest pageable = PageRequest.of(0, 20);
+        when(disputeRepository.findAll(org.mockito.ArgumentMatchers.<Specification<Dispute>>any(), eq(pageable)))
+            .thenReturn(new PageImpl<>(List.of(dispute)));
+        assertEquals(DisputeSeverity.CRITICAL,
+            disputeService.search("manager", true, null, null, null, null, null, pageable)
+                .getContent().get(0).severity());
+
+        when(disputeRepository.save(dispute)).thenReturn(dispute);
+        var resolved = disputeService.resolve(4L, authentication("manager"));
+        assertEquals(DisputeStatus.RESOLVED, resolved.status());
+        assertEquals(DisputeSeverity.CRITICAL, resolved.severity());
+        assertEquals(DisputeSeverity.CRITICAL,
+            disputeService.resolve(4L, authentication("manager")).severity());
+
+        order.setPrice(BigDecimal.ONE);
+        assertEquals(DisputeSeverity.NORMAL, disputeService.get(4L, "owner", false).severity());
+    }
+
+    @ParameterizedTest
+    @CsvSource({", 25.00", "1, ", "0, 25.00", "-1, 25.00", "1, 0", "1, -25.00"})
+    void invalidExecutionDataIsAnExplicitError(String quantity, String price) {
+        Dispute dispute = disputeFor("owner", DisputeStatus.OPEN);
+        dispute.getTradeOrder().setQuantity(quantity == null ? null : new BigDecimal(quantity));
+        dispute.getTradeOrder().setPrice(price == null ? null : new BigDecimal(price));
+        when(disputeRepository.findById(4L)).thenReturn(Optional.of(dispute));
+
+        var exception = assertThrows(ResponseStatusException.class,
+            () -> disputeService.get(4L, "owner", false));
+
+        assertEquals(500, exception.getStatusCode().value());
+    }
 
     @Test
     void createRequiresTradeOrderAccountOwner() {
@@ -175,6 +274,12 @@ class DisputeServiceTests {
         order.setId(7L);
         order.setAccount(account);
         order.setValue(new BigDecimal("25.00"));
+        order.setQuantity(BigDecimal.ONE);
+        order.setPrice(new BigDecimal("25.00"));
+        TradeOrderStatus filled = new TradeOrderStatus();
+        filled.setTradeOrder(order);
+        filled.setStatus(TradeOrderStatus.OrderStatus.FILLED);
+        order.addStatus(filled);
         return order;
     }
 }

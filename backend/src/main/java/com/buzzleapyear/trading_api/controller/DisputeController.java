@@ -2,7 +2,9 @@ package com.buzzleapyear.trading_api.controller;
 
 import com.buzzleapyear.trading_api.dto.CreateDisputeRequest;
 import com.buzzleapyear.trading_api.dto.DisputeResponse;
+import com.buzzleapyear.trading_api.dto.ManagerDashboardSummary;
 import com.buzzleapyear.trading_api.service.DisputeService;
+import com.buzzleapyear.trading_api.service.ManagerDashboardService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.*;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -19,9 +21,16 @@ import java.util.Set;
 public class DisputeController {
     private static final Set<String> SORT_FIELDS = Set.of("createdAt", "status", "tradeValue");
     private final DisputeService disputeService;
+    private final ManagerDashboardService dashboardService;
 
-    public DisputeController(DisputeService disputeService) {
+    public DisputeController(DisputeService disputeService, ManagerDashboardService dashboardService) {
         this.disputeService = disputeService;
+        this.dashboardService = dashboardService;
+    }
+
+    @GetMapping("/summary")
+    public ManagerDashboardSummary summary(Authentication authentication) {
+        return dashboardService.summary(authentication.getName());
     }
 
     @PostMapping
