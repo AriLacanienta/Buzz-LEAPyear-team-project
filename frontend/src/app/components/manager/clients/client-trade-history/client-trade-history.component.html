@@ -1,0 +1,30 @@
+<div class="trade-list" *ngIf="trades.length > 0; else noTrades">
+  <article
+    class="trade-row"
+    *ngFor="let trade of trades; trackBy: trackByTradeId">
+    <div class="trade-instrument">
+      <strong>{{ trade.instrumentSymbol }}</strong>
+      <small>{{ trade.instrumentName }}</small>
+    </div>
+
+    <span class="trade-side" [class.sell]="trade.side === 'SELL'">
+      {{ trade.side }}
+    </span>
+    <span class="trade-quantity">{{ trade.quantity }} units</span>
+    <span class="trade-value">{{ trade.value | currency:trade.currency }}</span>
+    <span class="status-badge" [class]="statusClass(trade.status)">
+      {{ trade.status ?? 'UNKNOWN' }}
+    </span>
+    <time>
+      {{ trade.timePlaced
+        ? (trade.timePlaced | date:'MMM d, yyyy HH:mm')
+        : 'Time unavailable' }}
+    </time>
+  </article>
+</div>
+
+<ng-template #noTrades>
+  <div class="empty-detail">
+    <p>No trade history is available for this client.</p>
+  </div>
+</ng-template>

@@ -7,32 +7,26 @@ import { CommonModule } from '@angular/common';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 
 import { AppComponent } from './app.component';
-import { DashboardComponent } from './pages/dashboard/dashboard.component';
-import { TradeComponent } from './pages/trade/trade.component';
-import { MarketsComponent } from './pages/markets/markets.component';
 import { LoginComponent } from './pages/login/login.component';
 import { RegisterComponent } from './pages/register/register.component';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
-import { authGuard } from './auth.guard';
 import { AccountComponent } from './pages/account/account.component';
-import { NavbarComponent } from './components/navbar/navbar.component';
 import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
-import { PortfolioHoldingCardComponent } from './components/portfolio/portfolio-holding-card/portfolio-holding-card.component';
-//import { PortfolioHoldingCardComponent } from './components/portfolio-holding-card/portfolio-holding-card.component';
+import { managerRoutes } from './manager.routes';
+import { clientRoutes } from './client.routes';
+import { PortfolioHoldingCardComponent } from './components/client/portfolio/portfolio-holding-card/portfolio-holding-card.component';
 import { HoldingService } from './services/holding.service';
 import { HighchartsChartModule } from 'highcharts-angular';
 import { FundsComponent } from './components/trade/funds/funds.component';
 import { AdminComponent } from './pages/admin/admin.component';
+import { authGuard } from './guards/auth.guard';
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
-  { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard] },
-  { path: 'account', component: AccountComponent, canActivate: [authGuard] },
-  { path: 'portfolio', component: DashboardComponent, canActivate: [authGuard] },
-  { path: 'trade', component: TradeComponent, canActivate: [authGuard] },
-  { path: 'markets', component: MarketsComponent, canActivate: [authGuard] },
+  ...managerRoutes,
+  ...clientRoutes,
   { path: 'admin', component: AdminComponent, canActivate: [authGuard], data: { roles: ['MANAGER'] } },
   { path: '', redirectTo: '/login', pathMatch: 'full' }
 ];
@@ -43,7 +37,6 @@ const routes: Routes = [
     LoginComponent,
     RegisterComponent,
     AccountComponent,
-    NavbarComponent,
     AdminComponent
   ],
   imports: [
@@ -56,8 +49,6 @@ const routes: Routes = [
     MatTableModule,
     MatIconModule,
     PortfolioHoldingCardComponent,
-    MarketsComponent,
-    DashboardComponent,
     FundsComponent,
     HighchartsChartModule
   ],

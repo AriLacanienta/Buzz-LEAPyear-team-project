@@ -1,0 +1,18 @@
+$spacing-md: 1rem;
+
+main {
+	max-width: 85%;
+	margin: 0 auto;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.dashboard-info-cards {
+	display: grid;
+	grid-template-columns: repeat(5, minmax(0, 1fr));
+	width: 100%;
+	margin-bottom: 2rem;
+	gap: clamp(0.65rem, 1.5vw, $spacing-md);
+}
+

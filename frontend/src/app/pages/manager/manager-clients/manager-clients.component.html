@@ -1,0 +1,14 @@
+<main class="clients-page">
+  <app-client-directory
+    [clients]="clients"
+    [selectedClient]="selectedClient"
+    [loading]="loading"
+    [error]="error"
+    (clientSelected)="selectClient($event)"
+    (retryRequested)="loadClients()" />
+
+  <app-client-detail
+    [client]="selectedClient"
+    (refreshRequested)="loadClients()"
+    (notesSaved)="saveClientNotes($event)" />
+</main>

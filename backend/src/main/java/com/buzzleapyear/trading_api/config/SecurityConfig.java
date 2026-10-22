@@ -1,8 +1,6 @@
 package com.buzzleapyear.trading_api.config;
 
-import java.util.Arrays;
 import org.springframework.http.HttpStatus;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -50,6 +48,7 @@ public class SecurityConfig {
                 // RESTRICTED (RBAC)
                 .requestMatchers("/api/v1/accounts/**").authenticated()
                 .requestMatchers("/api/v1/holdings/**").authenticated()
+                .requestMatchers("/api/v1/tradeorders/**").hasAnyRole(ROLE_MANAGER, ROLE_CLIENT, ROLE_ANALYST)
                 .requestMatchers("/api/v1/instruments/**").authenticated()
                 .requestMatchers("/api/v1/quote/**").authenticated()
 
@@ -58,6 +57,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/client/**").hasAnyRole(ROLE_MANAGER, ROLE_CLIENT, ROLE_ANALYST)
                 .requestMatchers("/api/v1/compliance/**").hasRole(ROLE_MANAGER)
                 .requestMatchers("/api/v1/instruments/**", "/api/v1/quote/**").authenticated()
+                .requestMatchers("/api/v1/manager/**").hasRole(ROLE_MANAGER)
                 .requestMatchers("/api/v1/test").hasRole(ROLE_MANAGER)
                 .requestMatchers("/api/v1/user/allUsers").hasRole(ROLE_MANAGER)
                 .requestMatchers("/api/v1/user/**").authenticated()

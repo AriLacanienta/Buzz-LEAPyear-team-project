@@ -29,6 +29,12 @@ public interface TradeOrderRepository extends JpaRepository<TradeOrder, Long> {
     )
     Page<TradeOrder> findByAccountIdOrderByOrderDateDesc(Long accountId, Pageable pageable);
 
+    @EntityGraph(attributePaths = {"account", "account.client", "account.client.user", "instrument"})
+    @Query("SELECT o FROM TradeOrder o ORDER BY o.orderDate DESC, o.id DESC")
+    Page<TradeOrder> findAllForManager(Pageable pageable);
+    @EntityGraph(attributePaths = {"account", "account.client", "account.client.user", "instrument"})
+    @Query("SELECT o FROM TradeOrder o WHERE o.id = :orderId")
+    Optional<TradeOrder> findForManagerById(@Param("orderId") Long orderId);
     @Query("SELECT o FROM TradeOrder o JOIN FETCH o.instrument WHERE o.account.id = :accountId AND o.side = :side "
         + "AND EXISTS (SELECT s FROM TradeOrderStatus s WHERE s.tradeOrder = o AND s.status = :status AND s.timeUpdated >= :since)")
         List<TradeOrder> findFilledOrdersSince(

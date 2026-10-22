@@ -1,0 +1,67 @@
+<aside class="trade-detail" aria-label="Trade details">
+  <header class="detail-header">
+    <div>
+      <p class="eyebrow">Order detail</p>
+      <h2>{{ detail ? '#' + detail.trade.tradeId : 'Selected trade' }}</h2>
+    </div>
+    <button type="button" class="close-button" aria-label="Close trade details" (click)="closed.emit()">Close</button>
+  </header>
+
+  <p *ngIf="loading" class="detail-state">Loading trade details...</p>
+  <p *ngIf="error" class="detail-state error">Unable to load this trade.</p>
+
+  <ng-container *ngIf="detail as selectedDetail">
+    <section class="detail-section">
+      <div class="identity">
+        <div>
+          <span class="label">Client</span>
+          <strong>{{ selectedDetail.trade.clientName }}</strong>
+          <small>{{ selectedDetail.trade.clientEmail }}</small>
+        </div>
+        <div>
+          <span class="label">Account</span>
+          <strong>{{ selectedDetail.trade.accountName }}</strong>
+          <small>#{{ selectedDetail.trade.accountId }}</small>
+        </div>
+      </div>
+    </section>
+
+    <section class="detail-section">
+      <div class="section-heading">
+        <div>
+          <span class="label">Instrument</span>
+          <h3>{{ selectedDetail.trade.instrumentSymbol }}</h3>
+        </div>
+        <span class="status-badge">{{ selectedDetail.trade.status ?? 'UNKNOWN' }}</span>
+      </div>
+      <p class="instrument-name">{{ selectedDetail.trade.instrumentName }} - {{ selectedDetail.trade.assetType }}</p>
+      <dl class="metrics">
+        <div><dt>Side</dt><dd>{{ selectedDetail.trade.side }}</dd></div>
+        <div><dt>Quantity</dt><dd>{{ selectedDetail.trade.quantity }}</dd></div>
+        <div><dt>Price</dt><dd>{{ selectedDetail.trade.price | currency:selectedDetail.trade.currency }}</dd></div>
+        <div><dt>Value</dt><dd>{{ selectedDetail.trade.value | currency:selectedDetail.trade.currency }}</dd></div>
+      </dl>
+      <p *ngIf="selectedDetail.trade.statusReason" class="reason">{{ selectedDetail.trade.statusReason }}</p>
+    </section>
+
+    <section class="detail-section timeline-section">
+      <div class="section-heading">
+        <div>
+          <span class="label">Audit trail</span>
+          <h3>Status history</h3>
+        </div>
+        <span>{{ selectedDetail.statusHistory.length }} updates</span>
+      </div>
+      <ol class="timeline" *ngIf="selectedDetail.statusHistory.length > 0; else noHistory">
+        <li *ngFor="let update of selectedDetail.statusHistory">
+          <div>
+            <strong>{{ update.status }}</strong>
+            <time>{{ update.timeUpdated | date:'MM/dd/yyyy HH:mm' }}</time>
+          </div>
+          <p *ngIf="update.reason">{{ update.reason }}</p>
+        </li>
+      </ol>
+      <ng-template #noHistory><p class="detail-state">No status history is available.</p></ng-template>
+    </section>
+  </ng-container>
+</aside>
