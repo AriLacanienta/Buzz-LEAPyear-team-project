@@ -1,55 +1,81 @@
-<div class="container">
-  <main>
-    <section class="profile-section">
-      <h2>Personal Information</h2>
-
-      <!-- Loading state -->
-      <div *ngIf="loading" class="loading-state">
-        <p>Loading profile...</p>
+<div class="account-page">
+  <main class="account-layout">
+    <aside class="settings-sidebar" aria-label="Account settings">
+      <div class="profile-card" *ngIf="userProfile && !loading">
+        <img src="assets/images/joanna.jpg" alt="Profile photo" class="avatar">
+        <div class="profile-card-copy"><strong>{{ userProfile.firstName }} {{ userProfile.lastName }}</strong><span>Personal account</span></div>
       </div>
+      <div class="profile-card profile-card-loading" *ngIf="loading"><div class="avatar avatar-placeholder"></div><span>Loading profile...</span></div>
+      <nav class="settings-nav">
+        <button *ngFor="let section of sections" type="button" [class.active]="activeSection === section.key" (click)="setSection(section.key)"><span class="section-icon" [attr.data-icon]="section.key" aria-hidden="true"></span><span>{{ section.label }}</span></button>
+      </nav>
+      <button type="button" class="sidebar-logout" (click)="openLogoutDialog()"><span class="logout-icon" aria-hidden="true"></span>Log out</button>
+    </aside>
 
-      <!-- Error state -->
-      <div *ngIf="errorMessage && !loading" class="error-state">
-        <p>{{ errorMessage }}</p>
-      </div>
+    <section class="settings-content">
+      <div *ngIf="errorMessage && !loading" class="error-state">{{ errorMessage }}</div>
+      <div *ngIf="savedMessage" class="saved-state">{{ savedMessage }}</div>
 
-      <!-- User profile data -->
-      <div *ngIf="userProfile && !loading" class="profile-content">
-        <!-- Profile Header -->
-        <div class="profile-header">
-          <img src="https://via.placeholder.com/150?text=Profile" alt="Profile Photo" class="profile-photo">
-          <div class="profile-info-header">
-            <h3>{{ userProfile.firstName }} {{ userProfile.lastName }}</h3>
-            <p class="username">{{ '@' }}{{ userProfile.username }}</p>
+      <ng-container *ngIf="activeSection === 'profile'">
+        <section class="settings-panel" *ngIf="userProfile && !loading">
+          <div class="panel-heading"><div><p class="eyebrow">Account</p><h1>Personal information</h1></div><span class="status-pill">Active</span></div>
+          <div class="field-grid">
+            <label><span>First name</span><input [value]="userProfile.firstName"></label>
+            <label><span>Last name</span><input [value]="userProfile.lastName"></label>
+            <label><span>Email</span><input [value]="userProfile.email" type="email"></label>
+            <label><span>Username</span><input [value]="userProfile.username"></label>
+            <label><span>Phone</span><input value="Not provided"></label>
+            <label><span>Country</span><input value="United States"></label>
           </div>
+          <button type="button" class="primary-button" (click)="saveChanges()">Save changes</button>
+        </section>
+        <section class="settings-panel status-panel" *ngIf="userProfile && !loading">
+          <div class="panel-heading compact-heading"><div><p class="eyebrow">Overview</p><h2>Account status</h2></div></div>
+          <div class="status-grid"><div><span>KYC status</span><strong class="positive">Verified</strong></div><div><span>Account tier</span><strong class="accent">Standard</strong></div><div><span>Member since</span><strong>2025</strong></div><div><span>Account ID</span><strong>{{ accountInfo ? '#' + accountInfo.accountId : 'Loading...' }}</strong></div></div>
+        </section>
+      </ng-container>
+
+      <section class="settings-panel" *ngIf="activeSection === 'security'">
+        <div class="panel-heading"><div><p class="eyebrow">Protection</p><h1>Security settings</h1></div></div>
+        <div class="preference-list">
+          <div class="preference-row"><div><strong>Two-factor authentication</strong><span>Require an extra verification code when signing in.</span></div><button type="button" class="toggle" [class.on]="preferences.twoFactor" (click)="togglePreference('twoFactor')"><span></span></button></div>
+          <div class="preference-row"><div><strong>Biometric login</strong><span>Use Face ID or fingerprint on supported devices.</span></div><button type="button" class="toggle" [class.on]="preferences.biometrics" (click)="togglePreference('biometrics')"><span></span></button></div>
         </div>
+        <div class="subsection password-section"><p class="eyebrow">Password</p><div class="field-grid"><label><strong>Current password</strong><input type="password" placeholder="Enter current password"></label><label><strong>New password</strong><input type="password" placeholder="Enter new password"></label></div><button type="button" class="primary-button" (click)="saveChanges()">Update password</button></div>
+      </section>
 
-        <!-- Profile Details Grid -->
-        <div class="profile-details">
-          <div class="profile-item">
-            <label>Username</label>
-            <p>{{ userProfile.username }}</p>
-          </div>
-
-          <div class="profile-item">
-            <label>Email</label>
-            <p>{{ userProfile.email }}</p>
-          </div>
-
-          <div class="profile-item">
-            <label>First Name</label>
-            <p>{{ userProfile.firstName }}</p>
-          </div>
-
-          <div class="profile-item">
-            <label>Last Name</label>
-            <p>{{ userProfile.lastName }}</p>
-          </div>
+      <section class="settings-panel" *ngIf="activeSection === 'notifications'">
+        <div class="panel-heading"><div><p class="eyebrow">Stay informed</p><h1>Notification preferences</h1></div></div>
+        <div class="preference-list">
+          <div class="preference-row" *ngFor="let item of notificationSettings"><div><strong>{{ item.label }}</strong><span>{{ item.description }}</span></div><button type="button" class="toggle" [class.on]="preferences[item.key]" (click)="togglePreference(item.key)"><span></span></button></div>
         </div>
-      </div>
-    </section>
-    <section class="funds-section">
-      <app-funds></app-funds>
+      </section>
+
+      <section class="settings-panel" *ngIf="activeSection === 'preferences'">
+        <div class="panel-heading"><div><p class="eyebrow">Workspace</p><h1>Display preferences</h1></div></div>
+        <div class="preference-list"><div class="preference-row"><div><strong>Dark mode</strong><span>Use the dark colour scheme across the platform.</span></div><button type="button" class="toggle" [class.on]="preferences.darkMode" (click)="togglePreference('darkMode')"><span></span></button></div><div class="preference-row"><div><strong>Compact view</strong><span>Reduce spacing for denser information display.</span></div><button type="button" class="toggle" [class.on]="preferences.compactView" (click)="togglePreference('compactView')"><span></span></button></div><div class="preference-row"><div><strong>Show P&amp;L on holdings</strong><span>Display unrealised gain and loss figures.</span></div><button type="button" class="toggle" [class.on]="preferences.showPnl" (click)="togglePreference('showPnl')"><span></span></button></div></div>
+        <div class="field-grid preference-fields"><label><span>Base currency</span><select><option>USD ($)</option><option>EUR (€)</option><option>GBP (£)</option></select></label><label><span>Time zone</span><select><option>America/New_York</option><option>Europe/London</option><option>Asia/Kolkata</option></select></label></div>
+      </section>
+
+      <section class="settings-panel" *ngIf="activeSection === 'billing'">
+        <div class="panel-heading"><div><p class="eyebrow">Plan and payments</p><h1>Billing</h1></div></div>
+        <div class="billing-summary"><div><strong>Standard account</strong><span>Your current trading account plan</span></div><span class="status-pill">Active</span></div>
+        <section class="funds-section" aria-label="Manage funds">
+          <app-funds></app-funds>
+        </section>
+        <div class="subsection"><p class="eyebrow">Account history</p><div class="billing-row" *ngFor="let bill of ['Account opened', 'Trading account activated']"><span>{{ bill }}</span><strong>Completed</strong></div></div>
+      </section>
     </section>
   </main>
+
+  <div class="logout-dialog-backdrop" *ngIf="showLogoutDialog" (click)="cancelLogout()">
+    <section class="logout-dialog" role="dialog" aria-modal="true" aria-labelledby="logout-dialog-title" (click)="$event.stopPropagation()">
+      <h2 id="logout-dialog-title">Log out?</h2>
+      <p>Are you sure you want to log out of your account?</p>
+      <div class="logout-dialog-actions">
+        <button type="button" class="dialog-cancel" (click)="cancelLogout()">Cancel</button>
+        <button type="button" class="dialog-confirm" (click)="confirmLogout()">Log out</button>
+      </div>
+    </section>
+  </div>
 </div>

@@ -1,11 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterModule } from '@angular/router';
 import { AccountService } from '../../../services/account.service';
 import { MarketStatusService } from '../../../services/market-status.service';
 import { AuthService } from '../../../services/auth.service';
-import { Router } from '@angular/router';
 import { map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 
@@ -16,7 +15,7 @@ import { Observable } from 'rxjs';
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.scss']
 })
-export class NavbarComponent {
+export class NavbarComponent implements OnInit {
   accountName = this.accountService.accountName;
 
   isMarketOpen$: Observable<boolean> = this.marketStatusService.isMarketOpen();
@@ -32,13 +31,28 @@ export class NavbarComponent {
   constructor(
     private accountService: AccountService,
     private marketStatusService: MarketStatusService,
-    private authService: AuthService,
-    private router: Router
+    private authService: AuthService
   ) { }
 
-  logout(): void {
-    this.authService.logout();
-    this.router.navigate(['/login']);
+  ngOnInit(): void {
+    const token = this.authService.getToken();
+    if (!token) {
+      return;
+    }
+
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const username = payload.sub;
+      if (!username) {
+        return;
+      }
+
+      this.accountService.getUserProfile(username).subscribe(profile => {
+        this.accountService.setAccountName(`${profile.firstName} ${profile.lastName}`);
+      });
+    } catch {
+      // Keep the existing account label when the token cannot be read.
+    }
   }
 
   getAppNameColor(word: String): string {
