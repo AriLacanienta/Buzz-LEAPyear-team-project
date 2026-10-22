@@ -7,6 +7,8 @@ import { HoldingService } from '../../../services/holding.service';
 import { InstrumentService } from '../../../services/instrument.service';
 import { RecentOrderService } from '../../../services/recent-order.service';
 import { AccountService } from '../../../services/account.service';
+import { WatchlistService } from '../../../services/watchlist.service';
+import { WatchlistItem } from '../../../models/watchlist-item.model';
 import { RecentOrder } from '../../../models/recent-order.model';
 import { PortfolioHoldingsContainerComponent } from '@app/components/client/portfolio/portfolio-holdings-container/portfolio-holdings-container.component';
 import { MarketInfoCardComponent } from '@app/components/client/portfolio/market-info-card/market-info-card.component';
@@ -17,8 +19,8 @@ import { switchMap, startWith } from 'rxjs/operators';
 
 export interface QuoteResponse {
   symbol: string;
-  price: number;
-  changePercent: number;
+  price: number | null;
+  changePercent: number | null;
   name: string;
 }
 
@@ -41,11 +43,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
   holdings: any[] = [];
   topGainers: QuoteResponse[] = [];
   topLosers: QuoteResponse[] = [];
+  watchlist: QuoteResponse[] = [];
   isLoading = true;
   accountId: number | null = null;
   private refreshSubscription: Subscription | undefined;
   private gainersSubscription: Subscription | undefined;
   private losersSubscription: Subscription | undefined;
+  private watchlistSubscription: Subscription | undefined;
   recentOrders: RecentOrder[] = [];
   private orderSubscription: Subscription | undefined;
   
@@ -54,6 +58,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private instrumentService: InstrumentService,
     private recentOrderService: RecentOrderService,
     private accountService: AccountService,
+    private watchlistService: WatchlistService,
     private cdr: ChangeDetectorRef
   ) {
   }
@@ -163,6 +168,25 @@ export class DashboardComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error loading top losers:', error);
+        }
+      });
+
+    this.watchlistSubscription = interval(5000)
+      .pipe(
+        startWith(0),
+        switchMap(() => this.watchlistService.getWatchlist())
+      )
+      .subscribe({
+        next: (items) => {
+          this.watchlist = items.map((item: WatchlistItem) => ({
+            symbol: item.symbol,
+            price: item.price,
+            changePercent: item.changePercent,
+            name: item.instrumentName
+          }));
+        },
+        error: (error) => {
+          console.error('Error loading watchlist:', error);
         }
       });
   }
@@ -316,6 +340,9 @@ trackBySymbol(index: number, item: any): string {
     }
     if (this.losersSubscription) {
       this.losersSubscription.unsubscribe();
+    }
+    if (this.watchlistSubscription) {
+      this.watchlistSubscription.unsubscribe();
     }
     if (this.orderSubscription) {
       this.orderSubscription.unsubscribe();
