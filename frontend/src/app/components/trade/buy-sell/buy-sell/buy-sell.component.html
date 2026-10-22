@@ -16,13 +16,23 @@
     <app-search-result-detail [selectedResult]="selectedResult"></app-search-result-detail>
 
     <div class="tag quantity-mode">
-        <button [class.selected]="quantityMode === 'SHARES'">Shares</button>
-        <button [class.selected]="quantityMode === 'AMOUNT'">Amount</button>
+        <button [class.selected]="quantityMode === 'SHARES'" [disabled]="!canTradeWholeShares" (click)="setQuantityMode('SHARES')">Whole shares</button>
+        <button [class.selected]="quantityMode === 'AMOUNT'" [disabled]="!canTradeByAmount" (click)="setQuantityMode('AMOUNT')">Dollar amount</button>
     </div>
 
     <div class="quantity-container">
-        <label for="quantity">QUANTITY / SHARES</label>
-        <input type="number" id="quantity" name="quantity" class="quantity-input" min="0" step="1" placeholder="0" [value]="quantity || ''" [disabled]="isNotHeld" (input)="onQuantityInput($event)"/>
+        <ng-container *ngIf="quantityMode === 'SHARES'; else amountInput">
+             <label for="quantity">QUANTITY / SHARES</label>
+            <input type="number" id="quantity" name="quantity" class="quantity-input" min="0" step="1" placeholder="0" [value]="quantity || ''" [disabled]="isNotHeld" (input)="onQuantityInput($event)"/>
+        </ng-container>
+        <ng-template #amountInput>
+            <label for="amount">AMOUNT (USD)</label>
+            <input type="text" inputmode="decimal" id="amount" name="amount" class="quantity-input" placeholder="$0.00" [value]="amount || ''" [disabled]="isNotHeld" (input)="onAmountInput($event)"/>
+        </ng-template>
+    </div>
+
+    <div *ngIf="isMarketClosed" role="status" class="market-closed-notice">
+        The market for {{ selectedResult?.instrumentSymbol }} is currently closed.
     </div>
 
     <div *ngIf="selectedResult" class="price-summary">
@@ -34,13 +44,17 @@
                 <span class="price-label">Indicative price</span>
                 <span class="price-value">{{ indicativePrice | currency }}</span>
             </div>
+            <div *ngIf="quantityMode === 'AMOUNT'" class="price-summary-row">
+                <span class="price-label">Amount</span>
+                <span class="price-value">{{ amount | currency }}</span>
+            </div>
             <div class="price-summary-row">
-                <span class="price-label">Quantity</span>
-                <span class="price-value">{{ quantity }}</span>
+                <span class="price-label">{{ quantityMode === 'AMOUNT' ? 'Est. quantity' : 'Quantity' }}</span>
+                <span class="price-value">{{ estimatedQuantity != null ? (estimatedQuantity | number:1.0-8') : '--' }}</span>
             </div>
             <div *ngIf="!isBuy && preview" class="price-summary-row">
                 <span class="price-label">Shares held</span>
-                <span class="price-value">{{ preview.holdingQuantity }}</span>
+                <span class="price-value">{{ preview.holdingQuantity | number: '1.0-8' }}</span>
             </div>
             <div *ngIf="!isBuy && preview?.realizedPnL != null" class="price-summary-row">
                 <span class="price-label">Estimated P/L</span>
@@ -99,10 +113,16 @@
                 <span>Instrument</span>
                 <strong>{{ selectedResult?.instrumentSymbol }}</strong>
             </div>
-            <div>
-                <span>Price x quantity</span>
-                <strong>{{ indicativePrice != null ? (indicativePrice | currency) : '--' }} x {{ quantity }}</strong>
+            <div *ngIf="QuantityMode === 'AMOUNT'; else sharesConfirmation">
+                <span>Amount</span>
+                <strong>{{ amount | currency }} (~{{ estimatedQuantity != null ? (estimatedQuantity | number: '1.0-8') : '--' }} &#64; {{ indicativePrice != null ? (indicativePrice | currency) : '--' }})</strong>
             </div>
+            <ng-template #sharesConfirmation>
+                <div>
+                    <span>Price x quantity</span>
+                    <strong>{{ indicativePrice != null ? (indicativePrice | currency) : '--' }} x {{ quantity }}</strong>
+                </div>
+            </ng-template>
             <div>
                 <span>Estimated total</span>
                 <strong>{{ estimatedTotal != null ? (estimatedTotal | currency) : '--' }}</strong>

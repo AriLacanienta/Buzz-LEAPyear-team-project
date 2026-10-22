@@ -124,6 +124,11 @@ $shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
     &:active {
       opacity: 0.7;
     }
+
+    &:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
   }
 
   button.selected {
@@ -243,6 +248,15 @@ $shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
   padding-bottom: 0.375rem;
   margin-bottom: 0.375rem;
   border-bottom: 1px solid $border-dark;
+}
+
+.market-closed-notice {
+  font-size: $text-xs;
+  color: #fbbf24;
+  background-color: #fbbf241a;
+  border: 1px solid #fbbf244d;
+  border-radius: $radius-lg;
+  padding: 0.5rem 0.75rem;
 }
 
 .buying-power {
