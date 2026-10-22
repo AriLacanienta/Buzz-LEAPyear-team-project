@@ -6,7 +6,9 @@ public record HoldingResponseDto(
     String instrumentSymbol,
     BigDecimal quantity,
     BigDecimal currentPrice,
+    String currencyCode,
     BigDecimal totalValue,
+    BigDecimal usdValue,
     BigDecimal change,
     BigDecimal changePercent,
     BigDecimal totalCost

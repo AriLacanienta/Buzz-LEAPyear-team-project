@@ -73,6 +73,7 @@ public class QuoteController {
             case "US" -> "USD";
             case "UK" -> "GBP";
             case "INDIA", "INDIAN" -> "INR";
+            case "FOREIGN" -> "*";
             default -> null;
         };
     }

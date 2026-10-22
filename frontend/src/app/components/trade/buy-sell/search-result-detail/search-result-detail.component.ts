@@ -1,11 +1,11 @@
 import { Component, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, CurrencyPipe } from '@angular/common';
 import { InstrumentSearchResponse } from '@app/models/instrument-search-response.model';
 
 @Component({
   selector: 'app-search-result-detail',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, CurrencyPipe],
   templateUrl: './search-result-detail.component.html',
   styleUrl: './search-result-detail.component.scss'
 })

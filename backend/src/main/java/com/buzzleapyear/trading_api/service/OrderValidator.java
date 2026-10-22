@@ -52,17 +52,17 @@ public class OrderValidator {
             if (quantity != null && quantity.stripTrailingZeros().scale() > 0) {
                 return "Share orders must be for a whole number of shares";
             }
-        }
-
-        if (!instrument.isFractionalAllowed()) {
-            return symbol + " does not support dollar-amount orders";
-        }
-        BigDecimal amount = order.getRequestedAmount();
-        if (amount == null || amount.compareTo(instrument.getMinOrderAmount()) < 0) {
-            return String.format("Minimum order amount for %s is $%.2f", symbol, instrument.getMinOrderAmount());
-        }
-        if (quantity != null && quantity.stripTrailingZeros().scale() > AMOUNT_ORDER_QUANTITY_SCALE) {
-            return String.format("%s quantity cannot have more than %d decimal places", symbol, AMOUNT_ORDER_QUANTITY_SCALE);
+        } else {
+            if (!instrument.isFractionalAllowed()) {
+                return symbol + " does not support dollar-amount orders";
+            }
+            BigDecimal amount = order.getRequestedAmount();
+            if (amount == null || amount.compareTo(instrument.getMinOrderAmount()) < 0) {
+                return String.format("Minimum order amount for %s is $%.2f", symbol, instrument.getMinOrderAmount());
+            }
+            if (quantity != null && quantity.stripTrailingZeros().scale() > AMOUNT_ORDER_QUANTITY_SCALE) {
+                return String.format("%s quantity cannot have more than %d decimal places", symbol, AMOUNT_ORDER_QUANTITY_SCALE);
+            }
         }
 
         return null;

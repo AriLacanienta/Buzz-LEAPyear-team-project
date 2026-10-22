@@ -19,5 +19,8 @@ public record TradeOrderPreviewResponseDto(
     BigDecimal averageCostAfter,
     BigDecimal realizedPnL,
     boolean valid,
-    String reason
+    String reason,
+    String instrumentCurrency,
+    BigDecimal exchangeRate,
+    BigDecimal estimatedNativeValue
 ){}

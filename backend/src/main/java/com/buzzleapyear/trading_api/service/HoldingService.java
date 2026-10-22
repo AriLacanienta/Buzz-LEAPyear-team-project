@@ -12,10 +12,13 @@ import java.util.stream.Collectors;
 public class HoldingService {
     private final HoldingRepository holdingRepository;
     private final QuoteService quoteService;
+    private final ExchangeRateService exchangeRateService;
 
-    public HoldingService(HoldingRepository holdingRepository, QuoteService quoteService) {
+    public HoldingService(HoldingRepository holdingRepository, QuoteService quoteService,
+            ExchangeRateService exchangeRateService) {
         this.holdingRepository = holdingRepository;
         this.quoteService = quoteService;
+        this.exchangeRateService = exchangeRateService;
     }
 
     public List<HoldingResponseDto> getHoldingsByAccountId(Long accountId) {
@@ -41,13 +44,17 @@ public class HoldingService {
         }
         
         BigDecimal totalValue = holding.getQuantity().multiply(price);
+        String currencyCode = holding.getInstrument().getCurrencyCode();
+        BigDecimal usdValue = exchangeRateService.toUsd(totalValue, currencyCode);
         
         return new HoldingResponseDto(
             holding.getInstrument().getInstrumentName(),
             symbol,
             holding.getQuantity(),
             price,
+            currencyCode,
             totalValue,
+            usdValue,
             change,
             changePercent,
             holding.getTotalCost()

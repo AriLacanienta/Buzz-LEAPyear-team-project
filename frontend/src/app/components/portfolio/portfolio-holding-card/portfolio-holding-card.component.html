@@ -22,13 +22,13 @@
 
     <!-- Total Value -->
     <div class="total-value">
-      ${{ formatTotalValue(holding.totalValue) }}
+      {{ holding.usdValue != null ? (holding.usdValue | currency:'USD':'symbol':'1.2-2') : ('$' + formatTotalValue(holding.totalValue)) }}
     </div>
 
     <!-- Quantity and Price Info -->
     <div class="quantity-info">
       <span class="quantity">{{ holding.quantity.toFixed(0) }} shares</span>
-      <span class="current-price">${{ formatPrice(holding.currentPrice) }}</span>
+      <span class="current-price">{{ holding.currentPrice | currency:(holding.currencyCode || 'USD'):'symbol':'1.2-2' }}</span>
     </div>
 
     <!-- Change Info -->

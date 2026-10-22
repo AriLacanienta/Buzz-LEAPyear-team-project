@@ -31,10 +31,17 @@
     >
       Crypto
     </button>
+    <button
+      [class.selected]="selectedTag === 'Foreign'"
+      (click)="selectTag('Foreign')"
+    >
+      Foreign
+    </button>
   </div>
 
   <app-search
     [assetTypes]="searchAssetTypes"
+    [market]="searchMarket"
     (itemSelected)="onSearchItemSelected($event)"
   ></app-search>
 
@@ -117,7 +124,15 @@
     <ng-template #summaryRows>
       <div class="price-summary-row">
         <span class="price-label">Indicative price</span>
-        <span class="price-value">{{ indicativePrice | currency }}</span>
+        <span class="price-value">{{ indicativePrice | currency:selectedCurrency }}</span>
+      </div>
+      <div *ngIf="selectedCurrency !== 'USD' && preview" class="price-summary-row">
+        <span class="price-label">Native value</span>
+        <span class="price-value">{{ preview.estimatedNativeValue | currency:selectedCurrency }}</span>
+      </div>
+      <div *ngIf="selectedCurrency !== 'USD' && preview" class="price-summary-row">
+        <span class="price-label">FX rate</span>
+        <span class="price-value">1 {{ selectedCurrency }} = {{ preview.exchangeRate | currency:'USD' }}</span>
       </div>
       <div *ngIf="quantityMode === 'AMOUNT'" class="price-summary-row">
         <span class="price-label">Amount</span>
@@ -148,7 +163,7 @@
       <div class="price-summary-row total">
         <span class="price-label">Estimated total</span>
         <span class="price-value">{{
-          estimatedTotal != null ? (estimatedTotal | currency) : "--"
+          estimatedTotal != null ? (estimatedTotal | currency:"USD") : "--"
         }}</span>
       </div>
     </ng-template>

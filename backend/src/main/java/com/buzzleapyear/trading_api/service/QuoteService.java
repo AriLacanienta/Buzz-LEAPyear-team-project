@@ -254,7 +254,10 @@ public class QuoteService {
             if (assetTypes != null && !assetTypes.isEmpty() && !assetTypes.contains(instrument.getAssetType())) {
                 continue;
             }
-            if (currencyCode != null && !currencyCode.equals(instrument.getCurrencyCode())) {
+            if ("*".equals(currencyCode) && "USD".equals(instrument.getCurrencyCode())) {
+                continue;
+            }
+            if (currencyCode != null && !"*".equals(currencyCode) && !currencyCode.equals(instrument.getCurrencyCode())) {
                 continue;
             }
             long instrumentId = instrument.getId();

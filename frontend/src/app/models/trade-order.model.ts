@@ -31,6 +31,9 @@ export interface TradeOrderPreviewResponse {
     realizedPnL: number | null;
     valid: boolean;
     reason: string | null;
+    instrumentCurrency: string;
+    exchangeRate: number | null;
+    estimatedNativeValue: number | null;
 }
 
 export interface TradeOrderResponse {

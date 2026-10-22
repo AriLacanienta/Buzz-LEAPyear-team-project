@@ -23,11 +23,15 @@ export class SearchComponent implements OnInit {
   @Input() set assetTypes(value: string[]) {
     this.assetTypes$.next(value);
   }
+  @Input() set market(value: string) {
+    this.market$.next(value || 'US');
+  }
 
   private searchTerm$ = new BehaviorSubject<string>('');
   private selectedItem$ = new BehaviorSubject<InstrumentSearchResponse | null>(null);
   private focused$ = new BehaviorSubject<boolean>(false);
   private assetTypes$ = new BehaviorSubject<string[]>(['EQUITY', 'ETF', 'BOND']);
+  private market$ = new BehaviorSubject<string>('US');
   searchInput: string = '';
   searchResults: InstrumentSearchResponse[] = [];
   isSearchBoxFocused: boolean = false;
@@ -42,9 +46,9 @@ export class SearchComponent implements OnInit {
       distinctUntilChanged()
     );
 
-    combineLatest([this.focused$, term$, this.assetTypes$.pipe(distinctUntilChanged())]).pipe(
-      switchMap(([focused, term, assetTypes]) => 
-        focused ? timer (0, POLL_INTERVAL_MS).pipe(switchMap(() => this.fetchResults(term, assetTypes))) : EMPTY
+    combineLatest([this.focused$, term$, this.assetTypes$.pipe(distinctUntilChanged()), this.market$.pipe(distinctUntilChanged())]).pipe(
+      switchMap(([focused, term, assetTypes, market]) =>
+        focused ? timer (0, POLL_INTERVAL_MS).pipe(switchMap(() => this.fetchResults(term, assetTypes, market))) : EMPTY
       ),
       takeUntilDestroyed(this.destroyRef)
     ).subscribe(results => this.searchResults = results);
@@ -60,8 +64,8 @@ export class SearchComponent implements OnInit {
     ).subscribe(updated => this.itemSelected.emit(updated));
   }
 
-  private fetchResults(term: string, assetTypes: string[]): Observable<InstrumentSearchResponse[]> {
-    const request$: Observable<InstrumentSearchResponse[]> = this.instrumentService.searchInstruments(term, assetTypes);
+  private fetchResults(term: string, assetTypes: string[], market: string): Observable<InstrumentSearchResponse[]> {
+    const request$: Observable<InstrumentSearchResponse[]> = this.instrumentService.searchInstruments(term, assetTypes, market);
 
     return request$.pipe(
       catchError(() => of(this.searchResults))
@@ -69,7 +73,8 @@ export class SearchComponent implements OnInit {
   }
 
   get placeholder(): string {
-    return this.assetTypes$.value.includes('CRYPTO') ? 'Search crypto...' : 'Search US stocks, ETFs, bonds...';
+    if (this.assetTypes$.value.includes('CRYPTO')) return 'Search crypto...';
+    return this.market$.value === 'FOREIGN' ? 'Search foreign stocks, ETFs, bonds...' : 'Search US stocks, ETFs, bonds...';
   }
 
   onSearchBoxFocus(): void {

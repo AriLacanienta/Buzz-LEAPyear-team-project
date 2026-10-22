@@ -45,6 +45,12 @@ public class TradeOrder {
 
     @Column(name = "requested_amount")
     private BigDecimal requestedAmount;
+
+    @Column(name = "native_currency", nullable = false, length = 3)
+    private String nativeCurrency = "USD";
+
+    @Column(name = "exchange_rate", nullable = false, precision = 20, scale = 10)
+    private BigDecimal exchangeRate = BigDecimal.ONE;
     
     @OneToMany(mappedBy = "tradeOrder", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TradeOrderStatus> statuses = new ArrayList<>();
@@ -83,6 +89,10 @@ public class TradeOrder {
 
     public BigDecimal getRequestedAmount() { return requestedAmount; }
     public void setRequestedAmount(BigDecimal requestedAmount) { this.requestedAmount = requestedAmount; }
+    public String getNativeCurrency() { return nativeCurrency; }
+    public void setNativeCurrency(String nativeCurrency) { this.nativeCurrency = nativeCurrency; }
+    public BigDecimal getExchangeRate() { return exchangeRate; }
+    public void setExchangeRate(BigDecimal exchangeRate) { this.exchangeRate = exchangeRate; }
 
     public enum QuantityMode {
         SHARES, AMOUNT
