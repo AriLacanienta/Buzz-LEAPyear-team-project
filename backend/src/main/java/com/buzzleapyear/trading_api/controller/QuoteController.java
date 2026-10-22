@@ -42,7 +42,7 @@ public class QuoteController {
     @GetMapping("/search")
     public ResponseEntity<Page<InstrumentSearchResponseDto>> getInstrumentSearchResults(
         @RequestParam("q") String query,
-        @RequestParam(name = "assetType", defaultValue = "EQUITY,ETF,BOND") AssetType assetTypes,
+        @RequestParam(name = "assetType", defaultValue = "EQUITY,ETF,BOND") List<AssetType> assetTypes,
         @RequestParam(defaultValue = "US") String market,
         Pageable pageable
     ) {

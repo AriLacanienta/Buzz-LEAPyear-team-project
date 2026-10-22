@@ -1,5 +1,7 @@
 package com.buzzleapyear.trading_api.service;
 
+import com.buzzleapyear.trading_api.entity.Instrument.TradingSession;
+
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.Map;

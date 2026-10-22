@@ -21,6 +21,7 @@ const TAG_ASSET_TYPES: Record<AssetTag, string[]> = {
 
 const PREVIEW_POLL_INTERVAL_MS = 3000;
 const SUCCESS_MESSAGE_TIMEOUT = 2000;
+const SHARE_QUANTITY_DECIMAL_PLACES = 3;
 
 @Component({
   selector: 'app-buy-sell',
@@ -33,6 +34,7 @@ export class BuySellComponent implements OnInit {
   isBuy: boolean = true;
   quantity: number = 0;
   amount: number = 0;
+  private amountInputValid: boolean = false;
   quantityMode: QuantityMode = 'SHARES';
   successMessage: string = '';
   errorMessage: string = '';
@@ -110,6 +112,13 @@ export class BuySellComponent implements OnInit {
     this.applyQuantityModeConstraints(mode);
   }
 
+  onQuantityModeChange(event: Event): void {
+    const value = (event.target as HTMLSelectElement).value;
+    if (value === 'SHARES' || value === 'AMOUNT') {
+      this.setQuantityMode(value);
+    }
+  }
+
   onAmountInput(event: Event): void {
     const input = event.target as HTMLInputElement;
     const [whole, ...fraction] = input.value.replace(/[^0-9.]/g, '').split('.');
@@ -118,6 +127,7 @@ export class BuySellComponent implements OnInit {
     input.value = value;
 
     this.amount = parseFloat(input.value) || 0;
+    this.amountInputValid = /^\d+(?:\.\d{1,2})?$/.test(value) && this.amount > 0;
     this.errorMessage = '';
     this.successMessage = '';
     this.requestPreview();
@@ -160,7 +170,7 @@ export class BuySellComponent implements OnInit {
     }
 
     if (this.quantityMode === 'AMOUNT') {
-      if (!(this.amount > 0)) {
+      if (!this.amountInputValid || !(this.amount > 0)) {
         this.errorMessage = 'Please enter a valid amount greater than 0.';
         return;
       }
@@ -289,7 +299,7 @@ export class BuySellComponent implements OnInit {
     const preview = this.preview;
     const matchesInput = preview
       && preview.side === side
-      && preview.symbol === this.selectedResult?.instrumentSymbol
+      && preview.instrumentSymbol === this.selectedResult?.instrumentSymbol
       && preview.quantityMode === this.quantityMode
       && (this.quantityMode === 'AMOUNT'
         ? Number(preview.requestedAmount) === this.amount
@@ -334,6 +344,7 @@ export class BuySellComponent implements OnInit {
     this.quantityMode = mode;
     this.quantity = 0;
     this.amount = 0;
+    this.amountInputValid = false;
     this.preview = null;
     this.errorMessage = '';
     this.requestPreview();
@@ -356,14 +367,29 @@ export class BuySellComponent implements OnInit {
   }
 
   get hasOrderInput(): boolean {
-    return this.quantityMode === 'AMOUNT' ? this.amount > 0 : this.quantity > 0;
+    return this.quantityMode === 'AMOUNT'
+      ? this.amountInputValid && this.amount > 0
+      : this.quantity > 0;
   }
 
   get estimatedQuantity(): number | null {
     if (this.quantityMode === 'SHARES') {
       return this.quantity || null;
     }
-    return this.preview?.quantity ?? null;
+    if (!this.isPreviewForCurrentInput() || this.preview?.quantity == null) {
+      return null;
+    }
+    return Number(this.preview.quantity.toFixed(SHARE_QUANTITY_DECIMAL_PLACES));
+  }
+
+  private isPreviewForCurrentInput(): boolean {
+    return !!this.preview
+      && this.preview.side === (this.isBuy ? 'BUY' : 'SELL')
+      && this.preview.instrumentSymbol === this.selectedResult?.instrumentSymbol
+      && this.preview.quantityMode === this.quantityMode
+      && (this.quantityMode === 'AMOUNT'
+        ? Number(this.preview.requestedAmount) === this.amount
+        : Number(this.preview.quantity) === this.quantity);
   }
 
   get isMarketClosed(): boolean {

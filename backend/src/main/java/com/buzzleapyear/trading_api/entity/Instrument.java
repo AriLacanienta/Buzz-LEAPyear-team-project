@@ -60,10 +60,10 @@ public class Instrument {
     public TradingSession getTradingSession() { return tradingSession; }
     public void setTradingSession(TradingSession tradingSession) { this.tradingSession = tradingSession; }
 
-    public Boolean getWholeSharesAllowed() { return wholeSharesAllowed; }
+    public Boolean isWholeSharesAllowed() { return wholeSharesAllowed; }
     public void setWholeSharesAllowed(Boolean wholeSharesAllowed) { this.wholeSharesAllowed = wholeSharesAllowed; }
 
-    public Boolean getFractionalAllowed() { return fractionalAllowed; }
+    public Boolean isFractionalAllowed() { return fractionalAllowed; }
     public void setFractionalAllowed(Boolean fractionalAllowed) { this.fractionalAllowed = fractionalAllowed; }
 
     public Integer getQuantityPrecision() { return quantityPrecision; }

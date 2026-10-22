@@ -1,139 +1,325 @@
 <div class="buy-sell-container">
-    <h2 class="header">Place an Order</h2>
+  <h2 class="header">Place an Order</h2>
 
-    <div class="toggle">
-        <button class="buy-btn" [class.selected]="isBuy" (click)="toggleOrderType('BUY')">Buy</button>
-        <button class="sell-btn" [class.selected]="!isBuy" (click)="toggleOrderType('SELL')">Sell</button>
-    </div>
-
-    <div class="tag">
-        <button [class.selected]="selectedTag === 'Stock'" (click)="selectTag('Stock')">Stock</button>
-        <button [class.selected]="selectedTag === 'Crypto'" (click)="selectTag('Crypto')">Crypto</button>
-    </div>
-
-    <app-search [assetTypes]="searchAssetTypes" (itemSelected)="onSearchItemSelected($event)"></app-search>
-
-    <app-search-result-detail [selectedResult]="selectedResult"></app-search-result-detail>
-
-    <div class="tag quantity-mode">
-        <button [class.selected]="quantityMode === 'SHARES'" [disabled]="!canTradeWholeShares" (click)="setQuantityMode('SHARES')">Whole shares</button>
-        <button [class.selected]="quantityMode === 'AMOUNT'" [disabled]="!canTradeByAmount" (click)="setQuantityMode('AMOUNT')">Dollar amount</button>
-    </div>
-
-    <div class="quantity-container">
-        <ng-container *ngIf="quantityMode === 'SHARES'; else amountInput">
-             <label for="quantity">QUANTITY / SHARES</label>
-            <input type="number" id="quantity" name="quantity" class="quantity-input" min="0" step="1" placeholder="0" [value]="quantity || ''" [disabled]="isNotHeld" (input)="onQuantityInput($event)"/>
-        </ng-container>
-        <ng-template #amountInput>
-            <label for="amount">AMOUNT (USD)</label>
-            <input type="text" inputmode="decimal" id="amount" name="amount" class="quantity-input" placeholder="$0.00" [value]="amount || ''" [disabled]="isNotHeld" (input)="onAmountInput($event)"/>
-        </ng-template>
-    </div>
-
-    <div *ngIf="isMarketClosed" role="status" class="market-closed-notice">
-        The market for {{ selectedResult?.instrumentSymbol }} is currently closed.
-    </div>
-
-    <div *ngIf="selectedResult" class="price-summary">
-        <div *ngIf="isNotHeld; else summaryRows" class="not-held-notice">
-            You don't own any shares of {{ selectedResult.instrumentSymbol }}.
-        </div>
-        <ng-template #summaryRows>
-            <div class="price-summary-row">
-                <span class="price-label">Indicative price</span>
-                <span class="price-value">{{ indicativePrice | currency }}</span>
-            </div>
-            <div *ngIf="quantityMode === 'AMOUNT'" class="price-summary-row">
-                <span class="price-label">Amount</span>
-                <span class="price-value">{{ amount | currency }}</span>
-            </div>
-            <div class="price-summary-row">
-                <span class="price-label">{{ quantityMode === 'AMOUNT' ? 'Est. quantity' : 'Quantity' }}</span>
-                <span class="price-value">{{ estimatedQuantity != null ? (estimatedQuantity | number:1.0-8') : '--' }}</span>
-            </div>
-            <div *ngIf="!isBuy && preview" class="price-summary-row">
-                <span class="price-label">Shares held</span>
-                <span class="price-value">{{ preview.holdingQuantity | number: '1.0-8' }}</span>
-            </div>
-            <div *ngIf="!isBuy && preview?.realizedPnL != null" class="price-summary-row">
-                <span class="price-label">Estimated P/L</span>
-                <span class="price-value">{{ preview?.realizedPnL | currency}}</span>
-            </div>
-            <div class="price-summary-row total">
-                <span class="price-label">Estimated total</span>
-                <span class="price-value">{{estimatedTotal != null ? (estimatedTotal | currency) : '--'}}</span>
-            </div>
-        </ng-template>
-    </div>
-
-    <div class="buying-power">
-        <span class="buying-power-label">{{ buyingPowerLabel}}</span>
-        <span class="buying-power-value" [class.negative]="buyingPowerValue != null && buyingPowerValue < 0">{{ buyingPowerValue != null ? (buyingPowerValue | currency) : '--' }}</span>
-    </div>
-
-    <div *ngIf="isInsufficientCash && !errorMessage" role="alert" class="error-container">
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-            <circle cx="6" cy="6" r="5.5" stroke="currentColor" stroke-width="1"></circle>
-            <path d="M6 3.5V6.5M6 8.5V8.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"></path>
-        </svg>
-        <span>Insufficient cash for this order.</span>
-    </div>
-
-    <div *ngIf="successMessage" role="status" [ngClass]="{ 'order-accepted': successMessage.includes('accepted'), 'order-submitted': successMessage.includes('submitted'), 'order-filled': successMessage.includes('Bought') || successMessage.includes('Sold') }">
-        <span *ngIf="successMessage.includes('submitted')" class="animate-spin">⟳</span>
-        <span *ngIf="successMessage.includes('accepted') || successMessage.includes('Bought') || successMessage.includes('Sold')">✓</span>
-        <span class="font-medium capitalize">{{ successMessage.includes('accepted') ? 'Order accepted' : successMessage.includes('submitted') ? 'Order submitted' : successMessage }}</span>
-    </div>
-
-    <div *ngIf="errorMessage" role="alert" class="error-container">
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-            <circle cx="6" cy="6" r="5.5" stroke="currentColor" stroke-width="1"></circle>
-            <path d="M6 3.5V6.5M6 8.5V8.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"></path>
-        </svg>
-        <span>{{ errorMessage }}</span>
-    </div>
-
-    <button class="place-order-btn" [class.sell]="!isBuy" [disabled]="isSubmitting || isNotHeld || isInsufficientCash || successMessage" (click)="onPlaceOrder()">
-        {{ isSubmitting ? 'Submitting...' : (isBuy ? 'BUY' : 'SELL') }}
+  <div class="toggle">
+    <button
+      class="buy-btn"
+      [class.selected]="isBuy"
+      (click)="toggleOrderType('BUY')"
+    >
+      Buy
     </button>
+    <button
+      class="sell-btn"
+      [class.selected]="!isBuy"
+      (click)="toggleOrderType('SELL')"
+    >
+      Sell
+    </button>
+  </div>
+
+  <div class="tag">
+    <button
+      [class.selected]="selectedTag === 'Stock'"
+      (click)="selectTag('Stock')"
+    >
+      Stock
+    </button>
+    <button
+      [class.selected]="selectedTag === 'Crypto'"
+      (click)="selectTag('Crypto')"
+    >
+      Crypto
+    </button>
+  </div>
+
+  <app-search
+    [assetTypes]="searchAssetTypes"
+    (itemSelected)="onSearchItemSelected($event)"
+  ></app-search>
+
+  <app-search-result-detail
+    [selectedResult]="selectedResult"
+  ></app-search-result-detail>
+
+  <div class="quantity-container">
+    <ng-container *ngIf="quantityMode === 'SHARES'; else amountInput">
+      <label for="quantity">QUANTITY / SHARES</label>
+      <div class="quantity-input-wrapper">
+        <input
+          type="number"
+          id="quantity"
+          name="quantity"
+          class="quantity-input"
+          min="0"
+          step="1"
+          placeholder="0"
+          [value]="quantity || ''"
+          [disabled]="isNotHeld"
+          (input)="onQuantityInput($event)"
+        />
+        <select
+          class="quantity-mode-select"
+          aria-label="Order quantity type"
+          [value]="quantityMode"
+          [disabled]="isNotHeld"
+          (change)="onQuantityModeChange($event)"
+        >
+          <option value="SHARES" [disabled]="!canTradeWholeShares">
+            SHARES
+          </option>
+          <option value="AMOUNT" [disabled]="!canTradeByAmount">
+            DOLLARS
+          </option>
+        </select>
+      </div>
+    </ng-container>
+    <ng-template #amountInput>
+      <label for="amount">AMOUNT (USD)</label>
+      <div class="quantity-input-wrapper">
+        <input
+          type="text"
+          inputmode="decimal"
+          id="amount"
+          name="amount"
+          class="quantity-input"
+          placeholder="$0.00"
+          [value]="amount || ''"
+          [disabled]="isNotHeld"
+          (input)="onAmountInput($event)"
+        />
+        <select
+          class="quantity-mode-select"
+          aria-label="Order quantity type"
+          [value]="quantityMode"
+          [disabled]="isNotHeld"
+          (change)="onQuantityModeChange($event)"
+        >
+          <option value="SHARES" [disabled]="!canTradeWholeShares">
+            SHARES
+          </option>
+          <option value="AMOUNT" [disabled]="!canTradeByAmount">
+            DOLLARS
+          </option>
+        </select>
+      </div>
+    </ng-template>
+  </div>
+
+  <div *ngIf="isMarketClosed" role="status" class="market-closed-notice">
+    The market for {{ selectedResult?.instrumentSymbol }} is currently closed.
+  </div>
+
+  <div *ngIf="selectedResult" class="price-summary">
+    <div *ngIf="isNotHeld; else summaryRows" class="not-held-notice">
+      You don't own any shares of {{ selectedResult.instrumentSymbol }}.
+    </div>
+    <ng-template #summaryRows>
+      <div class="price-summary-row">
+        <span class="price-label">Indicative price</span>
+        <span class="price-value">{{ indicativePrice | currency }}</span>
+      </div>
+      <div *ngIf="quantityMode === 'AMOUNT'" class="price-summary-row">
+        <span class="price-label">Amount</span>
+        <span class="price-value">{{ amount | currency }}</span>
+      </div>
+      <div class="price-summary-row">
+        <span class="price-label">{{
+          quantityMode === "AMOUNT" ? "Est. quantity" : "Quantity"
+        }}</span>
+        <span
+          class="price-value"
+          >{{ estimatedQuantity != null ? (estimatedQuantity | number: "1.0-3") : "--" }}</span
+        >
+      </div>
+      <div *ngIf="!isBuy && preview" class="price-summary-row">
+        <span class="price-label">Shares held</span>
+        <span class="price-value">{{
+          preview.holdingQuantity | number: "1.0-3"
+        }}</span>
+      </div>
+      <div
+        *ngIf="!isBuy && preview?.realizedPnL != null"
+        class="price-summary-row"
+      >
+        <span class="price-label">Estimated P/L</span>
+        <span class="price-value">{{ preview?.realizedPnL | currency }}</span>
+      </div>
+      <div class="price-summary-row total">
+        <span class="price-label">Estimated total</span>
+        <span class="price-value">{{
+          estimatedTotal != null ? (estimatedTotal | currency) : "--"
+        }}</span>
+      </div>
+    </ng-template>
+  </div>
+
+  <div class="buying-power">
+    <span class="buying-power-label">{{ buyingPowerLabel }}</span>
+    <span
+      class="buying-power-value"
+      [class.negative]="buyingPowerValue != null && buyingPowerValue < 0"
+      >{{
+        buyingPowerValue != null ? (buyingPowerValue | currency) : "--"
+      }}</span
+    >
+  </div>
+
+  <div
+    *ngIf="isInsufficientCash && !errorMessage"
+    role="alert"
+    class="error-container"
+  >
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+      <circle
+        cx="6"
+        cy="6"
+        r="5.5"
+        stroke="currentColor"
+        stroke-width="1"
+      ></circle>
+      <path
+        d="M6 3.5V6.5M6 8.5V8.6"
+        stroke="currentColor"
+        stroke-width="1.2"
+        stroke-linecap="round"
+      ></path>
+    </svg>
+    <span>Insufficient cash for this order.</span>
+  </div>
+
+  <div
+    *ngIf="successMessage"
+    role="status"
+    [ngClass]="{
+      'order-accepted': successMessage.includes('accepted'),
+      'order-submitted': successMessage.includes('submitted'),
+      'order-filled':
+        successMessage.includes('Bought') || successMessage.includes('Sold'),
+    }"
+  >
+    <span *ngIf="successMessage.includes('submitted')" class="animate-spin"
+      >⟳</span
+    >
+    <span
+      *ngIf="
+        successMessage.includes('accepted') ||
+        successMessage.includes('Bought') ||
+        successMessage.includes('Sold')
+      "
+      >✓</span
+    >
+    <span class="font-medium capitalize">{{
+      successMessage.includes("accepted")
+        ? "Order accepted"
+        : successMessage.includes("submitted")
+          ? "Order submitted"
+          : successMessage
+    }}</span>
+  </div>
+
+  <div *ngIf="errorMessage" role="alert" class="error-container">
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+      <circle
+        cx="6"
+        cy="6"
+        r="5.5"
+        stroke="currentColor"
+        stroke-width="1"
+      ></circle>
+      <path
+        d="M6 3.5V6.5M6 8.5V8.6"
+        stroke="currentColor"
+        stroke-width="1.2"
+        stroke-linecap="round"
+      ></path>
+    </svg>
+    <span>{{ errorMessage }}</span>
+  </div>
+
+  <button
+    class="place-order-btn"
+    [class.sell]="!isBuy"
+    [disabled]="
+      isSubmitting || isNotHeld || isInsufficientCash || successMessage
+    "
+    (click)="onPlaceOrder()"
+  >
+    {{ isSubmitting ? "Submitting..." : isBuy ? "BUY" : "SELL" }}
+  </button>
 </div>
 
-<div *ngIf="isConfirmationOpen" class="confirmation-backdrop" (click)="cancelConfirmation()">
-    <section class="confirmation-dialog" role="dialog" aria-modal="true" aria-labelledby="confirmation-title" (click)="$event.stopPropagation()">
-        <h2 id="confirmation-title">Confirm Order</h2>
-        <p class="confirmation-message">Are you sure you want to place this order?</p>
+<div
+  *ngIf="isConfirmationOpen"
+  class="confirmation-backdrop"
+  (click)="cancelConfirmation()"
+>
+  <section
+    class="confirmation-dialog"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="confirmation-title"
+    (click)="$event.stopPropagation()"
+  >
+    <h2 id="confirmation-title">Confirm Order</h2>
+    <p class="confirmation-message">
+      Are you sure you want to place this order?
+    </p>
 
-        <div class="confirmation-summary">
-            <div>
-                <span>Action</span>
-                <strong>{{ isBuy ? 'Buy' : 'Sell' }}</strong>
-            </div>
-            <div>
-                <span>Instrument</span>
-                <strong>{{ selectedResult?.instrumentSymbol }}</strong>
-            </div>
-            <div *ngIf="QuantityMode === 'AMOUNT'; else sharesConfirmation">
-                <span>Amount</span>
-                <strong>{{ amount | currency }} (~{{ estimatedQuantity != null ? (estimatedQuantity | number: '1.0-8') : '--' }} &#64; {{ indicativePrice != null ? (indicativePrice | currency) : '--' }})</strong>
-            </div>
-            <ng-template #sharesConfirmation>
-                <div>
-                    <span>Price x quantity</span>
-                    <strong>{{ indicativePrice != null ? (indicativePrice | currency) : '--' }} x {{ quantity }}</strong>
-                </div>
-            </ng-template>
-            <div>
-                <span>Estimated total</span>
-                <strong>{{ estimatedTotal != null ? (estimatedTotal | currency) : '--' }}</strong>
-            </div>
+    <div class="confirmation-summary">
+      <div>
+        <span>Action</span>
+        <strong>{{ isBuy ? "Buy" : "Sell" }}</strong>
+      </div>
+      <div>
+        <span>Instrument</span>
+        <strong>{{ selectedResult?.instrumentSymbol }}</strong>
+      </div>
+      <div *ngIf="quantityMode === 'AMOUNT'; else sharesConfirmation">
+        <span>Amount</span>
+        <strong
+          >{{ amount | currency }} (~{{
+            estimatedQuantity != null
+              ? (estimatedQuantity | number: "1.0-3")
+              : "--"
+          }}
+          &#64;
+          {{
+            indicativePrice != null ? (indicativePrice | currency) : "--"
+          }})</strong
+        >
+      </div>
+      <ng-template #sharesConfirmation>
+        <div>
+          <span>Price x quantity</span>
+          <strong
+            >{{
+              indicativePrice != null ? (indicativePrice | currency) : "--"
+            }}
+            x {{ quantity }}</strong
+          >
         </div>
+      </ng-template>
+      <div>
+        <span>Estimated total</span>
+        <strong>{{
+          estimatedTotal != null ? (estimatedTotal | currency) : "--"
+        }}</strong>
+      </div>
+    </div>
 
-        <div class="confirmation-actions">
-            <button type="button" class="cancel-btn" (click)="cancelConfirmation()">Cancel</button>
-            <button type="button" class="confirm-btn" [class.sell]="!isBuy" (click)="confirmOrder()">
-                Confirm {{ isBuy ? 'Buy' : 'Sell' }}
-            </button>
-        </div>
-    </section>
+    <div class="confirmation-actions">
+      <button type="button" class="cancel-btn" (click)="cancelConfirmation()">
+        Cancel
+      </button>
+      <button
+        type="button"
+        class="confirm-btn"
+        [class.sell]="!isBuy"
+        (click)="confirmOrder()"
+      >
+        Confirm {{ isBuy ? "Buy" : "Sell" }}
+      </button>
+    </div>
+  </section>
 </div>

@@ -36,6 +36,7 @@ import org.springframework.beans.factory.annotation.Value;
  */
 @Service
 public class OrderProcessor {
+    private static final int SHARE_QUANTITY_SCALE = 3;
     
     private static final Logger logger = LoggerFactory.getLogger(OrderProcessor.class);
     
@@ -121,7 +122,7 @@ public class OrderProcessor {
                 }
                 order.setQuantity(resolvedQuantity);
             }
-            order.setValue(marketPrice.multiply(order.getQuantity()).setScale(2, RoundingMode.HALF_UP));
+            order.setTradeValue(marketPrice.multiply(order.getQuantity()).setScale(2, RoundingMode.HALF_UP));
             tradeOrderRepository.save(order);
 
             // Step 2: Validate order against business rules
@@ -167,20 +168,20 @@ public class OrderProcessor {
     }
 
     public BigDecimal resolveQuantity(Instrument instrument, QuantityMode mode, BigDecimal quantity, BigDecimal amount, BigDecimal price, OrderSide side, BigDecimal heldQuantity) {
-        if (mode != QuantityMode.QUANTITY) {
+        if (mode != QuantityMode.AMOUNT) {
             return quantity;
         }
         if (amount == null || price == null || price.signum() <= 0) {
             return null;
         }
-        BigDecimal resolved = amount.divide(price, instrument.getQuantityPrecision(), RoundingMode.DOWN);
+        BigDecimal resolved = amount.divide(price, SHARE_QUANTITY_SCALE, RoundingMode.DOWN);
         if(side == OrderSide.SELL && heldQuantity != null && heldQuantity.signum() > 0) {
             BigDecimal heldValue = heldQuantity.multiply(price).setScale(2, RoundingMode.CEILING);
             if (heldValue.subtract(amount).abs().compareTo(ONE_CENT) <= 0) {
                 resolved = heldQuantity;
             }
         }
-        return resolved;
+        return resolved.setScale(SHARE_QUANTITY_SCALE, RoundingMode.DOWN);
     }
 
     private BigDecimal getHeldQuantity(Account account, Instrument instrument) {
@@ -335,7 +336,7 @@ public class OrderProcessor {
         }
 
         order.setPrice(executionPrice);
-        order.setValue(executionPrice.multiply(order.getQuantity()).setScale(2, RoundingMode.HALF_UP));
+        order.setTradeValue(executionPrice.multiply(order.getQuantity()).setScale(2, RoundingMode.HALF_UP));
         try {
             tradeOrderRepository.save(order);
             if (order.getSide() == OrderSide.BUY) {

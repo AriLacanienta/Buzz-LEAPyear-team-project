@@ -16,7 +16,7 @@ export interface TradeOrderRequest extends TradeOrderPreviewRequest {
 }
 
 export interface TradeOrderPreviewResponse {
-    symbol: string;
+    instrumentSymbol: string;
     side: OrderSide;
     quantityMode: QuantityMode;
     quantity: number;

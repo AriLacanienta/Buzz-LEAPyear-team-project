@@ -22,6 +22,7 @@ import com.buzzleapyear.trading_api.service.MarketHoursService;
  */
 @Component 
 public class OrderValidator {
+    private static final int AMOUNT_ORDER_QUANTITY_SCALE = 3;
     
     private static final Logger logger = LoggerFactory.getLogger(OrderValidator.class);
 
@@ -60,8 +61,8 @@ public class OrderValidator {
         if (amount == null || amount.compareTo(instrument.getMinOrderAmount()) < 0) {
             return String.format("Minimum order amount for %s is $%.2f", symbol, instrument.getMinOrderAmount());
         }
-        if (quantity != null && quantity.stripTrailingZeros().scale() > instrument.getQuantityPrecision()) {
-            return String.format("%s quantity cannot have more than %d decimal places", symbol, instrument.getQuantityPrecision());
+        if (quantity != null && quantity.stripTrailingZeros().scale() > AMOUNT_ORDER_QUANTITY_SCALE) {
+            return String.format("%s quantity cannot have more than %d decimal places", symbol, AMOUNT_ORDER_QUANTITY_SCALE);
         }
 
         return null;
@@ -220,7 +221,7 @@ public class OrderValidator {
                     .orElse(null);
                 BigDecimal available = holding != null ? holding.getQuantity() : BigDecimal.ZERO;
                 String reason = String.format("Insufficient quantity: need %s, have %s", 
-                    order.getQuantity().stripTrailingZeroes().toPlainString(), available.stripTrailingZeroes().toPlainString());
+                    order.getQuantity().stripTrailingZeros().toPlainString(), available.stripTrailingZeros().toPlainString());
                 logger.warn("Order ID: {} failed validation: {}", order.getId(), reason);
                 return new ValidationResult(false, reason);
             }
