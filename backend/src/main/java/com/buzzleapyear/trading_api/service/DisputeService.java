@@ -4,7 +4,9 @@ import com.buzzleapyear.trading_api.dto.CreateDisputeRequest;
 import com.buzzleapyear.trading_api.dto.DisputeResponse;
 import com.buzzleapyear.trading_api.entity.Dispute;
 import com.buzzleapyear.trading_api.entity.DisputeStatus;
+import com.buzzleapyear.trading_api.entity.DisputeSeverity;
 import com.buzzleapyear.trading_api.entity.TradeOrder;
+import com.buzzleapyear.trading_api.entity.TradeOrderStatus.OrderStatus;
 import com.buzzleapyear.trading_api.repository.DisputeRepository;
 import com.buzzleapyear.trading_api.repository.TradeOrderRepository;
 import org.springframework.data.domain.*;
@@ -16,10 +18,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 
 @Service
 public class DisputeService {
+    private static final BigDecimal CRITICAL_TRADE_VALUE = new BigDecimal("10000.00");
     private final DisputeRepository disputeRepository;
     private final TradeOrderRepository tradeOrderRepository;
 
@@ -37,6 +41,9 @@ public class DisputeService {
             .orElseThrow(() -> error(HttpStatus.NOT_FOUND, "Trade order not found"));
         if (!isOwnedBy(order, username)) {
             throw error(HttpStatus.FORBIDDEN, "Only the account owner may create a dispute");
+        }
+        if (order.getStatuses().stream().noneMatch(status -> status.getStatus() == OrderStatus.FILLED)) {
+            throw error(HttpStatus.CONFLICT, "Only successfully executed orders may be disputed");
         }
         if (disputeRepository.existsByTradeOrderIdAndStatus(order.getId(), DisputeStatus.OPEN)) {
             throw error(HttpStatus.CONFLICT, "An open dispute already exists for this trade order");
@@ -132,8 +139,19 @@ public class DisputeService {
     private DisputeResponse toResponse(Dispute dispute) {
         TradeOrder order = dispute.getTradeOrder();
         return new DisputeResponse(dispute.getId(), order.getId(), order.getAccount().getId(),
-            order.getValue(), dispute.getMessage(), dispute.getStatus(),
+            order.getValue(), dispute.getMessage(), dispute.getStatus(), severityOf(order),
             dispute.getCreatedAt(), dispute.getResolvedAt());
+    }
+
+    private DisputeSeverity severityOf(TradeOrder order) {
+        if (order.getQuantity() == null || order.getPrice() == null
+            || order.getQuantity().signum() <= 0 || order.getPrice().signum() <= 0) {
+            throw error(HttpStatus.INTERNAL_SERVER_ERROR, "Order execution quantity and price must be positive");
+        }
+        BigDecimal executionValue = order.getQuantity().multiply(order.getPrice())
+            .setScale(2, RoundingMode.HALF_UP);
+        return executionValue.compareTo(CRITICAL_TRADE_VALUE) >= 0
+            ? DisputeSeverity.CRITICAL : DisputeSeverity.NORMAL;
     }
 
     private ResponseStatusException error(HttpStatus status, String message) {

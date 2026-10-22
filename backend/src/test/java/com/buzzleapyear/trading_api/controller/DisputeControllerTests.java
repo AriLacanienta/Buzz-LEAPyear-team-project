@@ -3,6 +3,7 @@ package com.buzzleapyear.trading_api.controller;
 import com.buzzleapyear.trading_api.dto.CreateDisputeRequest;
 import com.buzzleapyear.trading_api.dto.DisputeResponse;
 import com.buzzleapyear.trading_api.entity.DisputeStatus;
+import com.buzzleapyear.trading_api.entity.DisputeSeverity;
 import com.buzzleapyear.trading_api.service.DisputeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -24,6 +26,9 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
 class DisputeControllerTests {
@@ -51,6 +56,7 @@ class DisputeControllerTests {
 
         assertEquals(HttpStatus.CREATED, result.getStatusCode());
         assertEquals(response, result.getBody());
+        assertEquals(DisputeSeverity.CRITICAL, result.getBody().severity());
         verify(disputeService).create(request, "client");
     }
 
@@ -63,6 +69,18 @@ class DisputeControllerTests {
             () -> disputeController.create(new CreateDisputeRequest(null, null), client));
 
         assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
+    }
+
+    @Test
+    void getSerializesSeveritySeparatelyFromLifecycleStatus() throws Exception {
+        when(disputeService.get(4L, "manager", true))
+            .thenReturn(response(4L, DisputeStatus.RESOLVED));
+
+        MockMvcBuilders.standaloneSetup(disputeController).build()
+            .perform(get("/api/v1/dispute/4").principal(manager))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.severity").value("CRITICAL"))
+            .andExpect(jsonPath("$.status").value("RESOLVED"));
     }
 
     @Test
@@ -123,7 +141,8 @@ class DisputeControllerTests {
     }
 
     private DisputeResponse response(Long id, DisputeStatus status) {
-        return new DisputeResponse(id, 7L, 11L, BigDecimal.TEN, "details", status,
+        return new DisputeResponse(id, 7L, 11L, new BigDecimal("10000.00"), "details", status,
+            DisputeSeverity.CRITICAL,
             LocalDateTime.now(), null);
     }
 }
