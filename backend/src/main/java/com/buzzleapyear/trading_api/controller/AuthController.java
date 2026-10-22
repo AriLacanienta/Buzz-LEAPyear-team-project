@@ -33,6 +33,7 @@ import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * This Authentication Controller handles login, registration, and token validation
@@ -160,7 +161,7 @@ public class AuthController {
                 //returning access token in body and refresh token in secure HttpOnly cookie
                 return ResponseEntity.ok()
                     .header(HttpHeaders.SET_COOKIE, buildRefreshCookie(refreshToken, request).toString())
-                    .body(new AuthResponse(accessToken, null, user.getUsername(), user.getEmail()));
+                    .body(buildAuthResponse(user, accessToken));
 
         } catch (Exception e) {
             // If any unexpected error occurs, return 401 Unauthorized
@@ -267,7 +268,7 @@ public class AuthController {
                 //returning access token in body and refresh token in secure HttpOnly cookie
             return ResponseEntity.status(HttpStatus.CREATED)
                     .header(HttpHeaders.SET_COOKIE, buildRefreshCookie(refreshToken, request).toString())
-                    .body(new AuthResponse(accessToken, null, savedUser.getUsername(), savedUser.getEmail()));
+                    .body(buildAuthResponse(savedUser, accessToken));
 
         } catch (Exception e) {
             // If any error occurs during registration, return 400 Bad Request
@@ -316,11 +317,18 @@ public class AuthController {
 
             return ResponseEntity.ok()
                     .header(HttpHeaders.SET_COOKIE, buildRefreshCookie(newRefreshToken, request).toString())
-                    .body(new AuthResponse(newAccessToken, null, user.getUsername(), user.getEmail()));
+                    .body(buildAuthResponse(user, newAccessToken));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(new ErrorResponse("Refresh failed: " + e.getMessage()));
         }
+    }
+
+    private AuthResponse buildAuthResponse(User user, String accessToken) {
+        var roles = user.getUserRoles().stream()
+                .map(userRole -> userRole.getRole().getRoleName().name())
+                .collect(Collectors.toList());
+        return new AuthResponse(accessToken, user.getUsername(), user.getEmail(), roles);
     }
 
     @PostMapping("/logout")
