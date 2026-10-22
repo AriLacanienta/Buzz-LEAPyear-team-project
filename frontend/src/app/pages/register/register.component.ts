@@ -24,7 +24,11 @@ export class RegisterComponent {
       email: ['', [Validators.required, Validators.email]],
       firstName: ['', Validators.required],
       lastName: ['', Validators.required],
-      password: ['', [Validators.required, Validators.minLength(6)]]
+      password: ['', [
+        Validators.required,
+        Validators.minLength(8),
+        Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).+$/)
+      ]]
     });
   }
 
@@ -46,22 +50,14 @@ export class RegisterComponent {
 
     this.authService.register(username, email, firstName, lastName, password).subscribe(
       (response) => {
+        this.authService.setAuthSessionFromResponse(response);
         this.loading = false;
-        console.log('Registration successful!', response);
-
-        const landingPage = this.authService.hasRole('MANAGER')
-          ? '/admin'
-          : '/dashboard';
-        this.router.navigate([landingPage]);
+        this.router.navigate(['/dashboard']);
       },
       (error) => {
         this.loading = false;
-        // Check if it's a technical/security error, show generic message instead
-        if (error.error?.message?.includes('signing key') || error.error?.message?.includes('JWT')) {
-          this.errorMessage = 'Please enter a strong password.';
-        } else {
-          this.errorMessage = error.error?.message || 'Please enter a strong password.';
-        }
+        this.errorMessage = error.error?.message ||
+          'Registration failed. Please check your details and try again.';
         console.error('Registration error:', error);
       }
     );

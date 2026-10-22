@@ -16,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import jakarta.servlet.http.HttpServletRequest;
 
 import com.buzzleapyear.trading_api.controller.AuthController;
 import com.buzzleapyear.trading_api.dto.AuthResponse;
@@ -26,6 +27,7 @@ import com.buzzleapyear.trading_api.entity.UserRole;
 import com.buzzleapyear.trading_api.repository.AccountRepository;
 import com.buzzleapyear.trading_api.repository.ClientRepository;
 import com.buzzleapyear.trading_api.repository.RoleRepository;
+import com.buzzleapyear.trading_api.repository.RefreshSessionRepository;
 import com.buzzleapyear.trading_api.repository.UserRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -48,6 +50,12 @@ class AuthRoleTests {
 
     @Mock
     private JwtTokenProvider tokenProvider;
+
+    @Mock
+    private RefreshSessionRepository refreshSessionRepository;
+
+    @Mock
+    private HttpServletRequest httpServletRequest;
 
     @InjectMocks
     private AuthController authController;
@@ -87,11 +95,24 @@ class AuthRoleTests {
         when(roleRepository.findByRoleName(Role.RoleName.CLIENT)).thenReturn(Optional.of(clientRole));
         when(passwordEncoder.encode(request.getPassword())).thenReturn("hashed-password");
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(tokenProvider.generateToken(request.getUsername())).thenReturn("token");
+        when(tokenProvider.generateAccessToken(request.getUsername(), 0)).thenReturn("token");
+        when(httpServletRequest.isSecure()).thenReturn(false);
+        when(httpServletRequest.getHeader("X-Forwarded-Proto")).thenReturn(null);
+        org.springframework.test.util.ReflectionTestUtils.setField(
+            authController, "refreshSessionRepository", refreshSessionRepository);
 
-        ResponseEntity<?> response = authController.register(request);
+        ResponseEntity<?> response = authController.register(request, httpServletRequest);
 
         AuthResponse authResponse = assertInstanceOf(AuthResponse.class, response.getBody());
-        assertEquals(List.of("CLIENT"), authResponse.getRoles());
+        assertEquals("new-client", authResponse.getUsername());
+        assertEquals("new-client@example.com", authResponse.getEmail());
+        User savedUser = org.mockito.Mockito.mockingDetails(userRepository).getInvocations().stream()
+            .filter(invocation -> invocation.getMethod().getName().equals("save"))
+            .map(invocation -> (User) invocation.getArgument(0))
+            .findFirst()
+            .orElseThrow();
+        assertEquals(List.of("ROLE_CLIENT"), savedUser.getUserRoles().stream()
+            .map(userRole -> "ROLE_" + userRole.getRole().getRoleName().name())
+            .toList());
     }
 }
