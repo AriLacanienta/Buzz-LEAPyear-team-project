@@ -30,10 +30,12 @@ public class DisputeService {
 
     @Transactional
     public DisputeResponse create(CreateDisputeRequest request, String username) {
+        if (request == null || request.tradeOrderId() == null) {
+            throw error(HttpStatus.BAD_REQUEST, "Trade order ID is required");
+        }
         TradeOrder order = tradeOrderRepository.findById(request.tradeOrderId())
             .orElseThrow(() -> error(HttpStatus.NOT_FOUND, "Trade order not found"));
-        if (order.getAccount().getClient().getUser() == null
-            || !username.equals(order.getAccount().getClient().getUser().getUsername())) {
+        if (!isOwnedBy(order, username)) {
             throw error(HttpStatus.FORBIDDEN, "Only the account owner may create a dispute");
         }
         if (disputeRepository.existsByTradeOrderIdAndStatus(order.getId(), DisputeStatus.OPEN)) {
@@ -41,16 +43,17 @@ public class DisputeService {
         }
         Dispute dispute = new Dispute();
         dispute.setTradeOrder(order);
-        dispute.setMessage(request.message());
+        dispute.setMessage(normalizeMessage(request.message()));
         return toResponse(disputeRepository.save(dispute));
     }
 
     @Transactional(readOnly = true)
     public DisputeResponse get(Long id, String username, boolean manager) {
-        Dispute dispute = manager
-            ? disputeRepository.findById(id).orElseThrow(() -> error(HttpStatus.NOT_FOUND, "Dispute not found"))
-            : disputeRepository.findByIdAndTradeOrderAccountClientUserUsername(id, username)
-                .orElseThrow(() -> error(HttpStatus.NOT_FOUND, "Dispute not found"));
+        Dispute dispute = disputeRepository.findById(id)
+            .orElseThrow(() -> error(HttpStatus.NOT_FOUND, "Dispute not found"));
+        if (!manager && !isOwnedBy(dispute.getTradeOrder(), username)) {
+            throw error(HttpStatus.FORBIDDEN, "You may not view this dispute");
+        }
         return toResponse(dispute);
     }
 
@@ -98,12 +101,32 @@ public class DisputeService {
         }
         Dispute dispute = disputeRepository.findById(id)
             .orElseThrow(() -> error(HttpStatus.NOT_FOUND, "Dispute not found"));
+        if (isOwnedBy(dispute.getTradeOrder(), authentication.getName())) {
+            throw error(HttpStatus.FORBIDDEN, "Managers may not resolve disputes for their own accounts");
+        }
         if (dispute.getStatus() == DisputeStatus.RESOLVED) {
-            throw error(HttpStatus.CONFLICT, "Dispute is already resolved");
+            return toResponse(dispute);
         }
         dispute.setStatus(DisputeStatus.RESOLVED);
         dispute.setResolvedAt(LocalDateTime.now());
         return toResponse(disputeRepository.save(dispute));
+    }
+
+    private boolean isOwnedBy(TradeOrder order, String username) {
+        return order != null
+            && order.getAccount() != null
+            && order.getAccount().getClient() != null
+            && order.getAccount().getClient().getUser() != null
+            && username != null
+            && username.equals(order.getAccount().getClient().getUser().getUsername());
+    }
+
+    private String normalizeMessage(String message) {
+        if (message == null) {
+            return null;
+        }
+        String normalized = message.trim();
+        return normalized.isEmpty() ? null : normalized;
     }
 
     private DisputeResponse toResponse(Dispute dispute) {

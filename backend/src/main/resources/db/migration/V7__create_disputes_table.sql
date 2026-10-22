@@ -5,6 +5,7 @@ CREATE TABLE disputes (
     status VARCHAR(20) NOT NULL DEFAULT 'OPEN',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     resolved_at TIMESTAMP,
+    version BIGINT NOT NULL DEFAULT 0,
     CONSTRAINT fk_disputes_trade_order FOREIGN KEY (trade_order_id)
         REFERENCES trade_orders(trade_order_id) ON DELETE CASCADE,
     CONSTRAINT chk_disputes_status CHECK (status IN ('OPEN', 'RESOLVED')),
