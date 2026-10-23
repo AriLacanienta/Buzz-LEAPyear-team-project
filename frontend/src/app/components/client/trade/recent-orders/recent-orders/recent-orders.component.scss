@@ -17,12 +17,13 @@ $transition-duration: 200ms;
 
 :host {
   display: block;
-  height: clamp(20rem, 35vw, 30rem);
+  min-width: 0;
+  min-height: clamp(20rem, 35vw, 30rem);
   box-sizing: border-box;
 }
 
 .recent-orders-container {
-  height: 100%;
+  min-height: inherit;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -49,14 +50,20 @@ $transition-duration: 200ms;
 }
 
 .recent-orders-body {
-  overflow: auto;
-  flex: 1;
-  min-height: 0;
-  overflow: auto;
-  scrollbar-width: none;
+  overflow-x: auto;
+  overflow-y: hidden;
+  flex: 1 0 auto;
+  scrollbar-width: thin;
+  scrollbar-color: $border-dark transparent;
 
   &::-webkit-scrollbar {
-    display: none;
+    width: 6px;
+    height: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: $border-dark;
+    border-radius: 3px;
   }
 }
 
@@ -241,4 +248,46 @@ tbody {
   p {
     margin: 0;
   }
+}
+
+.order-reference {
+  color: $color-slate-300;
+  white-space: nowrap;
+}
+
+.raise-dispute {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  border: 1px solid $border-dark;
+  border-radius: 4px;
+  padding: clamp(0.15rem, 0.5vw, 0.25rem) clamp(0.3rem, 0.8vw, 0.5rem);
+  color: $color-slate-300;
+  background: transparent;
+  font-family: monospace;
+  font-size: clamp(0.6rem, 0.9vw, 10px);
+  font-weight: $font-weight-semibold;
+  line-height: 1.25rem;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color $transition-duration $transition-timing,
+    border-color $transition-duration $transition-timing,
+    background-color $transition-duration $transition-timing;
+
+  &:hover {
+    color: $color-white;
+    border-color: $color-slate-400;
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #93c5fd;
+    outline-offset: 2px;
+  }
+}
+
+.dispute-unavailable {
+  color: $color-slate-300;
 }

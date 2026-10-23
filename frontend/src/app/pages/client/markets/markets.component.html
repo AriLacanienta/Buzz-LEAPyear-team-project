@@ -1,17 +1,41 @@
 <div class="container">
   <main>
     <section class="markets-content">
-      <app-market-tabs
-        [markets]="markets"
-        [selectedMarket]="selectedMarket()"
-        (marketChange)="onMarketChange($event)">
-      </app-market-tabs>
+      <header class="markets-heading">
+        <div>
+          <span class="eyebrow">MARKETPLACE</span>
+        </div>
+        <div class="instrument-count" aria-live="polite">
+          <span class="count-dot" aria-hidden="true"></span>
+          {{ visibleInstruments().length }} instruments
+        </div>
+      </header>
+
+      <section class="market-selector" aria-label="Choose a market">
+        <span class="section-label">REGION</span>
+        <app-market-tabs
+          [markets]="markets"
+          [selectedMarket]="selectedMarket()"
+          (marketChange)="onMarketChange($event)">
+        </app-market-tabs>
+      </section>
+
       <div class="instruments-table">
         <app-instruments-table
-          [instruments]="instruments()"
+          [instruments]="visibleInstruments()"
           [selectedMarket]="selectedMarket()"
-          [displayedColumns]="displayedColumns">
-          <div table-header>
+          [displayedColumns]="displayedColumns"
+          (instrumentSelected)="onInstrumentSelected($event)">
+          <div table-header class="markets-table-toolbar">
+            <label class="market-search">
+              <span class="search-icon" aria-hidden="true">⌕</span>
+              <input
+                type="search"
+                [value]="searchTerm()"
+                (input)="onSearch($any($event.target).value)"
+                placeholder="Search symbols or names"
+                aria-label="Search instruments by symbol or name">
+            </label>
             <app-asset-type-filter 
               [selectedAssetType]="selectedAssetType()"
               [assetTypes]="assetTypes"
@@ -23,3 +47,17 @@
     </section>
   </main>
 </div>
+
+<app-instrument-details-dialog
+  *ngIf="selectedInstrument() as instrument"
+  [instrument]="instrument"
+  [quote]="selectedQuote()"
+  [details]="selectedInstrumentDetails()"
+  [isLoading]="isDetailsLoading()"
+  [hasError]="hasDetailsError()"
+  [isFavorite]="isInstrumentInWatchlist(instrument.instrumentSymbol)"
+  [favoritePending]="isFavoriteActionPending()"
+  [favoriteError]="favoriteActionError()"
+  (favoriteToggled)="toggleSelectedInstrumentFavorite()"
+  (closed)="closeInstrumentDetails()">
+</app-instrument-details-dialog>

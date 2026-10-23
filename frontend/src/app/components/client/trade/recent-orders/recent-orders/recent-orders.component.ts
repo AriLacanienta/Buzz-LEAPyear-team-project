@@ -1,10 +1,12 @@
-import { Component, OnInit, DestroyRef } from '@angular/core';
+import { Component, OnInit, DestroyRef, inject } from '@angular/core';
+import { BreakpointObserver } from '@angular/cdk/layout';
 import { NgIf, NgFor, DatePipe, CurrencyPipe } from '@angular/common';
 import { merge, of, switchMap, timer, exhaustMap, retry, takeWhile, Subject } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AccountService } from '@app/services/account.service';
 import { RecentTradeOrderResponse } from '@app/models/recent-trade-order-response.model';
 import { TradeOrderService } from '@app/services/trade-order.service';
+import { DisputeComposerService } from '@app/services/dispute-composer.service';
 
 @Component({
   selector: 'app-recent-orders',
@@ -20,6 +22,8 @@ export class RecentOrdersComponent implements OnInit {
   totalElements = 0;
   totalPages = 0;
   private pageChanged$ = new Subject<void>();
+  private readonly disputeComposer = inject(DisputeComposerService);
+  private readonly breakpointObserver = inject(BreakpointObserver);
 
   constructor(
     private accountService: AccountService,
@@ -28,6 +32,17 @@ export class RecentOrdersComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    this.breakpointObserver.observe('(max-width: 1280px)')
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(({ matches }) => {
+        const pageSize = matches ? 5 : 9;
+        if (this.pageSize !== pageSize) {
+          this.pageSize = pageSize;
+          this.pageIndex = 0;
+          this.pageChanged$.next();
+        }
+      });
+
     this.fetchRecentOrders();
   }
 
@@ -81,6 +96,10 @@ export class RecentOrdersComponent implements OnInit {
 
   trackByOrderId(_: number, order: RecentTradeOrderResponse): number {
     return order.orderId;
+  }
+
+  raiseDispute(order: RecentTradeOrderResponse): void {
+    this.disputeComposer.openForOrder(order);
   }
 
   private isPending(status: RecentTradeOrderResponse['status']): boolean {

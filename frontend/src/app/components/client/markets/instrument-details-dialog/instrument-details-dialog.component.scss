@@ -1,0 +1,286 @@
+// Palette
+$dialog-background: #111a28;
+$dialog-text: #e8eef7;
+$dialog-title: #f3f7fc;
+$dialog-border: #26364c;
+$dialog-muted: #8094ae;
+$dialog-accent: #81b2fb;
+$dialog-accent-strong: #83b5ff;
+$dialog-positive: #36d9a1;
+$dialog-negative: #ff777d;
+$dialog-warning: #f2bd72;
+$favorite-color: #fbbf24;
+$favorite-hover: #fcd34d;
+
+// Layout
+$dialog-radius: 0.85rem;
+$control-size: 2.4rem;
+
+.dialog-backdrop {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1.25rem;
+  background: rgba(4, 8, 14, 0.78);
+  backdrop-filter: blur(5px);
+}
+
+.instrument-dialog {
+  width: min(100%, 38rem);
+  max-height: min(90vh, 48rem);
+  overflow-y: auto;
+  padding: clamp(1.25rem, 4vw, 2rem);
+  border: 1px solid #2a3b54;
+  border-radius: 1.15rem;
+  background: radial-gradient(ellipse at top left, rgba(48, 83, 129, 0.2), transparent 52%), $dialog-background;
+  color: $dialog-text;
+  box-shadow: 0 2rem 6rem rgba(0, 0, 0, 0.5);
+}
+
+.dialog-header,
+.instrument-identity,
+.price-summary,
+.dialog-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.instrument-identity {
+  justify-content: flex-start;
+  min-width: 0;
+}
+
+.instrument-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-width: 0;
+}
+
+.symbol-avatar {
+  display: grid;
+  width: 3.25rem;
+  height: 3.25rem;
+  flex: 0 0 3.25rem;
+  place-items: center;
+  border: 1px solid rgba(81, 162, 255, 0.3);
+  border-radius: 0.9rem;
+  background: rgba(43, 127, 255, 0.16);
+  color: $dialog-accent-strong;
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.eyebrow,
+.field-label {
+  display: block;
+  color: $dialog-muted;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.eyebrow {
+  margin: 0 0 0.35rem;
+  color: $dialog-accent;
+}
+
+.dialog-header h2 {
+  overflow: hidden;
+  min-width: 0;
+  margin: 0;
+  color: $dialog-title;
+  font-size: clamp(1.15rem, 3vw, 1.45rem);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.symbol-label {
+  display: inline-block;
+  margin-top: 0.3rem;
+  color: #a6b5c9;
+  font-size: 0.82rem;
+}
+
+.close-button {
+  display: grid;
+  width: $control-size;
+  height: $control-size;
+  flex: 0 0 $control-size;
+  place-items: center;
+  border: 1px solid #2b3c53;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.04);
+  color: #c2cee0;
+  cursor: pointer;
+  font-size: 1.55rem;
+  line-height: 1;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+  }
+}
+
+.favorite-button {
+  display: grid;
+  width: 1.9rem;
+  height: 1.9rem;
+  flex: 0 0 1.9rem;
+  place-items: center;
+  border: 1px solid #2b3c53;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.04);
+  color: #a6b5c9;
+  cursor: pointer;
+  font-size: 1.1rem;
+  line-height: 1;
+  transition: background-color 150ms ease, color 150ms ease, transform 150ms ease;
+
+  &:hover:not(:disabled) {
+    background: rgba($favorite-color, 0.12);
+    color: $favorite-hover;
+    transform: translateY(-1px);
+  }
+
+  &.is-favorite {
+    border-color: rgba($favorite-color, 0.32);
+    background: rgba($favorite-color, 0.1);
+    color: $favorite-color;
+  }
+
+  &:disabled {
+    cursor: wait;
+    opacity: 0.6;
+  }
+}
+
+.price-summary {
+  margin: 1.6rem 0 1rem;
+  padding: 1.15rem 1.2rem;
+  border: 1px solid #263950;
+  border-radius: $dialog-radius;
+  background: rgba(7, 13, 22, 0.58);
+}
+
+.price-value {
+  display: block;
+  margin-top: 0.35rem;
+  color: #f5f8fc;
+  font-size: clamp(1.7rem, 6vw, 2.1rem);
+  font-variant-numeric: tabular-nums;
+}
+
+.change-pill {
+  display: grid;
+  gap: 0.15rem;
+  justify-items: end;
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+
+  &.positive {
+    color: $dialog-positive;
+  }
+
+  &.negative {
+    color: $dialog-negative;
+  }
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  overflow: hidden;
+  border: 1px solid $dialog-border;
+  border-radius: $dialog-radius;
+}
+
+.detail-item {
+  display: grid;
+  min-height: 4.5rem;
+  align-content: center;
+  gap: 0.45rem;
+  padding: 0.8rem 1rem;
+  background: rgba(255, 255, 255, 0.018);
+
+  &:nth-child(odd) {
+    border-right: 1px solid $dialog-border;
+  }
+
+  &:nth-child(n + 3) {
+    border-top: 1px solid $dialog-border;
+  }
+
+  strong {
+    overflow: hidden;
+    color: #e4ebf5;
+    font-size: 0.88rem;
+    font-variant-numeric: tabular-nums;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.dialog-status {
+  margin-top: 1rem;
+  color: #91a5bf;
+  font-size: 0.8rem;
+}
+
+.dialog-status.error {
+  color: $dialog-warning;
+}
+
+.dialog-footer {
+  margin-top: 1.25rem;
+  color: #7589a3;
+  font-size: 0.72rem;
+}
+
+.done-button {
+  padding: 0.6rem 1.1rem;
+  border: 0;
+  border-radius: 0.6rem;
+  background: #347ff0;
+  color: white;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+
+  &:hover {
+    background: #4b8ff5;
+  }
+}
+
+button:focus-visible {
+  outline: 2px solid $dialog-accent-strong;
+  outline-offset: 3px;
+}
+
+@media (max-width: 420px) {
+  .dialog-backdrop {
+    padding: 0.65rem;
+  }
+
+  .instrument-dialog {
+    padding: 1rem;
+  }
+
+  .price-summary {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .change-pill {
+    justify-items: start;
+  }
+
+  .detail-item {
+    padding: 0.75rem;
+  }
+}

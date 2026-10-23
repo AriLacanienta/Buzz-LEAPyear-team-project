@@ -1,4 +1,5 @@
 export interface PortfolioSummaryResponse {
+    holdingsCount: number;
     portfolioValue: number;
     totalCostBasis: number;
     todayChange: number;
