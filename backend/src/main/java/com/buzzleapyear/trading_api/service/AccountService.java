@@ -95,7 +95,7 @@ public class AccountService {
         BigDecimal totalPortfolioValue = BigDecimal.valueOf(0.0);
 
         for (HoldingResponseDto holding : holdings) {
-            totalPortfolioValue = totalPortfolioValue.add(holding.totalValue());
+            totalPortfolioValue = totalPortfolioValue.add(holding.usdValue());
         }
 
         return Optional.of(new AccountValueResponseDto(
@@ -137,7 +137,7 @@ public class AccountService {
                     .divide(boughtToday, 10, RoundingMode.HALF_UP);
             BigDecimal olderQty = quantity.subtract(todayQty);
 
-            portfolioValue = portfolioValue.add(orZero(holding.totalValue()));
+            portfolioValue = portfolioValue.add(orZero(holding.usdValue()));
             totalCostBasis = totalCostBasis.add(orZero(holding.totalCost()));
             todayStartValue = todayStartValue.add(olderQty.multiply(previousClose)).add(todayCost);
         }
@@ -206,6 +206,9 @@ public class AccountService {
                     order.getSide(),
                     order.getQuantity(),
                     order.getPrice(),
+                    order.getNativeCurrency(),
+                    order.getExchangeRate(),
+                    order.getTradeValue(),
                     order.getOrderDate(),
                     status == null ? null : status.getStatus(),
                     status == null ? null : status.getTimeUpdated(),

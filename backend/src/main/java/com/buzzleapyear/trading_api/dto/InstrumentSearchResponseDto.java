@@ -7,6 +7,12 @@ public record InstrumentSearchResponseDto(
     String assetType,
     String currencyCode,
     BigDecimal currentPrice,
-    BigDecimal percentChange
+    BigDecimal percentChange,
+    String tradingSession,
+    boolean marketOpen,
+    boolean wholeSharesAllowed,
+    boolean fractionalAllowed,
+    int quantityPrecision,
+    BigDecimal minOrderAmount
 ) {
 }

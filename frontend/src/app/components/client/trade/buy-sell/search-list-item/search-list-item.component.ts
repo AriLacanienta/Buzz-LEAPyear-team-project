@@ -1,11 +1,11 @@
 import { Component, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, CurrencyPipe } from '@angular/common';
 import { InstrumentSearchResponse } from '@app/models/instrument-search-response.model';
 
 @Component({
   selector: 'app-search-list-item',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, CurrencyPipe],
   templateUrl: './search-list-item.component.html',
   styleUrl: './search-list-item.component.scss'
 })

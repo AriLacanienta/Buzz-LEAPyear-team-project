@@ -46,7 +46,7 @@ public class OrderExecutor {
      * @param order the trade order
      */
     @Transactional
-    public void executeBuyOrder(Account account, Instrument instrument, TradeOrder order, BigDecimal acceptedPrice) {
+    public void executeBuyOrder(Account account, Instrument instrument, TradeOrder order, BigDecimal acceptedUsdValue) {
         logger.info("Executing BUY order ID: {} for {} shares at ${}",
             order.getId(), order.getQuantity(), order.getPrice());
 
@@ -55,7 +55,7 @@ public class OrderExecutor {
         // Get or create holding for this instrument
         Holding holding = getOrCreateHolding(refreshedAccount, instrument);
 
-        updateCashReserved(refreshedAccount, order, acceptedPrice);
+        updateCashReserved(refreshedAccount, order, acceptedUsdValue);
 
         // Update holding quantity and total cost
         updateHoldingQuantity(holding, order, instrument);
@@ -87,9 +87,8 @@ public class OrderExecutor {
             instrument.getInstrumentSymbol(), holding.getQuantity(), holding.getTotalCost());
     }
 
-        private void updateCashReserved(Account account, TradeOrder order, BigDecimal acceptedPrice) {
-        BigDecimal acceptedCost = acceptedPrice.multiply(order.getQuantity());
-        BigDecimal executionCost = order.getPrice().multiply(order.getQuantity());
+        private void updateCashReserved(Account account, TradeOrder order, BigDecimal acceptedCost) {
+        BigDecimal executionCost = order.getTradeValue();
         BigDecimal priceDifference = executionCost.subtract(acceptedCost);
         if (priceDifference.signum() > 0 && account.getCashAvailable().compareTo(priceDifference) < 0) {
             throw new IllegalStateException("Insufficent available cash for the execution price");
@@ -97,7 +96,7 @@ public class OrderExecutor {
         account.setCashAvailable(account.getCashAvailable().subtract(priceDifference));
         account.setCashReserved(account.getCashReserved().subtract(acceptedCost));
         accountRepository.save(account);
-        logger.info("Account cash updated - execution price: ${}. New reserved: ${}",
+        logger.info("Account cash updated - execution USD value: ${}. New reserved: ${}",
             executionCost, account.getCashReserved());
     }
 
@@ -159,4 +158,3 @@ public class OrderExecutor {
             proceeds, refreshedAccount.getCashAvailable());
     }
 }
-
