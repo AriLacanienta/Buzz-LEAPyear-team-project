@@ -5,19 +5,31 @@
   aria-label="Open Buzz helper"
   (click)="toggleChatbot()"
 >
-  <span aria-hidden="true">⚡︎</span>
+  <svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
+    <path d="M13.2 2.8 5.7 13h5.1l-.5 8.2L18.3 11h-5.1v-8.2Z" fill="currentColor" />
+  </svg>
 </button>
 
 <section *ngIf="isOpen" class="chatbot">
-  <header>
-    <h2>BUZZ Helper</h2>
+  <header class="chat-header">
+    <span class="chatbot-avatar" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M13.2 2.8 5.7 13h5.1l-.5 8.2L18.3 11h-5.1v-8.2Z" fill="currentColor" />
+      </svg>
+    </span>
+    <div class="chat-header-copy">
+      <h2>Buzz assistant</h2>
+      <p><span class="assistant-status" aria-hidden="true"></span>Here to help with your account</p>
+    </div>
     <button
       type="button"
       class="close-button"
-      aria-label="Minimize Buzz helper"
+      aria-label="Minimize Buzz assistant"
       (click)="toggleChatbot()"
     >
-      <span aria-hidden="true">&times;</span>
+      <svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
+        <path d="m6 6 12 12M18 6 6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+      </svg>
     </button>
   </header>
 
