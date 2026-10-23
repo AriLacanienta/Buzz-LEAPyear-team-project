@@ -1,7 +1,7 @@
 .container {
   display: grid;
   grid-template-columns: repeat(1, minmax(0, 1fr));
-  width: 90%;
+  width: 85%;
   margin-inline: auto;
   padding-block: 24px;
   padding-inline: clamp(8px, 2vw, 24px);

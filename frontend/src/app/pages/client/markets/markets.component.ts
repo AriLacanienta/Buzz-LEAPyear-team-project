@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, computed, signal } from '@angular/core';
 import { InstrumentService } from '@app/services/instrument.service';
 import { WatchlistService } from '@app/services/watchlist.service';
 import { Subscription } from 'rxjs';
@@ -16,6 +16,17 @@ import { CommonModule } from '@angular/common';
 })
 export class MarketsComponent implements OnInit, OnDestroy {
   instruments = signal<any[]>([]);
+  searchTerm = signal('');
+  visibleInstruments = computed(() => {
+    const query = this.searchTerm().trim().toLowerCase();
+    if (!query) return this.instruments();
+
+    return this.instruments().filter((instrument) =>
+      `${instrument.instrumentSymbol ?? ''} ${instrument.instrumentName ?? ''}`
+        .toLowerCase()
+        .includes(query)
+    );
+  });
   displayedColumns: string[] = ['watchlist', 'instrumentSymbol', 'instrumentName', 'currentPrice', 'changePercent', 'volume', 'marketCap'];
   selectedMarket = signal('US');
   selectedAssetType = signal('EQUITY');
@@ -86,6 +97,10 @@ export class MarketsComponent implements OnInit, OnDestroy {
     this.selectedAssetType.set(assetType);
     this.loadInstruments();
     this.startAutoRefresh();
+  }
+
+  onSearch(searchTerm: string): void {
+    this.searchTerm.set(searchTerm);
   }
 
   ngOnDestroy(): void {
