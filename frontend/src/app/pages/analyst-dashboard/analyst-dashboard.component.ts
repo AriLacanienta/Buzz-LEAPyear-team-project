@@ -32,7 +32,7 @@ export class AnalystDashboardComponent implements OnInit, OnDestroy {
   searchTerm = '';
   selectedPreset = 'today';
   pageIndex = 0;
-  readonly pageSize = 100;
+  readonly pageSize = 20;
   isLoading = true;
   lastUpdated: Date | null = null;
   errorMessage = '';
