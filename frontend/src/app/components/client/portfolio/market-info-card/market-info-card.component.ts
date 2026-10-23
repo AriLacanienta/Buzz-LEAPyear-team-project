@@ -4,8 +4,8 @@ import { MatCardModule } from '@angular/material/card';
 
 export interface QuoteResponse {
   symbol: string;
-  price: number;
-  changePercent: number;
+  price: number | null;
+  changePercent: number | null;
   name: string;
 }
 
@@ -35,7 +35,10 @@ export class MarketInfoCardComponent {
     return symbol.charAt(0).toUpperCase();
   }
 
-  getChangeClass(changePercent: number): string {
+  getChangeClass(changePercent: number | null): string {
+    if (changePercent === null) {
+      return 'neutral-change';
+    }
     if (changePercent > 0) {
       return 'positive-change';
     } else if (changePercent < 0) {
@@ -55,10 +58,17 @@ export class MarketInfoCardComponent {
     }
   }
 
-  formatChangePercent(changePercent: number): string {
+  formatChangePercent(changePercent: number | null): string {
+    if (changePercent === null) {
+      return '--';
+    }
     const sign = changePercent > 0 ? '+' : '';
     const arrow = changePercent > 0 ? '↗' : changePercent < 0 ? '↘' : '';
     return `${sign}${changePercent.toFixed(2)}%${arrow}`;
+  }
+
+  formatPrice(price: number | null): string {
+    return price === null ? '--' : `$${price.toFixed(2)}`;
   }
 
   getSymbolColor(symbol: string): string {
