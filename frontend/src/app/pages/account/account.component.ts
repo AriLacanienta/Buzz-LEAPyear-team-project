@@ -54,7 +54,7 @@ export class AccountComponent implements OnInit {
     { key: 'security', label: 'Security', icon: 'lock' },
     { key: 'notifications', label: 'Notifications', icon: 'notifications' },
     { key: 'preferences', label: 'Preferences', icon: 'tune' },
-    { key: 'billing', label: 'Billing', icon: 'credit_card' }
+    { key: 'billing', label: 'Transfers and Funds', icon: 'credit_card' }
   ];
   preferences: Preferences = {
     emailAlerts: true, pushAlerts: false, smsAlerts: false, orderFills: true,

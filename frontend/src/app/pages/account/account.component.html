@@ -38,6 +38,9 @@
         <section class="settings-panel status-panel" *ngIf="userProfile && !loading">
           <div class="panel-heading compact-heading"><div><p class="eyebrow">Overview</p><h2>Account status</h2></div></div>
           <div class="status-grid"><div><span>KYC status</span><strong class="positive">Verified</strong></div><div><span>Account tier</span><strong class="accent">Standard</strong></div><div><span>Member since</span><strong>2025</strong></div><div><span>Account ID</span><strong>{{ accountInfo ? '#' + accountInfo.accountId : 'Loading...' }}</strong></div></div>
+          <div class="subsection">
+            <div class="billing-summary"><div><strong>Standard account</strong><span>Your current trading account plan</span></div><span class="status-pill">Active</span></div>
+          </div>
         </section>
       </ng-container>
 
@@ -65,12 +68,10 @@
       </section>
 
       <section class="settings-panel" *ngIf="activeSection === 'billing'">
-        <div class="panel-heading"><div><p class="eyebrow">Plan and payments</p><h1>Billing</h1></div></div>
-        <div class="billing-summary"><div><strong>Standard account</strong><span>Your current trading account plan</span></div><span class="status-pill">Active</span></div>
+        <div class="panel-heading"><div><p class="eyebrow">Plan and payments</p><h1>Transfers and Funds</h1></div></div>
         <section class="funds-section" aria-label="Manage funds">
           <app-funds></app-funds>
         </section>
-        <div class="subsection"><p class="eyebrow">Account history</p><div class="billing-row" *ngFor="let bill of ['Account opened', 'Trading account activated']"><span>{{ bill }}</span><strong>Completed</strong></div></div>
       </section>
     </section>
   </main>
