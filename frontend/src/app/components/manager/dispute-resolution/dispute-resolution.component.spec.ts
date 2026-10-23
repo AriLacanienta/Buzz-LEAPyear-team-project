@@ -51,11 +51,13 @@ describe('DisputeResolutionComponent', () => {
     expect(dialogRef.close).toHaveBeenCalledOnceWith(true);
   });
 
-  it('submits the selected ID and trimmed text from the rendered form', () => {
+  it('prevents navigation and submits the selected ID and trimmed text from the rendered form', () => {
     const textarea: HTMLTextAreaElement = fixture.nativeElement.querySelector('textarea');
     textarea.value = '  Reviewed  ';
     textarea.dispatchEvent(new Event('input'));
-    fixture.nativeElement.querySelector('form').dispatchEvent(new Event('submit'));
+    const submit = new Event('submit', { bubbles: true, cancelable: true });
+    fixture.nativeElement.querySelector('form').dispatchEvent(submit);
+    expect(submit.defaultPrevented).toBeTrue();
     expect(service.resolve).toHaveBeenCalledOnceWith(7, 'Reviewed');
     expect(dialogRef.close).toHaveBeenCalledOnceWith(true);
   });

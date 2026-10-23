@@ -1,4 +1,4 @@
-<form (ngSubmit)="resolve()" [attr.aria-busy]="saving">
+<form (submit)="$event.preventDefault(); resolve()" [attr.aria-busy]="saving">
   <h2 id="dispute-resolution-title">Resolve dispute {{ disputeId }}</h2>
   <label for="resolution-message">Resolution message</label>
   <textarea id="resolution-message" [formControl]="resolutionMessage" rows="6" maxlength="2000"
