@@ -1,4 +1,7 @@
-<main class="login-container">
+<main class="login-container" [class.background-moving]="backgroundMotion">
+  <button type="button" class="background-motion-toggle" [attr.aria-pressed]="backgroundMotion" (click)="backgroundMotion = !backgroundMotion">
+    {{ backgroundMotion ? 'Pause background' : 'Animate background' }}
+  </button>
   <div class="comet" aria-hidden="true"></div>
   <div class="comet comet-small comet-small-one" aria-hidden="true"></div>
   <div class="comet comet-small comet-small-two" aria-hidden="true"></div>

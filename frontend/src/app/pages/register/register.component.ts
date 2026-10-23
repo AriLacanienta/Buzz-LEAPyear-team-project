@@ -12,6 +12,7 @@ import { COUNTRY_OPTIONS } from '../../utils/country-options';
 export class RegisterComponent {
   registerForm: FormGroup;
   loading = false;
+  backgroundMotion = true;
   submitted = false;
   errorMessage = '';
   readonly countryOptions = COUNTRY_OPTIONS;

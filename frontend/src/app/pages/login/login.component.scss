@@ -13,16 +13,52 @@
 
 .login-container::before {
   position: absolute;
-  z-index: -1;
-  inset: 0;
+  z-index: 0;
+  top: 50%;
+  left: 50%;
+  width: 150vmax;
+  height: 150vmax;
   background:
-    radial-gradient(circle at 14% 22%, #c8dcff 0 1px, transparent 1.5px),
-    radial-gradient(circle at 79% 28%, #9fc8ff 0 1px, transparent 1.5px),
-    radial-gradient(circle at 23% 76%, #b8cbff 0 1px, transparent 1.5px),
-    radial-gradient(circle at 88% 82%, #d9e7ff 0 1px, transparent 1.5px);
+    radial-gradient(circle at 29px 43px, #e4efff 0 1px, transparent 1.7px) 0 0 / 173px 211px,
+    radial-gradient(circle at 81px 107px, #9ecaff 0 .8px, transparent 1.5px) 0 0 / 257px 193px,
+    radial-gradient(circle at 137px 67px, #ffffff 0 1.3px, transparent 2px) 0 0 / 359px 307px,
+    radial-gradient(ellipse at 28% 45%, #4567a838, transparent 28%),
+    radial-gradient(ellipse at 72% 60%, #6951a32b, transparent 30%);
   content: '';
-  opacity: .46;
+  opacity: .65;
+  transform: translate(-50%, -50%) rotate(0deg);
+  animation: login-space-turn 180s linear infinite;
+  animation-play-state: paused;
   pointer-events: none;
+}
+
+.login-container.background-moving::before {
+  animation: login-space-turn 180s linear infinite;
+}
+
+.background-motion-toggle {
+  position: absolute;
+  right: 20px;
+  bottom: 16px;
+  z-index: 2;
+  padding: 8px 12px;
+  border: 1px solid #b7d0ff30;
+  border-radius: 6px;
+  background: #0b111dcc;
+  color: #b8c8df;
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.background-motion-toggle:focus-visible {
+  outline: 2px solid #83aef1;
+  outline-offset: 3px;
+}
+
+@keyframes login-space-turn {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
 }
 
 .comet {

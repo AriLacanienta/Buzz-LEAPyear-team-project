@@ -1,5 +1,7 @@
-<div class="register-container">
-  <div class="register-orbit" aria-hidden="true"><span></span></div>
+<div class="register-container" [class.background-moving]="backgroundMotion">
+    <button type="button" class="background-motion-toggle" [attr.aria-pressed]="backgroundMotion" (click)="backgroundMotion = !backgroundMotion">
+      {{ backgroundMotion ? 'Pause background' : 'Animate background' }}
+    </button>
   <div class="register-card">
     <div class="brand-lockup">
       <span class="register-logo" aria-hidden="true">
