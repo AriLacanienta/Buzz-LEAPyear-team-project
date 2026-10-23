@@ -6,17 +6,22 @@ import { Subject, interval, merge, of } from 'rxjs';
 import { catchError, map, startWith, switchMap, takeUntil } from 'rxjs/operators';
 import { AnalystTrade, AnalystTradePage } from '../../models/analyst-trade.model';
 import { AnalystTradeService } from '../../services/analyst-trade.service';
+import { AuthService } from '../../services/auth.service';
+import { Router } from '@angular/router';
 import { HighchartsChartModule } from 'highcharts-angular';
 import * as Highcharts from 'highcharts';
+import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-analyst-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, HighchartsChartModule],
+  imports: [CommonModule, FormsModule, HighchartsChartModule, DragDropModule],
   templateUrl: './analyst-dashboard.component.html',
   styleUrls: ['./analyst-dashboard.component.scss']
 })
 export class AnalystDashboardComponent implements OnInit, OnDestroy {
+  readonly defaultWidgetOrder = ['summary', 'market-insights', 'charts', 'trades'];
+  widgetOrder = [...this.defaultWidgetOrder];
   Highcharts: typeof Highcharts = Highcharts;
   assetMixChartOptions: Highcharts.Options = {};
   orderFlowChartOptions: Highcharts.Options = {};
@@ -35,7 +40,44 @@ export class AnalystDashboardComponent implements OnInit, OnDestroy {
   private readonly refresh$ = new Subject<void>();
   private requestVersion = 0;
 
-  constructor(private analystTradeService: AnalystTradeService) {}
+  constructor(
+    private analystTradeService: AnalystTradeService,
+    private authService: AuthService,
+    private router: Router
+  ) {}
+
+  logout(): void {
+    this.authService.logout();
+    this.router.navigate(['/login']);
+  }
+
+  dropWidget(event: CdkDragDrop<string[]>): void {
+    if (event.previousIndex === event.currentIndex) {
+      return;
+    }
+    moveItemInArray(this.widgetOrder, event.previousIndex, event.currentIndex);
+    localStorage.setItem('analyst-dashboard-widget-order', JSON.stringify(this.widgetOrder));
+  }
+
+  resetWidgetOrder(): void {
+    this.widgetOrder = [...this.defaultWidgetOrder];
+    localStorage.removeItem('analyst-dashboard-widget-order');
+  }
+
+  widgetPosition(widget: string): number {
+    return this.widgetOrder.indexOf(widget);
+  }
+
+  private loadWidgetOrder(): void {
+    try {
+      const saved = JSON.parse(localStorage.getItem('analyst-dashboard-widget-order') || 'null');
+      if (Array.isArray(saved) && this.defaultWidgetOrder.every(widget => saved.includes(widget))) {
+        this.widgetOrder = saved;
+      }
+    } catch {
+      this.widgetOrder = [...this.defaultWidgetOrder];
+    }
+  }
 
   get buyCount(): number {
     return this.trades.filter(trade => trade.side === 'BUY').length;
@@ -69,6 +111,7 @@ export class AnalystDashboardComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.loadWidgetOrder();
     merge(interval(2000), this.refresh$).pipe(
       startWith(0),
       map(() => ++this.requestVersion),
