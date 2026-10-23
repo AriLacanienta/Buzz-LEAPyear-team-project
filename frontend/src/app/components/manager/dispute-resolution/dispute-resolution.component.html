@@ -1,0 +1,19 @@
+<form (submit)="$event.preventDefault(); resolve()" [attr.aria-busy]="saving">
+  <h2 id="dispute-resolution-title">Resolve dispute {{ disputeId }}</h2>
+  <label for="resolution-message">Resolution message</label>
+  <textarea id="resolution-message" [formControl]="resolutionMessage" rows="6" maxlength="2000"
+    required [readOnly]="saving" aria-describedby="resolution-hint resolution-validation"
+    [attr.aria-invalid]="resolutionMessage.touched && resolutionMessage.invalid"></textarea>
+  <p id="resolution-hint" class="hint">Required. Maximum 2000 characters.</p>
+  <p id="resolution-validation" class="error">
+    <ng-container *ngIf="resolutionMessage.touched && resolutionMessage.invalid">
+      Enter a resolution message with 1 to 2000 characters, not just whitespace.
+    </ng-container>
+  </p>
+  <p *ngIf="error" class="error" role="alert">{{ error }}</p>
+  <p *ngIf="saving" role="status">Resolving dispute...</p>
+  <div class="actions">
+    <button type="button" (click)="cancel()" [disabled]="saving">Cancel</button>
+    <button type="submit" [disabled]="saving || resolutionMessage.invalid">Resolve</button>
+  </div>
+</form>
