@@ -16,7 +16,7 @@ import { CommonModule } from '@angular/common';
 })
 export class MarketsComponent implements OnInit, OnDestroy {
   instruments = signal<any[]>([]);
-  displayedColumns: string[] = ['instrumentSymbol', 'instrumentName', 'currentPrice', 'changePercent', 'volume', 'marketCap', 'watchlist'];
+  displayedColumns: string[] = ['watchlist', 'instrumentSymbol', 'instrumentName', 'currentPrice', 'changePercent', 'volume', 'marketCap'];
   selectedMarket = signal('US');
   selectedAssetType = signal('EQUITY');
   markets: string[] = ['US', 'UK', 'India'];

@@ -1,4 +1,5 @@
   import { Component, DestroyRef, HostListener, OnInit } from '@angular/core';
+  import { ActivatedRoute } from '@angular/router';
 import { HoldingService } from '@app/services/holding.service';
 import { TradeOrderService } from '@app/services/trade-order.service';
 import { TradeOrderPreviewRequest, TradeOrderPreviewResponse } from '@app/models/trade-order.model';
@@ -7,6 +8,7 @@ import { SearchResultDetailComponent } from '../search-result-detail/search-resu
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { InstrumentSearchResponse } from '@app/models/instrument-search-response.model';
 import { AccountService } from '@app/services/account.service';
+import { InstrumentService } from '@app/services/instrument.service';
 import { merge, switchMap, timer, of, Subject } from 'rxjs';
 import { catchError, debounceTime, filter, finalize, take, tap } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -38,16 +40,20 @@ export class BuySellComponent implements OnInit {
 
   private accountId: string | null = null;
   private ownsSelected: boolean | null = null;
+  private openPresetConfirmation = false;
   private previewTrigger$ = new Subject<void>();
 
   constructor(
     private accountService: AccountService, 
     private holdingService: HoldingService,
     private tradeOrderService: TradeOrderService, 
+    private instrumentService: InstrumentService,
+    private route: ActivatedRoute,
     private destroyRef: DestroyRef
   ) {}
 
   ngOnInit(): void {
+    this.applyTradePreset();
     this.accountService.getMyAccount().pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
@@ -75,7 +81,40 @@ export class BuySellComponent implements OnInit {
       this.preview = preview;
       if (preview) {
         this.cashAvailable = preview.cashAvailable;
+
+        if (preview.valid && this.openPresetConfirmation) {
+          this.isConfirmationOpen = true;
+          this.openPresetConfirmation = false;
+        }
       }
+    });
+  }
+
+  private applyTradePreset(): void {
+    this.route.queryParams.pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(params => {
+      const symbol = params['symbol'];
+      const quantity = Number(params['quantity']);
+      const side = params['side'];
+      this.openPresetConfirmation = params['confirm'] === 'true';
+
+      if (!symbol || !Number.isInteger(quantity) || quantity <= 0) {
+        return;
+      }
+
+      this.isBuy = side !== 'SELL';
+      this.quantity = quantity;
+
+      this.instrumentService.searchInstruments(symbol).pipe(
+        take(1),
+        catchError(() => of([]))
+      ).subscribe(results => {
+        const instrument = results.find(item => item.instrumentSymbol === symbol);
+        if (instrument) {
+          this.onSearchItemSelected(instrument);
+        }
+      });
     });
   }
 
@@ -243,7 +282,7 @@ export class BuySellComponent implements OnInit {
     const preview = this.preview;
     const matchesInput = preview
       && preview.side === side
-      && preview.symbol === this.selectedResult?.instrumentSymbol
+      && preview.instrumentSymbol === this.selectedResult?.instrumentSymbol
       && Number(preview.quantity) === this.quantity;
 
     if (preview && matchesInput && !preview.valid) {

@@ -57,10 +57,11 @@
         type="button"
         class="watchlist-button"
         [class.is-added]="isInWatchlist(instrument.instrumentSymbol)"
+        [attr.aria-pressed]="isInWatchlist(instrument.instrumentSymbol)"
         [attr.aria-label]="isInWatchlist(instrument.instrumentSymbol) ? 'Remove ' + instrument.instrumentSymbol + ' from watchlist' : 'Add ' + instrument.instrumentSymbol + ' to watchlist'"
         [title]="isInWatchlist(instrument.instrumentSymbol) ? 'Remove from watchlist' : 'Add to watchlist'"
         (click)="$event.stopPropagation(); toggleWatchlist(instrument.instrumentSymbol)">
-        {{ isInWatchlist(instrument.instrumentSymbol) ? '-' : '+' }}
+        <span class="watchlist-icon" aria-hidden="true">{{ isInWatchlist(instrument.instrumentSymbol) ? '★' : '☆' }}</span>
       </button>
     </td>
   </ng-container>

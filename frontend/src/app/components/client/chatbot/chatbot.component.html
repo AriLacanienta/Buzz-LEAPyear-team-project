@@ -1,0 +1,191 @@
+<button
+  *ngIf="!isOpen"
+  class="chatbot-launcher"
+  type="button"
+  aria-label="Open Buzz helper"
+  (click)="toggleChatbot()"
+>
+  <svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
+    <path d="M13.2 2.8 5.7 13h5.1l-.5 8.2L18.3 11h-5.1v-8.2Z" fill="currentColor" />
+  </svg>
+</button>
+
+<section *ngIf="isOpen" class="chatbot">
+  <header class="chat-header">
+    <span class="chatbot-avatar" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M13.2 2.8 5.7 13h5.1l-.5 8.2L18.3 11h-5.1v-8.2Z" fill="currentColor" />
+      </svg>
+    </span>
+    <div class="chat-header-copy">
+      <h2>Buzz assistant</h2>
+      <p><span class="assistant-status" aria-hidden="true"></span>Here to help with your account</p>
+    </div>
+    <button
+      type="button"
+      class="close-button"
+      aria-label="Minimize Buzz assistant"
+      (click)="toggleChatbot()"
+    >
+      <svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
+        <path d="m6 6 12 12M18 6 6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+      </svg>
+    </button>
+  </header>
+
+  <div class="chatbot-shortcuts">
+    <button type="button" (click)="openDisputeForm()" [disabled]="loading">
+      {{ activeDispute ? 'View current dispute' : 'Raise a dispute' }}
+    </button>
+    <button type="button" class="portfolio-summary-shortcut" (click)="sendMessage('portfolio summary')" [disabled]="loading">
+      Portfolio summary
+    </button>
+  </div>
+
+  <div #messagesContainer class="messages">
+    <div
+      *ngFor="let message of messages; let messageIndex = index"
+      [class.user]="message.role === 'user'"
+      [class.assistant]="message.role === 'assistant'"
+    >
+      <p>{{ message.text }}</p>
+
+      <section *ngIf="message.dispute as dispute" class="dispute-card" aria-label="Trade dispute"
+        [attr.data-active-dispute]="dispute === activeDispute ? 'true' : null">
+        <form *ngIf="dispute.state === 'draft'" class="dispute-form" (ngSubmit)="reviewDispute(dispute)" ngNativeValidate>
+          <label [for]="'dispute-order-' + messageIndex">Order to dispute</label>
+          <select [id]="'dispute-order-' + messageIndex" name="selectedOrder" required
+            [(ngModel)]="dispute.selectedOrder" (ngModelChange)="dispute.error = ''"
+            [disabled]="dispute.ordersLoading || !dispute.orders.length">
+            <option [ngValue]="undefined" disabled>Select an executed order</option>
+            <option *ngFor="let order of dispute.orders; trackBy: trackDisputeOrder" [ngValue]="order">
+              #{{ order.orderId }} · {{ order.instrumentSymbol }} · {{ order.side }} {{ order.quantity }} · {{ order.orderDate | date: 'MMM d, yyyy HH:mm' }}
+            </option>
+          </select>
+          <span *ngIf="dispute.ordersLoading" role="status">Loading your orders…</span>
+          <div *ngIf="dispute.ordersError" role="alert" class="dispute-error">
+            {{ dispute.ordersError }}
+            <button type="button" [disabled]="dispute.ordersLoading" (click)="loadDisputeOrders(dispute, dispute.pageIndex)">Retry loading orders</button>
+          </div>
+          <small *ngIf="!dispute.ordersLoading && !dispute.ordersError && !dispute.pageOrderCount">
+            {{ dispute.totalPages ? 'No executed orders on this page. Try another page.' : 'No orders found. Place a trade before raising a dispute.' }}
+          </small>
+          <div *ngIf="dispute.totalPages > 1" class="dispute-pagination" aria-label="Order history pages">
+            <button type="button" [disabled]="dispute.ordersLoading || dispute.pageIndex === 0"
+              (click)="loadDisputeOrders(dispute, dispute.pageIndex - 1)">Newer</button>
+            <small>Page {{ dispute.pageIndex + 1 }} of {{ dispute.totalPages }}</small>
+            <button type="button" [disabled]="dispute.ordersLoading || dispute.pageIndex + 1 >= dispute.totalPages"
+              (click)="loadDisputeOrders(dispute, dispute.pageIndex + 1)">Older</button>
+          </div>
+          <div *ngIf="dispute.selectedOrder as order" class="dispute-order-summary">
+            <strong>Order #{{ order.orderId }} · {{ order.instrumentSymbol }}</strong>
+            <span>{{ order.side }} {{ order.quantity }} at {{ order.price | currency }}</span>
+            <span>{{ order.orderDate | date: 'MMM d, yyyy HH:mm:ss' }}</span>
+          </div>
+          <label [for]="'dispute-description-' + messageIndex">What went wrong?</label>
+          <textarea [id]="'dispute-description-' + messageIndex" name="description" rows="4" required
+            maxlength="2000" [(ngModel)]="dispute.description" [attr.aria-describedby]="'dispute-count-' + messageIndex"></textarea>
+          <small [id]="'dispute-count-' + messageIndex">{{ dispute.description.length }}/2,000 characters</small>
+          <div class="dispute-actions">
+            <button type="submit" [disabled]="dispute.ordersLoading || !dispute.selectedOrder">Review dispute</button>
+            <button type="button" class="secondary" (click)="cancelDispute(dispute)">Cancel</button>
+          </div>
+        </form>
+        <div *ngIf="dispute.state === 'review' || dispute.state === 'submitting'" class="dispute-review">
+          <strong>Review your dispute</strong>
+          <div *ngIf="dispute.selectedOrder as order" class="dispute-order-summary">
+            <strong>Order #{{ order.orderId }} · {{ order.instrumentSymbol }}</strong>
+            <span>{{ order.side }} {{ order.quantity }} at {{ order.price | currency }}</span>
+            <span>{{ order.orderDate | date: 'MMM d, yyyy HH:mm:ss' }}</span>
+          </div>
+          <p>{{ dispute.description }}</p>
+          <small>This will be submitted for your signed-in account.</small>
+          <div class="dispute-actions">
+            <button type="button" [disabled]="dispute.state === 'submitting'" (click)="confirmDispute(dispute)">
+              {{ dispute.state === 'submitting' ? 'Submitting…' : 'Confirm dispute' }}
+            </button>
+            <button type="button" class="secondary" [disabled]="dispute.state === 'submitting'" (click)="editDispute(dispute)">Edit</button>
+            <button type="button" class="secondary" [disabled]="dispute.state === 'submitting'" (click)="cancelDispute(dispute)">Cancel</button>
+          </div>
+        </div>
+        <p *ngIf="dispute.error" class="dispute-error" role="alert">{{ dispute.error }}</p>
+        <p *ngIf="dispute.state === 'succeeded' && dispute.result as result" role="status" class="dispute-success">
+          Dispute #{{ result.id }} created for order #{{ result.tradeOrderId }}. Status: {{ result.status }}.
+        </p>
+        <p *ngIf="dispute.state === 'cancelled'" role="status">Dispute cancelled. Nothing was submitted.</p>
+        <span *ngIf="dispute.state === 'submitting'" role="status">Submitting your dispute…</span>
+      </section>
+
+      <div *ngIf="message.preview as preview" class="preview">
+        <strong>{{ preview.side }} {{ preview.quantity }} {{ preview.instrumentSymbol }}</strong>
+        <span>Estimated value: {{ preview.estimatedValue }}</span>
+        <span>Cash after: {{ preview.cashAfter }}</span>
+        <span *ngIf="!preview.valid">{{ preview.reason }}</span>
+      </div>
+
+      <div *ngIf="message.portfolio as portfolio" class="portfolio-summary">
+        <span>Portfolio value: {{ portfolio.portfolioValue | currency }}</span>
+        <span>Cost basis: {{ portfolio.totalCostBasis | currency }}</span>
+        <span>Today: {{ portfolio.todayChange | currency }} ({{ portfolio.todayChangePercent }}%)</span>
+        <span>All time: {{ portfolio.allTimeChange | currency }} ({{ portfolio.allTimeChangePercent }}%)</span>
+      </div>
+
+      <div *ngIf="message.marketMovers as movers" class="market-movers">
+        <section *ngIf="movers.topGainers.length">
+          <strong>Top gainers</strong>
+          <div *ngFor="let mover of movers.topGainers; let i = index">
+            <span>{{ i + 1 }}. {{ mover.symbol }}</span>
+            <span class="positive">+{{ mover.changePercent }}%</span>
+          </div>
+        </section>
+        <section *ngIf="movers.topLosers.length">
+          <strong>Top losers</strong>
+          <div *ngFor="let mover of movers.topLosers; let i = index">
+            <span>{{ i + 1 }}. {{ mover.symbol }}</span>
+            <span class="negative">{{ mover.changePercent }}%</span>
+          </div>
+        </section>
+      </div>
+
+      <div *ngIf="message.comparison as comparison" class="comparison">
+        <div>
+          <strong>{{ comparison.first.symbol }}</strong>
+          <span>{{ comparison.first.price | currency }}</span>
+          <span [class.positive]="comparison.first.changePercent >= 0" [class.negative]="comparison.first.changePercent < 0">
+            {{ comparison.first.changePercent >= 0 ? '+' : '' }}{{ comparison.first.changePercent }}%
+          </span>
+        </div>
+        <div>
+          <strong>{{ comparison.second.symbol }}</strong>
+          <span>{{ comparison.second.price | currency }}</span>
+          <span [class.positive]="comparison.second.changePercent >= 0" [class.negative]="comparison.second.changePercent < 0">
+            {{ comparison.second.changePercent >= 0 ? '+' : '' }}{{ comparison.second.changePercent }}%
+          </span>
+        </div>
+      </div>
+
+      <button
+        *ngIf="message.action === 'VIEW_TRADE'"
+        type="button"
+        (click)="openAction(message.action, message.preview)"
+      >
+        Review
+      </button>
+    </div>
+
+    <p *ngIf="loading">Checking...</p>
+  </div>
+
+  <form (ngSubmit)="sendMessage()">
+    <input
+      name="message"
+      [(ngModel)]="message"
+      placeholder="Ask about your account"
+      autocomplete="off"
+    />
+
+    <button type="submit" [disabled]="loading || !message.trim()">
+      Send
+    </button>
+  </form>
+</section>

@@ -6,7 +6,8 @@
           <span class="header">{{ header }}</span>
         </div>
         <div class="data-wrapper">
-          <span class="data" [style.color]="header === 'FILL RATE' ? getFillRateColor() : header === 'OPEN DISPUTES' ? getOpenDisputesColor() : null">{{ data }}</span>
+          <span *ngIf="!dataLines.length" class="data" [style.color]="header === 'FILL RATE' ? getFillRateColor() : header === 'OPEN DISPUTES' ? getOpenDisputesColor() : null">{{ data }}</span>
+          <span *ngFor="let line of dataLines" class="currency-total">{{ line }}</span>
         </div>
         <div class="info-wrapper">
           <span class="info">{{ info }}</span>

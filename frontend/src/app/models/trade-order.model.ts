@@ -13,7 +13,7 @@ export interface TradeOrderRequest extends TradeOrderPreviewRequest {
 }
 
 export interface TradeOrderPreviewResponse {
-    symbol: string;
+    instrumentSymbol: string;
     side: OrderSide;
     quantity: number;
     livePrice: number | null;

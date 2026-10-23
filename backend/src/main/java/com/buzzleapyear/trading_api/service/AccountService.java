@@ -123,8 +123,9 @@ public class AccountService {
         BigDecimal portfolioValue = BigDecimal.ZERO;
         BigDecimal totalCostBasis = BigDecimal.ZERO;
         BigDecimal todayStartValue = BigDecimal.ZERO;
+        List<HoldingResponseDto> holdings = holdingService.getHoldingsByAccountId(accountId);
 
-        for (HoldingResponseDto holding : holdingService.getHoldingsByAccountId(accountId)) {
+        for (HoldingResponseDto holding : holdings) {
             BigDecimal quantity = orZero(holding.quantity());
             BigDecimal price = orZero(holding.currentPrice());
             BigDecimal previousClose = price.subtract(orZero(holding.change()));
@@ -146,6 +147,7 @@ public class AccountService {
         BigDecimal allTimeChange = portfolioValue.subtract(totalCostBasis);
 
         return Optional.of(new PortfolioSummaryResponseDto(
+            holdings.size(),
             portfolioValue.setScale(2, RoundingMode.HALF_UP),
             totalCostBasis.setScale(2, RoundingMode.HALF_UP),
             todayChange.setScale(2, RoundingMode.HALF_UP),

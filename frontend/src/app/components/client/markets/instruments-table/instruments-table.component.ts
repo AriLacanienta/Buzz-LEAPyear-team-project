@@ -13,7 +13,7 @@ import { WatchlistService } from '@app/services/watchlist.service';
 export class InstrumentsTableComponent {
   @Input() instruments: any[] = [];
   @Input() selectedMarket: string = 'US';
-  @Input() displayedColumns: string[] = ['instrumentSymbol', 'instrumentName', 'currentPrice', 'changePercent', 'volume', 'marketCap', 'watchlist'];
+  @Input() displayedColumns: string[] = ['watchlist', 'instrumentSymbol', 'instrumentName', 'currentPrice', 'changePercent', 'volume', 'marketCap'];
 
   constructor(private watchlistService: WatchlistService) {}
 
