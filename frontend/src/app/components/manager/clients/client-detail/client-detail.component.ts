@@ -3,11 +3,12 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ManagerClient } from '../../../../models/manager-client.model';
 import { ClientTradeHistoryComponent } from '../client-trade-history/client-trade-history.component';
+import { ManagerDisputesComponent } from '@app/pages/manager/manager-disputes/manager-disputes.component';
 
 @Component({
   selector: 'app-client-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, ClientTradeHistoryComponent],
+  imports: [CommonModule, FormsModule, ClientTradeHistoryComponent, ManagerDisputesComponent],
   templateUrl: './client-detail.component.html',
   styleUrls: ['./client-detail.component.scss']
 })

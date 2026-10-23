@@ -2,6 +2,8 @@ package com.buzzleapyear.trading_api.controller;
 
 import com.buzzleapyear.trading_api.dto.CreateDisputeRequest;
 import com.buzzleapyear.trading_api.dto.DisputeResponse;
+import com.buzzleapyear.trading_api.dto.ResolveDisputeRequest;
+import com.buzzleapyear.trading_api.entity.DisputeStatus;
 import com.buzzleapyear.trading_api.dto.ManagerDashboardSummary;
 import com.buzzleapyear.trading_api.service.DisputeService;
 import com.buzzleapyear.trading_api.service.ManagerDashboardService;
@@ -54,6 +56,7 @@ public class DisputeController {
         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime toDate,
         @RequestParam(required = false) BigDecimal minTradeValue,
         @RequestParam(required = false) BigDecimal maxTradeValue,
+        @RequestParam(required = false) DisputeStatus status,
         Authentication authentication) {
         if (page < 0 || size < 1 || size > 100 || !SORT_FIELDS.contains(sortBy)
             || (!sortDirection.equalsIgnoreCase("asc") && !sortDirection.equalsIgnoreCase("desc"))
@@ -67,12 +70,14 @@ public class DisputeController {
         Sort.Direction direction = Sort.Direction.fromString(sortDirection);
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, path).and(Sort.by("id")));
         return ResponseEntity.ok(disputeService.search(authentication.getName(), isManager(authentication),
-            accountId, fromDate, toDate, minTradeValue, maxTradeValue, pageable));
+            accountId, fromDate, toDate, minTradeValue, maxTradeValue, status, pageable));
     }
 
     @PatchMapping("/{id}/resolve")
-    public ResponseEntity<DisputeResponse> resolve(@PathVariable Long id, Authentication authentication) {
-        return ResponseEntity.ok(disputeService.resolve(id, authentication));
+    public ResponseEntity<DisputeResponse> resolve(@PathVariable Long id,
+                                                  @Valid @RequestBody ResolveDisputeRequest request,
+                                                  Authentication authentication) {
+        return ResponseEntity.ok(disputeService.resolve(id, request.resolutionMessage(), authentication));
     }
 
     private boolean isManager(Authentication authentication) {
