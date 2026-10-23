@@ -1,0 +1,101 @@
+<div class="trade-log-toolbar">
+  <label class="search-field">
+    <span aria-hidden="true">⌕</span>
+    <input
+      type="search"
+      placeholder="Search order, client, ticker"
+      [value]="searchTerm"
+      (input)="setSearchTerm($any($event.target).value)" />
+  </label>
+
+  <div class="filter-group" aria-label="Trade status filter">
+    <button type="button" [class.active]="statusFilter === 'ALL'" (click)="setStatusFilter('ALL')">ALL</button>
+    <button type="button" [class.active]="statusFilter === 'FILLED'" (click)="setStatusFilter('FILLED')">FILLED</button>
+    <button type="button" [class.active]="statusFilter === 'REJECTED'" (click)="setStatusFilter('REJECTED')">REJECTED</button>
+    <button type="button" [class.active]="statusFilter === 'PENDING'" (click)="setStatusFilter('PENDING')">PENDING</button>
+  </div>
+
+  <span class="divider">|</span>
+
+  <div class="filter-group" aria-label="Trade side filter">
+    <button type="button" [class.active]="sideFilter === 'ALL'" (click)="setSideFilter('ALL')">ALL</button>
+    <button type="button" [class.active]="sideFilter === 'BUY'" (click)="setSideFilter('BUY')">BUY</button>
+    <button type="button" [class.active]="sideFilter === 'SELL'" (click)="setSideFilter('SELL')">SELL</button>
+  </div>
+
+  <span class="order-count">
+    {{ totalElements || '' }} orders
+  </span>
+</div>
+
+<div class="trade-log-table">
+
+  <p *ngIf="loading">Loading trades...</p>
+  <p *ngIf="error">Unable to load trades.</p>
+
+  <div class="table-wrapper" *ngIf="!loading && !error">
+    <table *ngIf="filteredTrades.length > 0; else emptyState">
+      <thead>
+          <th>ORDER ID</th>
+          <th>CLIENT</th>
+          <th>TICKER</th>
+          <th>SIDE</th>
+          <th>QTY</th>
+          <th>PRICE</th>
+          <th>VALUE</th>
+          <th>STATUS</th>
+          <th>ORDER TIME</th>
+          <th>FILL TIME</th>
+      </thead>
+
+      <tbody>
+        <tr
+          *ngFor="let trade of filteredTrades; trackBy: trackByTradeId"
+          class="trade-row"
+          [class.selected]="selectedTradeId === trade.tradeId"
+          [attr.aria-selected]="selectedTradeId === trade.tradeId"
+          tabindex="0"
+          (click)="selectTrade(trade)"
+          (keydown.enter)="selectTrade(trade)"
+          (keydown.space)="$event.preventDefault(); selectTrade(trade)">
+          <td class="order-id">{{ trade.tradeId }}</td>
+          <td class="client">
+            {{ trade.clientName }}
+            <small>{{ trade.clientEmail }}</small>
+          </td>
+          <td class="instrument">{{ trade.instrumentSymbol }}</td>
+          <td class="side" [style.color]="getSideColor(trade.side)">{{ trade.side }}</td>
+          <td class="quantity" [style.color]="orderRejected(trade.status)">{{ trade.quantity }}</td>
+          <td class="price">{{ trade.price | currency:trade.currency }}</td>
+          <td class="value">{{ trade.value | currency:trade.currency }}</td>
+          <td class="status">
+                        <span class="status-badge" [class]="'status-' + (trade.status?.toLowerCase() ?? 'unknown')"
+                            [attr.title]="trade.statusReason">
+                            {{ trade.status ?? 'UNKNOWN' }}
+                        </span>
+                    </td>
+          <td class="time-placed">{{ trade.timePlaced ? (trade.timePlaced | date:'MM/dd/yyyy HH:mm') : '—' }}</td>
+          <td class="time-filled">{{ trade.timeFilled ? (trade.timeFilled | date:'MM/dd/yyyy HH:mm') : '—' }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <ng-template #emptyState>
+      <p>{{ trades.length > 0 ? 'No trades match the selected filters.' : 'No trades found.' }}</p>
+    </ng-template>
+  </div>
+
+  <div class="pagination" *ngIf="totalElements > 0">
+    <button (click)="previousPage()" [disabled]="pageIndex === 0">
+      Previous
+    </button>
+
+    <span>Page {{ pageIndex + 1 }} of {{ totalPages }}</span>
+
+    <button
+      (click)="nextPage()"
+      [disabled]="pageIndex + 1 >= totalPages">
+      Next
+    </button>
+  </div>
+</div>

@@ -48,9 +48,11 @@ export class AuthInterceptor implements HttpInterceptor {
     return next.handle(req).pipe(
       catchError(error => {
         const isRefreshCall = req.url.includes('/auth/refresh');
+        const isAuthenticationCall = req.url.includes('/auth/login')
+          || req.url.includes('/auth/register');
 
         //try refresh flow once for non refresh calls
-        if (error.status === 401 && !isRefreshCall) {
+        if (error.status === 401 && !isRefreshCall && !isAuthenticationCall) {
           //access token is expired recovering with refresh cookie
           return this.authService.refreshAccessToken().pipe(
             switchMap((authResponse) => {

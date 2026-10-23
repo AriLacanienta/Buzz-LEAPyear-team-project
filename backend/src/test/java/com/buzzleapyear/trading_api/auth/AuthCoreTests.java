@@ -5,10 +5,11 @@ import com.buzzleapyear.trading_api.dto.LoginRequest;
 import com.buzzleapyear.trading_api.dto.RegistrationRequest;
 import com.buzzleapyear.trading_api.entity.User;
 import com.buzzleapyear.trading_api.entity.Role;
-import com.buzzleapyear.trading_api.repository.RefreshSessionRepository;
 import com.buzzleapyear.trading_api.repository.AccountRepository;
 import com.buzzleapyear.trading_api.repository.ClientRepository;
+import com.buzzleapyear.trading_api.repository.LoginAttemptRepository;
 import com.buzzleapyear.trading_api.repository.RoleRepository;
+import com.buzzleapyear.trading_api.repository.RefreshSessionRepository;
 import com.buzzleapyear.trading_api.repository.UserRepository;
 import com.buzzleapyear.trading_api.security.JwtTokenProvider;
 import org.junit.jupiter.api.Test;
@@ -31,10 +32,11 @@ import static org.mockito.Mockito.*;
 class AuthCoreTests {
 
     @Mock UserRepository userRepository;
-    @Mock RefreshSessionRepository refreshSessionRepository;
     @Mock AccountRepository accountRepository;
     @Mock ClientRepository clientRepository;
     @Mock RoleRepository roleRepository;
+    @Mock RefreshSessionRepository refreshSessionRepository;
+    @Mock LoginAttemptRepository loginAttemptRepository;
     @Mock JwtTokenProvider tokenProvider;
     @Mock HttpServletRequest request;
     @InjectMocks AuthController controller;
@@ -51,11 +53,12 @@ class AuthCoreTests {
         when(roleRepository.findByRoleName(Role.RoleName.CLIENT))
             .thenReturn(java.util.Optional.of(new Role(Role.RoleName.CLIENT, "Client")));
         when(tokenProvider.generateAccessToken(eq("alice"), eq(0L))).thenReturn("access-token");
+        when(request.isSecure()).thenReturn(false);
+        when(request.getHeader("X-Forwarded-Proto")).thenReturn(null);
 
         RegistrationRequest registration = new RegistrationRequest(
                 "alice", "alice@example.com", "Alice", "Client", "Password123");
-        var response = controller.register(registration, request);
-        assertEquals(201, response.getStatusCode().value());
+        assertEquals(201, controller.register(registration, request).getStatusCode().value());
 
         User savedUser = verifyAndCaptureSavedUser();
         when(userRepository.findByEmail("alice@example.com")).thenReturn(java.util.Optional.of(savedUser));

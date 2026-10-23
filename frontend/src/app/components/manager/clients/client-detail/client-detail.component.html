@@ -1,0 +1,98 @@
+<section class="client-detail" *ngIf="client as selectedClient; else noSelection">
+  <header class="detail-header">
+    <div class="detail-identity">
+      <span class="avatar avatar-large">{{ selectedClient.initials }}</span>
+      <div>
+        <p class="client-profile">Client profile</p>
+        <h2>{{ selectedClient.name }}</h2>
+        <p>
+          <span class="client-email">{{ selectedClient.email }}</span>
+          <span aria-hidden="true"> | </span>
+          <span class="client-reference">{{ selectedClient.reference }}</span>
+        </p>
+      </div>
+    </div>
+
+    <button
+      class="refresh-button"
+      type="button"
+      aria-label="Refresh clients"
+      (click)="refreshRequested.emit()">
+      ↻
+    </button>
+  </header>
+
+  <div class="summary-grid">
+    <div class="summary-item">
+      <span>Portfolio total</span>
+      <strong>{{ selectedClient.totalValue | currency:'USD':'symbol':'1.0-0' }}</strong>
+    </div>
+    <div class="summary-item">
+      <span>Order total</span>
+      <strong>{{ selectedClient.orderTotal | currency:'USD':'symbol':'1.0-0' }}</strong>
+    </div>
+    <div class="summary-item">
+      <span>Orders reviewed</span>
+      <strong>{{ selectedClient.trades.length }}</strong>
+    </div>
+    <div class="summary-item" [class.warning]="selectedClient.rejectedOrders > 0">
+      <span>Rejected orders</span>
+      <strong>{{ selectedClient.rejectedOrders }}</strong>
+    </div>
+  </div>
+
+  <section class="detail-section">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">Activity</p>
+        <h3>Trade history</h3>
+      </div>
+      <span>{{ selectedClient.trades.length }} records</span>
+    </div>
+
+    <app-client-trade-history [trades]="selectedClient.trades" />
+  </section>
+
+  <section class="detail-section dispute-section">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">Resolution center</p>
+        <h3>Disputes</h3>
+      </div>
+      <span>No dispute feed connected</span>
+    </div>
+
+    <p>Dispute records will appear here when they are assigned to this client.</p>
+  </section>
+
+  <section class="detail-section notes-section">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">Client record</p>
+        <h3>Notes</h3>
+      </div>
+      <span>Internal</span>
+    </div>
+
+    <label class="notes-label" [attr.for]="'client-notes-' + selectedClient.id">
+      Add notes for {{ selectedClient.name }}
+    </label>
+    <textarea
+      [id]="'client-notes-' + selectedClient.id"
+      [(ngModel)]="draftNotes"
+      rows="4"
+      maxlength="2000"
+      placeholder="Record follow-ups, context, or review notes..."></textarea>
+
+    <div class="notes-actions">
+      <span *ngIf="notesSavedMessage" class="notes-saved" role="status">Notes saved</span>
+      <button type="button" class="save-notes-button" (click)="saveNotes()">Save notes</button>
+    </div>
+  </section>
+</section>
+
+<ng-template #noSelection>
+  <section class="client-detail empty-selection">
+    <p>Select a client to view their trade history and disputes.</p>
+  </section>
+</ng-template>

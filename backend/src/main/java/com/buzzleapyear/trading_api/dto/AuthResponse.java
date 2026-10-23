@@ -21,12 +21,6 @@ public class AuthResponse {
         this.username = username;
         this.email = email;
     }
-
-    public AuthResponse(String accessToken, String refreshToken, String username,
-                        String email, List<String> roles) {
-        this(accessToken, refreshToken, username, email);
-        this.roles = roles;
-    }
     public String getAccessToken() {
         return accessToken;
     }
@@ -34,11 +28,14 @@ public class AuthResponse {
         return refreshToken;
     }
 
+    public AuthResponse(String accessToken, String refreshToken, String username,
+                        String email, List<String> roles) {
+        this(accessToken, refreshToken, username, email);
+        this.roles = roles;
+    }
+
     public AuthResponse(String token, String username, String email, List<String> roles) {
-        this.token = token;
-        this.accessToken = token;
-        this.username = username;
-        this.email = email;
+        this(token, null, username, email);
         this.roles = roles;
     }
 
