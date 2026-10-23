@@ -1,63 +1,78 @@
-<div class="login-container">
-  <div class="login-box">
-    <h1>Login</h1>
-    
-    <!-- Error Message Display -->
-    <div *ngIf="errorMessage" class="error-alert">
-      {{ errorMessage }}
-    </div>
-    
-    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-      <!-- Email Field -->
-      <div class="form-group">
-        <label for="email">Email</label>
-        <input
-          type="email"
-          id="email"
-          formControlName="email"
-          class="form-control"
-          [class.is-invalid]="submitted && f['email'].errors"
-        />
-        <div *ngIf="submitted && f['email'].errors" class="invalid-feedback">
-          <span *ngIf="f['email'].errors['required']">Email is required</span>
-          <span *ngIf="f['email'].errors['email']">Email is invalid</span>
-        </div>
+<main class="login-container" [class.background-moving]="backgroundMotion">
+  <button type="button" class="background-motion-toggle" [attr.aria-pressed]="backgroundMotion" (click)="backgroundMotion = !backgroundMotion">
+    {{ backgroundMotion ? 'Pause background' : 'Animate background' }}
+  </button>
+  <div class="comet" aria-hidden="true"></div>
+  <div class="comet comet-small comet-small-one" aria-hidden="true"></div>
+  <div class="comet comet-small comet-small-two" aria-hidden="true"></div>
+  <section class="login-shell" aria-label="Sign in to Buzz Trader">
+    <section class="form-panel">
+      <div class="mobile-brand brand-lockup">
+        <span class="login-logo" aria-hidden="true">
+          <span class="login-logo-icon"><mat-icon>rocket_launch</mat-icon></span>
+          <span class="login-logo-square"></span>
+        </span>
+        <span>BUZZ <strong>TRADER</strong></span>
       </div>
 
-      <!-- Password Field -->
-      <div class="form-group">
-        <label for="password">Password</label>
-        <input
-          type="password"
-          id="password"
-          formControlName="password"
-          class="form-control"
-          [class.is-invalid]="submitted && f['password'].errors"
-        />
-        <div *ngIf="submitted && f['password'].errors" class="invalid-feedback">
-          <span *ngIf="f['password'].errors['required']">Password is required</span>
-          <span *ngIf="f['password'].errors['minlength']">Password must be at least 8 characters</span>
+      <div class="login-box">
+        <div class="form-heading">
+          <span class="eyebrow">WELCOME BACK</span>
+          <h1>Sign in to your account</h1>
+          <p>Enter your details to pick up where you left off.</p>
         </div>
+
+        <div *ngIf="errorMessage" class="error-alert" role="alert">
+          <span class="error-icon" aria-hidden="true">!</span>
+          <span>{{ errorMessage }}</span>
+        </div>
+
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+          <div class="form-group">
+            <label for="email">Email address</label>
+            <input
+              type="email"
+              id="email"
+              formControlName="email"
+              class="form-control"
+              placeholder="you@example.com"
+              autocomplete="email"
+              [class.is-invalid]="submitted && f['email'].errors"
+            />
+            <div *ngIf="submitted && f['email'].errors" class="invalid-feedback">
+              <span *ngIf="f['email'].errors['required']">Email is required</span>
+              <span *ngIf="f['email'].errors['email']">Enter a valid email address</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="label-row"><label for="password">Password</label><a href="#" (click)="forgotPassword(); $event.preventDefault()">Forgot password?</a></div>
+            <input
+              type="password"
+              id="password"
+              formControlName="password"
+              class="form-control"
+              placeholder="Enter your password"
+              autocomplete="current-password"
+              [class.is-invalid]="submitted && f['password'].errors"
+            />
+            <div *ngIf="submitted && f['password'].errors" class="invalid-feedback">
+              <span *ngIf="f['password'].errors['required']">Password is required</span>
+              <span *ngIf="f['password'].errors['minlength']">Password must be at least 8 characters</span>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-login" [disabled]="loading">
+            <span>{{ loading ? 'Signing in...' : 'Sign in' }}</span>
+            <span class="button-arrow" aria-hidden="true">→</span>
+          </button>
+        </form>
+
+        <div class="register-link">
+          <p>New to Buzz Trader? <a routerLink="/register" class="link">Create an account</a></p>
+        </div>
+
       </div>
-
-      <!-- Submit Button -->
-      <button
-        type="submit"
-        class="btn-login"
-        [disabled]="loading"
-      >
-        {{ loading ? 'Logging in...' : 'Login' }}
-      </button>
-    </form>
-
-    <!-- Forgot Password Link -->
-    <div class="forgot-password">
-      <a href="#" (click)="forgotPassword(); $event.preventDefault()">Forgot Password?</a>
-    </div>
-
-    <!-- Register Link -->
-    <div class="register-link">
-      <p>Don't have an account? <a routerLink="/register" class="link">Register here</a></p>
-    </div>
-  </div>
-</div>
+    </section>
+  </section>
+</main>

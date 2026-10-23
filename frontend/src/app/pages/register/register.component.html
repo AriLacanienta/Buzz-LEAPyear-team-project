@@ -1,6 +1,21 @@
-<div class="register-container">
+<div class="register-container" [class.background-moving]="backgroundMotion">
+    <button type="button" class="background-motion-toggle" [attr.aria-pressed]="backgroundMotion" (click)="backgroundMotion = !backgroundMotion">
+      {{ backgroundMotion ? 'Pause background' : 'Animate background' }}
+    </button>
   <div class="register-card">
-    <h1>Create Account</h1>
+    <div class="brand-lockup">
+      <span class="register-logo" aria-hidden="true">
+        <span class="register-logo-icon"><mat-icon>rocket_launch</mat-icon></span>
+        <span class="register-logo-square"></span>
+      </span>
+      <span>BUZZ <strong>TRADER</strong></span>
+    </div>
+
+    <header class="register-heading">
+      <span class="eyebrow">GET STARTED</span>
+      <h1>Create your account</h1>
+      <p>A few details and you’re ready to explore.</p>
+    </header>
     
     <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
       <div class="form-group">
@@ -62,6 +77,22 @@
       </div>
 
       <div class="form-group">
+        <label for="country">Country</label>
+        <select
+          id="country"
+          formControlName="country"
+          class="form-control"
+          [class.is-invalid]="submitted && f['country'].errors"
+        >
+          <option value="" disabled>Select a country</option>
+          <option *ngFor="let country of countryOptions" [value]="country">{{ country }}</option>
+        </select>
+        <div *ngIf="submitted && f['country'].errors" class="error-text">
+          <small>Please select a country</small>
+        </div>
+      </div>
+
+      <div class="form-group password-group">
         <label for="password">Password</label>
         <input 
           type="password" 

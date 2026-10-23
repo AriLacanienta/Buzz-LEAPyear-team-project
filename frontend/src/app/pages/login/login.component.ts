@@ -10,6 +10,7 @@ import { AuthService } from '../../services/auth.service';
 })
 export class LoginComponent {
   loginForm: FormGroup;
+  backgroundMotion = true;
   loading = false;
   submitted = false;
   errorMessage = '';  // For displaying error messages

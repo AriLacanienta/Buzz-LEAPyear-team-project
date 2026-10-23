@@ -12,7 +12,7 @@
     <div class="divider">|</div>
     <nav class="tabs">
       <a routerLink="/account" routerLinkActive="active" class="account-tab">
-        <img src="assets/images/profile_photo.jpg" alt="Account"/>
+        <img [src]="accountAvatar()" alt="Account"/>
         <span class="account-name">{{ accountName() }}</span>
       </a>
       <a routerLink="/portfolio" routerLinkActive="active" class="tab">Portfolio</a>
@@ -22,7 +22,6 @@
     </nav>
 
     <div class="navbar-right">
-      <button class="logout-btn" (click)="logout()" title="Logout">Logout</button>
       <div class="market-info">
         <div class="divider">|</div>
         <div class="market-text">
