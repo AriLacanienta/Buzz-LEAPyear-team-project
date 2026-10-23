@@ -52,7 +52,11 @@ export class RegisterComponent {
       (response) => {
         this.authService.setAuthSessionFromResponse(response);
         this.loading = false;
-        this.router.navigate(['/dashboard']);
+
+        const landingPage = this.authService.hasRole('MANAGER')
+          ? '/manager'
+          : '/dashboard';
+        this.router.navigate([landingPage]);
       },
       (error) => {
         this.loading = false;

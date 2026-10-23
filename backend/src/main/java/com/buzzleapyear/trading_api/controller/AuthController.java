@@ -31,6 +31,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Base64;
 import java.util.Optional;
 
@@ -160,7 +161,7 @@ public class AuthController {
                 //returning access token in body and refresh token in secure HttpOnly cookie
                 return ResponseEntity.ok()
                     .header(HttpHeaders.SET_COOKIE, buildRefreshCookie(refreshToken, request).toString())
-                    .body(new AuthResponse(accessToken, null, user.getUsername(), user.getEmail()));
+                    .body(createAuthResponse(accessToken, user));
 
         } catch (Exception e) {
             // If any unexpected error occurs, return 401 Unauthorized
@@ -267,7 +268,7 @@ public class AuthController {
                 //returning access token in body and refresh token in secure HttpOnly cookie
             return ResponseEntity.status(HttpStatus.CREATED)
                     .header(HttpHeaders.SET_COOKIE, buildRefreshCookie(refreshToken, request).toString())
-                    .body(new AuthResponse(accessToken, null, savedUser.getUsername(), savedUser.getEmail()));
+                    .body(createAuthResponse(accessToken, savedUser));
 
         } catch (Exception e) {
             // If any error occurs during registration, return 400 Bad Request
@@ -316,11 +317,18 @@ public class AuthController {
 
             return ResponseEntity.ok()
                     .header(HttpHeaders.SET_COOKIE, buildRefreshCookie(newRefreshToken, request).toString())
-                    .body(new AuthResponse(newAccessToken, null, user.getUsername(), user.getEmail()));
+                    .body(createAuthResponse(newAccessToken, user));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(new ErrorResponse("Refresh failed: " + e.getMessage()));
         }
+    }
+
+    private AuthResponse createAuthResponse(String accessToken, User user) {
+        List<String> roles = user.getUserRoles().stream()
+                .map(userRole -> userRole.getRole().getRoleName().name())
+                .toList();
+        return new AuthResponse(accessToken, null, user.getUsername(), user.getEmail(), roles);
     }
 
     @PostMapping("/logout")

@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
-import { catchError, map } from 'rxjs/operators';
+import { catchError, map, switchMap } from 'rxjs/operators';
 import { of } from 'rxjs';
 
 export const authGuard: CanActivateFn = (route, state) => {
@@ -9,15 +9,14 @@ export const authGuard: CanActivateFn = (route, state) => {
   const router = inject(Router);
   const requiredRoles = route.data?.['roles'] as string[] | undefined;
 
-  // First check if token exists locally
-  if (!authService.isLoggedIn()) {
-    console.warn('No token found, redirecting to login');
-    return router.createUrlTree(['/login']);
-  }
+  // Recover the in-memory access token after a reload before validating it.
+  return authService.restoreSession().pipe(
+    switchMap(restored => {
+      if (!restored) {
+        return of(router.createUrlTree(['/login']));
+      }
 
-  // Token exists, now validate it with the backend
-  // This will trigger a 401 if the token is expired
-  return authService.validateToken().pipe(
+      return authService.validateToken().pipe(
     map(response => {
       // Token is valid
       console.log('Token validated successfully');
@@ -26,6 +25,8 @@ export const authGuard: CanActivateFn = (route, state) => {
       }
 
       return router.createUrlTree(['/dashboard']);
+    })
+      );
     }),
     catchError(error => {
       // Token validation failed (likely 401 Unauthorized)

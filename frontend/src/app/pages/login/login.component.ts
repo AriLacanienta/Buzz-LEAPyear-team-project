@@ -52,7 +52,6 @@ export class LoginComponent {
         this.authService.setAuthSessionFromResponse(response);
         
         this.loading = false;
-        console.log('Login successful!', response);
 
         const landingPage = this.authService.hasRole('MANAGER')
           ? '/manager'

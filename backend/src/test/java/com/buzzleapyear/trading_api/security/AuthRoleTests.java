@@ -2,6 +2,7 @@ package com.buzzleapyear.trading_api.security;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -46,13 +47,13 @@ class AuthRoleTests {
     private RoleRepository roleRepository;
 
     @Mock
+    private RefreshSessionRepository refreshSessionRepository;
+
+    @Mock
     private PasswordEncoder passwordEncoder;
 
     @Mock
     private JwtTokenProvider tokenProvider;
-
-    @Mock
-    private RefreshSessionRepository refreshSessionRepository;
 
     @Mock
     private HttpServletRequest httpServletRequest;
@@ -82,6 +83,8 @@ class AuthRoleTests {
 
     @Test
     void registrationAssignsClientRoleAndReturnsItInAuthResponse() {
+        org.springframework.test.util.ReflectionTestUtils.setField(
+            authController, "refreshSessionRepository", refreshSessionRepository);
         RegistrationRequest request = new RegistrationRequest();
         request.setUsername("new-client");
         request.setEmail("new-client@example.com");
@@ -98,14 +101,17 @@ class AuthRoleTests {
         when(tokenProvider.generateAccessToken(request.getUsername(), 0)).thenReturn("token");
         when(httpServletRequest.isSecure()).thenReturn(false);
         when(httpServletRequest.getHeader("X-Forwarded-Proto")).thenReturn(null);
-        org.springframework.test.util.ReflectionTestUtils.setField(
-            authController, "refreshSessionRepository", refreshSessionRepository);
 
         ResponseEntity<?> response = authController.register(request, httpServletRequest);
 
         AuthResponse authResponse = assertInstanceOf(AuthResponse.class, response.getBody());
+        assertEquals(201, response.getStatusCode().value());
         assertEquals("new-client", authResponse.getUsername());
         assertEquals("new-client@example.com", authResponse.getEmail());
+        assertEquals(List.of("CLIENT"), authResponse.getRoles());
+        assertEquals("token", authResponse.getAccessToken());
+        assertEquals("token", authResponse.getToken());
+        assertNull(authResponse.getRefreshToken());
         User savedUser = org.mockito.Mockito.mockingDetails(userRepository).getInvocations().stream()
             .filter(invocation -> invocation.getMethod().getName().equals("save"))
             .map(invocation -> (User) invocation.getArgument(0))
