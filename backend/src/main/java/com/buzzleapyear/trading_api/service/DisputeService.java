@@ -72,7 +72,7 @@ public class DisputeService {
     public Page<DisputeResponse> search(String username, boolean manager, Long accountId,
                                         LocalDateTime fromDate, LocalDateTime toDate,
                                         BigDecimal minTradeValue, BigDecimal maxTradeValue,
-                                        DisputeStatus status,
+                                        DisputeStatus status, Long userId,
                                         Pageable pageable) {
         Specification<Dispute> specification = (root, query, cb) -> cb.conjunction();
         if (status != null) {
@@ -87,6 +87,10 @@ public class DisputeService {
         if (accountId != null) {
             specification = specification.and((root, query, cb) ->
                 cb.equal(root.get("tradeOrder").get("account").get("id"), accountId));
+        }
+        if (userId != null) {
+            specification = specification.and((root, query, cb) ->
+                cb.equal(root.get("tradeOrder").get("account").get("client").get("user").get("id"), userId));
         }
 
         if (fromDate != null) {

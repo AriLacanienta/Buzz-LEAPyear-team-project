@@ -66,4 +66,15 @@ describe('DisputeService', () => {
     request.flush({}, { status: 500, statusText: 'Error' });
     expect(failed).toBeTrue();
   });
+
+  it('requests all statuses for the selected user with server-side open-first ordering', () => {
+    service.search({ page: 0, size: 20, sortBy: 'status', sortDirection: 'asc', userId: 42 }).subscribe();
+    const request = http.expectOne(req => req.url.endsWith('/dispute/search'));
+    expect(request.request.params.get('userId')).toBe('42');
+    expect(request.request.params.get('sortBy')).toBe('status');
+    expect(request.request.params.get('sortDirection')).toBe('asc');
+    expect(request.request.params.has('status')).toBeFalse();
+    expect(request.request.params.has('accountId')).toBeFalse();
+    request.flush({ content: [], number: 0, size: 20, totalElements: 0, totalPages: 0 });
+  });
 });

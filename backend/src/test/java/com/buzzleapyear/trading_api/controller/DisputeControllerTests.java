@@ -97,19 +97,19 @@ class DisputeControllerTests {
     @org.junit.jupiter.params.provider.EnumSource(DisputeStatus.class)
     void searchForwardsStatusFilter(DisputeStatus filter) throws Exception {
         when(disputeService.search(eq("manager"), eq(true), isNull(), isNull(), isNull(),
-            isNull(), isNull(), eq(filter), any(Pageable.class)))
+            isNull(), isNull(), eq(filter), isNull(), any(Pageable.class)))
             .thenReturn(new PageImpl<>(List.of(), org.springframework.data.domain.PageRequest.of(0, 20), 0));
         MockMvcBuilders.standaloneSetup(disputeController).build()
             .perform(get("/api/v1/dispute/search").param("status", filter.name()).principal(manager))
             .andExpect(status().isOk());
         verify(disputeService).search(eq("manager"), eq(true), isNull(), isNull(), isNull(),
-            isNull(), isNull(), eq(filter), any(Pageable.class));
+            isNull(), isNull(), eq(filter), isNull(), any(Pageable.class));
     }
 
     @Test
     void searchRejectsInvalidSortField() {
         var result = disputeController.search(
-            0, 20, "invalid", "desc", null, null, null, null, null, null, client);
+            0, 20, "invalid", "desc", null, null, null, null, null, null, null, client);
 
         assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
         verifyNoInteractions(disputeService);
@@ -121,7 +121,7 @@ class DisputeControllerTests {
             0, 20, "createdAt", "desc", null,
             LocalDateTime.of(2026, 10, 23, 0, 0),
             LocalDateTime.of(2026, 10, 22, 0, 0),
-            BigDecimal.TEN, BigDecimal.ONE, null, client);
+            BigDecimal.TEN, BigDecimal.ONE, null, null, client);
 
         assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
         verifyNoInteractions(disputeService);
@@ -130,15 +130,15 @@ class DisputeControllerTests {
     @Test
     void clientSearchUsesOwnerScopeAndDefaults() {
         when(disputeService.search(eq("client"), eq(false), isNull(), isNull(), isNull(),
-            isNull(), isNull(), isNull(), any(Pageable.class)))
+            isNull(), isNull(), isNull(), isNull(), any(Pageable.class)))
             .thenReturn(new PageImpl<>(List.of(response(4L, DisputeStatus.OPEN))));
 
         var result = disputeController.search(
-            0, 20, "createdAt", "desc", null, null, null, null, null, null, client);
+            0, 20, "createdAt", "desc", null, null, null, null, null, null, null, client);
 
         assertEquals(HttpStatus.OK, result.getStatusCode());
         verify(disputeService).search(eq("client"), eq(false), isNull(), isNull(), isNull(),
-            isNull(), isNull(), isNull(), argThat(pageable ->
+            isNull(), isNull(), isNull(), isNull(), argThat(pageable ->
                 pageable.getPageNumber() == 0
                     && pageable.getPageSize() == 20
                     && pageable.getSort().getOrderFor("createdAt").isDescending()));
@@ -147,15 +147,43 @@ class DisputeControllerTests {
     @Test
     void managerSearchUsesGlobalScope() {
         when(disputeService.search(eq("manager"), eq(true), eq(11L), any(), any(),
-            eq(BigDecimal.ONE), eq(BigDecimal.TEN), isNull(), any(Pageable.class)))
+            eq(BigDecimal.ONE), eq(BigDecimal.TEN), isNull(), isNull(), any(Pageable.class)))
             .thenReturn(new PageImpl<>(List.of()));
 
         disputeController.search(1, 10, "tradeValue", "asc", 11L,
-            LocalDateTime.MIN, LocalDateTime.MAX, BigDecimal.ONE, BigDecimal.TEN, null, manager);
+            LocalDateTime.MIN, LocalDateTime.MAX, BigDecimal.ONE, BigDecimal.TEN, null, null, manager);
 
         verify(disputeService).search(eq("manager"), eq(true), eq(11L), any(), any(),
-            eq(BigDecimal.ONE), eq(BigDecimal.TEN), isNull(), argThat(pageable ->
+            eq(BigDecimal.ONE), eq(BigDecimal.TEN), isNull(), isNull(), argThat(pageable ->
                 pageable.getSort().getOrderFor("tradeOrder.tradeValue") != null));
+    }
+
+    @Test
+    void searchScopesByUserAcrossAccountsAndOrdersOpenFirstBeforePagination() throws Exception {
+        when(disputeService.search(eq("manager"), eq(true), isNull(), isNull(), isNull(),
+            isNull(), isNull(), isNull(), eq(42L), any(Pageable.class)))
+            .thenReturn(new PageImpl<>(List.of(), org.springframework.data.domain.PageRequest.of(1, 20), 0));
+
+        MockMvcBuilders.standaloneSetup(disputeController).build()
+            .perform(get("/api/v1/dispute/search").param("userId", "42")
+                .param("sortBy", "status").param("sortDirection", "asc")
+                .param("page", "1").principal(manager))
+            .andExpect(status().isOk());
+
+        verify(disputeService).search(eq("manager"), eq(true), isNull(), isNull(), isNull(),
+            isNull(), isNull(), isNull(), eq(42L), argThat(pageable ->
+                pageable.getPageNumber() == 1
+                    && pageable.getSort().getOrderFor("status").isAscending()
+                    && pageable.getSort().getOrderFor("id").isAscending()));
+    }
+
+    @ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(strings = {"0", "-1", "invalid"})
+    void searchRejectsInvalidUserId(String userId) throws Exception {
+        MockMvcBuilders.standaloneSetup(disputeController).build()
+            .perform(get("/api/v1/dispute/search").param("userId", userId).principal(manager))
+            .andExpect(status().isBadRequest());
+        verifyNoInteractions(disputeService);
     }
 
     @Test

@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { Component, DestroyRef, Input, OnChanges, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Dialog, DialogModule } from '@angular/cdk/dialog';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -15,7 +15,8 @@ import { DisputeService } from '../../../services/dispute.service';
   templateUrl: './manager-disputes.component.html',
   styleUrls: ['./manager-disputes.component.scss']
 })
-export class ManagerDisputesComponent implements OnInit {
+export class ManagerDisputesComponent implements OnInit, OnChanges {
+  @Input() userId?: number;
   readonly filters = new FormGroup({
     status: new FormControl<'OPEN' | 'RESOLVED' | ''>('OPEN', { nonNullable: true }),
     accountId: new FormControl('', { nonNullable: true, validators: [Validators.pattern(/^[1-9]\d*$/)] }),
@@ -38,6 +39,19 @@ export class ManagerDisputesComponent implements OnInit {
   private readonly dialog = inject(Dialog);
 
   constructor(private readonly disputes: DisputeService) {}
+
+  ngOnChanges(): void {
+    this.resetSearch();
+  }
+
+  private resetSearch(): void {
+    this.validationError = '';
+    this.filters.reset();
+    this.query = this.userId === undefined
+      ? { page: 0, size: 20, sortBy: 'createdAt', sortDirection: 'desc', status: 'OPEN' }
+      : { page: 0, size: 20, sortBy: 'status', sortDirection: 'asc', userId: this.userId };
+    this.requests.next();
+  }
 
   ngOnInit(): void {
     this.requests.pipe(
@@ -71,6 +85,10 @@ export class ManagerDisputesComponent implements OnInit {
   }
 
   applyFilters(): void {
+    if (this.userId !== undefined) {
+      this.resetSearch();
+      return;
+    }
     this.validationError = '';
     const values = this.filters.getRawValue();
     if (this.filters.invalid) {

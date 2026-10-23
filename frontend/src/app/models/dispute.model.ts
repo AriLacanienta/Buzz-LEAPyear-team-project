@@ -27,6 +27,7 @@ export interface DisputeSearch {
   sortBy: 'createdAt' | 'status' | 'tradeValue';
   sortDirection: 'asc' | 'desc';
   accountId?: string;
+  userId?: number;
   fromDate?: string;
   toDate?: string;
   minTradeValue?: string;

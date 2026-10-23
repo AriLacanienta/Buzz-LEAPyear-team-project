@@ -101,7 +101,7 @@ class DisputeServiceTests {
         when(disputeRepository.findAll(org.mockito.ArgumentMatchers.<Specification<Dispute>>any(), eq(pageable)))
             .thenReturn(new PageImpl<>(List.of(dispute)));
         assertEquals(DisputeSeverity.CRITICAL,
-            disputeService.search("manager", true, null, null, null, null, null, null, pageable)
+            disputeService.search("manager", true, null, null, null, null, null, null, null, pageable)
                 .getContent().get(0).severity());
 
         when(disputeRepository.save(dispute)).thenReturn(dispute);
@@ -219,7 +219,52 @@ class DisputeServiceTests {
                 verify(builder).equal(path, status);
                 return new PageImpl<Dispute>(List.of(), pageable, 0);
             });
-        assertTrue(disputeService.search("manager", true, null, null, null, null, null, status, pageable).isEmpty());
+        assertTrue(disputeService.search("manager", true, null, null, null, null, null, status, null, pageable).isEmpty());
+    }
+
+    @Test
+    void userFilterIncludesAllOwnedAccountsWithoutRemovingNonManagerOwnershipScope() {
+        var pageable = PageRequest.of(0, 20);
+        when(disputeRepository.findAll(org.mockito.ArgumentMatchers.<Specification<Dispute>>any(), eq(pageable)))
+            .thenAnswer(invocation -> {
+                Specification<Dispute> spec = invocation.getArgument(0);
+                jakarta.persistence.criteria.Root<Dispute> root =
+                    mock(jakarta.persistence.criteria.Root.class, RETURNS_DEEP_STUBS);
+                jakarta.persistence.criteria.CriteriaBuilder builder =
+                    mock(jakarta.persistence.criteria.CriteriaBuilder.class);
+                var account = root.get("tradeOrder").get("account");
+                var user = account.get("client").get("user");
+                spec.toPredicate(root, null, builder);
+                verify(builder).equal(user.get("id"), 42L);
+                verify(builder).equal(user.get("username"), "owner");
+                verify(account, never()).get("id");
+                verify(root, never()).get("status");
+                return new PageImpl<Dispute>(List.of(), pageable, 0);
+            });
+
+        assertTrue(disputeService.search("owner", false, null, null, null, null, null, null, 42L, pageable).isEmpty());
+    }
+
+    @Test
+    void userAndAccountFiltersAreCombinedForManagerSearches() {
+        var pageable = PageRequest.of(0, 20);
+        when(disputeRepository.findAll(org.mockito.ArgumentMatchers.<Specification<Dispute>>any(), eq(pageable)))
+            .thenAnswer(invocation -> {
+                Specification<Dispute> spec = invocation.getArgument(0);
+                jakarta.persistence.criteria.Root<Dispute> root =
+                    mock(jakarta.persistence.criteria.Root.class, RETURNS_DEEP_STUBS);
+                jakarta.persistence.criteria.CriteriaBuilder builder =
+                    mock(jakarta.persistence.criteria.CriteriaBuilder.class);
+                var account = root.get("tradeOrder").get("account");
+                var user = account.get("client").get("user");
+                spec.toPredicate(root, null, builder);
+                verify(builder).equal(user.get("id"), 42L);
+                verify(builder).equal(account.get("id"), 11L);
+                verify(user, never()).get("username");
+                return new PageImpl<Dispute>(List.of(), pageable, 0);
+            });
+
+        assertTrue(disputeService.search("manager", true, 11L, null, null, null, null, null, 42L, pageable).isEmpty());
     }
 
     @Test

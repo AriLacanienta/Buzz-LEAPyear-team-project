@@ -57,9 +57,11 @@ public class DisputeController {
         @RequestParam(required = false) BigDecimal minTradeValue,
         @RequestParam(required = false) BigDecimal maxTradeValue,
         @RequestParam(required = false) DisputeStatus status,
+        @RequestParam(required = false) Long userId,
         Authentication authentication) {
         if (page < 0 || size < 1 || size > 100 || !SORT_FIELDS.contains(sortBy)
             || (!sortDirection.equalsIgnoreCase("asc") && !sortDirection.equalsIgnoreCase("desc"))
+            || (userId != null && userId < 1)
             || (fromDate != null && toDate != null && fromDate.isAfter(toDate))
             || (minTradeValue != null && minTradeValue.signum() < 0)
             || (maxTradeValue != null && maxTradeValue.signum() < 0)
@@ -70,7 +72,7 @@ public class DisputeController {
         Sort.Direction direction = Sort.Direction.fromString(sortDirection);
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, path).and(Sort.by("id")));
         return ResponseEntity.ok(disputeService.search(authentication.getName(), isManager(authentication),
-            accountId, fromDate, toDate, minTradeValue, maxTradeValue, status, pageable));
+            accountId, fromDate, toDate, minTradeValue, maxTradeValue, status, userId, pageable));
     }
 
     @PatchMapping("/{id}/resolve")

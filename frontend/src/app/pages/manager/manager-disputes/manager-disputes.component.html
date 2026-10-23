@@ -1,6 +1,6 @@
-<main>
-  <h1>Disputes</h1>
-  <form [formGroup]="filters" (ngSubmit)="applyFilters()" aria-label="Search disputes">
+<section class="disputes" [class.embedded]="userId !== undefined">
+  <h1 *ngIf="userId === undefined">Disputes</h1>
+  <form *ngIf="userId === undefined" [formGroup]="filters" (ngSubmit)="applyFilters()" aria-label="Search disputes">
     <label>Status
       <select formControlName="status">
         <option value="OPEN">Open</option>
@@ -58,7 +58,7 @@
     </div>
     <ng-container *ngIf="result as page">
       <p>{{ page.totalElements | number }} disputes found</p>
-      <p *ngIf="!page.content.length">No disputes match these filters.</p>
+      <p *ngIf="!page.content.length">{{ userId === undefined ? 'No disputes match these filters.' : 'No disputes for this client.' }}</p>
       <div class="table-wrapper" *ngIf="page.content.length">
         <table>
           <caption>Disputes</caption>
@@ -126,4 +126,4 @@
       </nav>
     </ng-container>
   </section>
-</main>
+</section>

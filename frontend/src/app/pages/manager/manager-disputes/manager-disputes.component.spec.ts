@@ -51,6 +51,58 @@ describe('ManagerDisputesComponent', () => {
     expect(fixture.nativeElement.querySelector('tbody script')).toBeNull();
   });
 
+  it('embeds all user disputes with open-first sorting and no filter controls', () => {
+    fixture.componentRef.setInput('userId', 42);
+    fixture.detectChanges();
+    expect(service.search).toHaveBeenCalledOnceWith({
+      userId: 42, page: 0, size: 20, sortBy: 'status', sortDirection: 'asc'
+    });
+    expect(fixture.nativeElement.querySelector('form')).toBeNull();
+    expect(fixture.nativeElement.querySelector('h1')).toBeNull();
+    expect(fixture.nativeElement.querySelector('table')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('nav')).not.toBeNull();
+    const component = fixture.componentInstance;
+    component.changePage(1);
+    expect(service.search.calls.mostRecent().args[0]).toEqual({
+      userId: 42, page: 1, size: 20, sortBy: 'status', sortDirection: 'asc'
+    });
+    component.openResolution(page.content[0]);
+    closed.next(true);
+    component.retry();
+    expect(service.search.calls.mostRecent().args[0]).toEqual({
+      userId: 42, page: 1, size: 20, sortBy: 'status', sortDirection: 'asc'
+    });
+    component.clearFilters();
+    expect(service.search.calls.mostRecent().args[0]).toEqual({
+      userId: 42, page: 0, size: 20, sortBy: 'status', sortDirection: 'asc'
+    });
+  });
+
+  it('cancels the old user request and clears stale rows and expansion on client changes', () => {
+    const first = new Subject<DisputePage>();
+    const second = new Subject<DisputePage>();
+    service.search.and.returnValues(first, second);
+    fixture.componentRef.setInput('userId', 42);
+    fixture.detectChanges();
+    first.next(page);
+    fixture.componentInstance.toggleDispute(1);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('table')).not.toBeNull();
+    fixture.componentRef.setInput('userId', 43);
+    fixture.detectChanges();
+    expect(first.observed).toBeFalse();
+    expect(fixture.componentInstance.expandedDisputeIds.size).toBe(0);
+    expect(fixture.nativeElement.querySelector('table')).toBeNull();
+    expect(service.search.calls.mostRecent().args[0]).toEqual({
+      userId: 43, page: 0, size: 20, sortBy: 'status', sortDirection: 'asc'
+    });
+    first.next(page);
+    expect(fixture.componentInstance.result).toBeNull();
+    second.next({ ...page, content: [], totalElements: 0, totalPages: 0 });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('No disputes for this client.');
+  });
+
   it('expands all fields on row click and collapses using the accessible button without double toggling', () => {
     fixture.detectChanges();
     const row: HTMLTableRowElement = fixture.nativeElement.querySelector('.dispute-summary');
