@@ -110,6 +110,11 @@ $color-secondary-text: #62748E;
     overflow: hidden;
     padding: clamp(0.65rem, 2.5vw, 1rem);
 
+    &.watchlist-list {
+      max-height: 16rem;
+      overflow-y: auto;
+    }
+
     .data-item {
       display: flex;
       justify-content: space-between;
