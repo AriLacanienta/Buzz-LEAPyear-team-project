@@ -4,8 +4,6 @@
       <header class="markets-heading">
         <div>
           <span class="eyebrow">MARKETPLACE</span>
-          <h1>Markets</h1>
-          <p>Explore instruments and find your next opportunity.</p>
         </div>
         <div class="instrument-count" aria-live="polite">
           <span class="count-dot" aria-hidden="true"></span>
@@ -26,7 +24,8 @@
         <app-instruments-table
           [instruments]="visibleInstruments()"
           [selectedMarket]="selectedMarket()"
-          [displayedColumns]="displayedColumns">
+          [displayedColumns]="displayedColumns"
+          (instrumentSelected)="onInstrumentSelected($event)">
           <div table-header class="markets-table-toolbar">
             <label class="market-search">
               <span class="search-icon" aria-hidden="true">⌕</span>
@@ -48,3 +47,17 @@
     </section>
   </main>
 </div>
+
+<app-instrument-details-dialog
+  *ngIf="selectedInstrument() as instrument"
+  [instrument]="instrument"
+  [quote]="selectedQuote()"
+  [details]="selectedInstrumentDetails()"
+  [isLoading]="isDetailsLoading()"
+  [hasError]="hasDetailsError()"
+  [isFavorite]="isInstrumentInWatchlist(instrument.instrumentSymbol)"
+  [favoritePending]="isFavoriteActionPending()"
+  [favoriteError]="favoriteActionError()"
+  (favoriteToggled)="toggleSelectedInstrumentFavorite()"
+  (closed)="closeInstrumentDetails()">
+</app-instrument-details-dialog>

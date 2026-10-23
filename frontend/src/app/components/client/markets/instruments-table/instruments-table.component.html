@@ -67,7 +67,13 @@
   </ng-container>
 
   <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  <tr
+    mat-row
+    *matRowDef="let row; columns: displayedColumns;"
+    tabindex="0"
+    [attr.aria-label]="'View details for ' + row.instrumentName + ' (' + row.instrumentSymbol + ')'"
+    (click)="selectInstrument(row)"
+    (keydown)="onRowKeydown($event, row)"></tr>
 </table>
 </div>
 

@@ -47,10 +47,16 @@ table {
   }
 
   .mat-mdc-row {
+    cursor: pointer;
     transition: background-color 140ms ease;
 
     &:hover {
       background-color: rgba(81, 162, 255, 0.045);
+    }
+
+    &:focus-visible {
+      outline: 2px solid $color-primary-light;
+      outline-offset: -2px;
     }
   }
 

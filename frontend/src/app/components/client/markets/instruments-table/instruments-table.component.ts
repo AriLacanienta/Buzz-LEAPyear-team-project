@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { WatchlistService } from '@app/services/watchlist.service';
@@ -14,8 +14,22 @@ export class InstrumentsTableComponent {
   @Input() instruments: any[] = [];
   @Input() selectedMarket: string = 'US';
   @Input() displayedColumns: string[] = ['watchlist', 'instrumentSymbol', 'instrumentName', 'currentPrice', 'changePercent', 'volume', 'marketCap'];
+  @Output() instrumentSelected = new EventEmitter<any>();
 
   constructor(private watchlistService: WatchlistService) {}
+
+  selectInstrument(instrument: any): void {
+    this.instrumentSelected.emit(instrument);
+  }
+
+  onRowKeydown(event: KeyboardEvent, instrument: any): void {
+    if (event.target !== event.currentTarget) return;
+    if (event.key === 'Enter') this.selectInstrument(instrument);
+    if (event.key === ' ') {
+      event.preventDefault();
+      this.selectInstrument(instrument);
+    }
+  }
 
   isInWatchlist(symbol: string): boolean {
     return this.watchlistService.isInWatchlist(symbol);
