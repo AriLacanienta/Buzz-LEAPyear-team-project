@@ -22,6 +22,8 @@ import java.util.regex.Pattern;
 @Service
 public class ChatbotService {
 
+    private static final Pattern DISPUTE_PATTERN = Pattern.compile("\\bdisputes?\\b", Pattern.CASE_INSENSITIVE);
+
     private static final Pattern QUOTE_PATTERN = Pattern.compile(
         "quote\\s+([a-z0-9.-]+)",
         Pattern.CASE_INSENSITIVE
@@ -81,11 +83,20 @@ public class ChatbotService {
 
         String message = rawMessage.trim().toLowerCase(Locale.ROOT);
 
+        if (DISPUTE_PATTERN.matcher(message).find()) {
+            return new ChatResponse(
+                "DISPUTE_FORM",
+                "Select an executed order from your order history in the form below. Review the details before confirming. Only orders belonging to your signed-in account can be disputed.",
+                null,
+                "CREATE_DISPUTE"
+            );
+        }
+
         if (message.equals("help")) {
             return new ChatResponse(
                 "HELP",
                     "You can ask about your portfolio, quotes, stock comparisons (e.g., compare AAPL and MSFT), top gainers/losers, or trade previews. "
-                        + "Try: compare AAPL and MSFT, quote AAPL, or buy 5 shares of AAPL.",
+                        + "Try: compare AAPL and MSFT, quote AAPL, buy 5 shares of AAPL, or raise a dispute.",
                 null,
                 null
             );
@@ -189,7 +200,7 @@ public class ChatbotService {
 
         return new ChatResponse(
             "UNKNOWN",
-                "I can help with:\n- Portfolio summaries\n- Stock comparisons (e.g., AAPL vs MSFT)\n- Top gainers/losers\n- Quotes (e.g., quote AAPL)\n- Trade (e.g., buy 5 shares of AAPL)",
+                "I can help with:\n- Portfolio summaries\n- Stock comparisons (e.g., AAPL vs MSFT)\n- Top gainers/losers\n- Quotes (e.g., quote AAPL)\n- Trade (e.g., buy 5 shares of AAPL)\n- Trade disputes (e.g., raise a dispute)",
             null,
             null
         );

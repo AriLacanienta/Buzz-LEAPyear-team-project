@@ -5,7 +5,7 @@
                 <div class="header-accent" [ngClass]="getColorClass()"></div>
                 <h2 class="card-title">{{ title }}</h2>
             </div>
-            <div *ngIf="data.length > 0" class="data-list">
+            <div *ngIf="data.length > 0" class="data-list" [class.watchlist-list]="title === 'WATCHLIST'">
                 <div *ngFor="let item of data" class="data-item">
                     <span class="symbol-avatar" [ngClass]="getAvatarClass()">{{ getSymbolFirstLetter(item.symbol) }}</span>
                     <div class="symbol-details">

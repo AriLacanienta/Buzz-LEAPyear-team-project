@@ -88,6 +88,10 @@
   background: var(--primary-color);
 }
 
+.messages > div.user p {
+  color: #ffffff;
+}
+
 .messages p {
   margin: 0;
   font-size: 0.875rem;
