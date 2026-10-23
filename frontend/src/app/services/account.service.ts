@@ -15,6 +15,17 @@ export interface UserProfile {
   lastName: string;
 }
 
+export interface UserSettings {
+  phoneNumber: string | null;
+  country: string | null;
+  preferences: Record<string, boolean | string>;
+}
+
+export interface PasswordChange {
+  currentPassword: string;
+  newPassword: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -22,7 +33,9 @@ export class AccountService {
   private readonly apiUrl = `${environment.apiUrl}/accounts`;
   private readonly userApiUrl = `${environment.apiUrl}/user`;
   private accountNameState = signal('');
+  private accountAvatarState = signal('assets/images/space_avatar_astronaut.svg');
   accountName = this.accountNameState.asReadonly();
+  accountAvatar = this.accountAvatarState.asReadonly();
 
   constructor(private http: HttpClient) {}
 
@@ -36,6 +49,10 @@ export class AccountService {
 
   getAccountName(): string {
     return this.accountNameState();
+  }
+
+  setAccountAvatar(path: string): void {
+    this.accountAvatarState.set(path);
   }
 
   getAccountBalance(id: string): Observable<BalanceResponse> {
@@ -59,5 +76,17 @@ export class AccountService {
   }
   getUserProfile(username: string): Observable<UserProfile> {
     return this.http.get<UserProfile>(`${this.userApiUrl}/profile/${username}`);
+  }
+
+  getMySettings(): Observable<UserSettings> {
+    return this.http.get<UserSettings>(`${this.userApiUrl}/me/settings`);
+  }
+
+  updateMySettings(settings: UserSettings): Observable<UserSettings> {
+    return this.http.put<UserSettings>(`${this.userApiUrl}/me/settings`, settings);
+  }
+
+  changeMyPassword(passwordChange: PasswordChange): Observable<void> {
+    return this.http.put<void>(`${this.userApiUrl}/me/password`, passwordChange);
   }
 }

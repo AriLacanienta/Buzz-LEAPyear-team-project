@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Polished blue rocket flying through space">
+  <defs>
+    <radialGradient id="rocket-bg" cx="32%" cy="22%" r="95%"><stop stop-color="#284d91"/><stop offset=".52" stop-color="#18264e"/><stop offset="1" stop-color="#080c14"/></radialGradient>
+    <linearGradient id="rocket-body" x1=".12" y1="0" x2=".88" y2="1"><stop stop-color="#fff"/><stop offset=".48" stop-color="#dbeafe"/><stop offset="1" stop-color="#88a9d8"/></linearGradient>
+    <linearGradient id="rocket-fin" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#7dd3fc"/><stop offset="1" stop-color="#3b5fc0"/></linearGradient>
+    <linearGradient id="rocket-flame" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff0a6"/><stop offset=".48" stop-color="#f6a85d"/><stop offset="1" stop-color="#e85d75"/></linearGradient>
+    <clipPath id="rocket-clip"><circle cx="64" cy="64" r="63"/></clipPath>
+  </defs>
+  <g clip-path="url(#rocket-clip)">
+    <circle cx="64" cy="64" r="64" fill="url(#rocket-bg)"/>
+    <circle cx="96" cy="35" r="21" fill="#5a43a1" opacity=".18"/>
+    <circle cx="25" cy="27" r="1.5" fill="#fff"/><circle cx="100" cy="20" r="1" fill="#fff"/><circle cx="102" cy="87" r="1.5" fill="#fff"/><circle cx="27" cy="91" r="1.2" fill="#fff"/><circle cx="82" cy="105" r="1" fill="#fff"/>
+    <path d="M54 82c-12-2-20 3-24 13 8-3 14-2 19 2m25-15c12-2 20 3 24 13-8-3-14-2-19 2" fill="url(#rocket-fin)" stroke="#b9e9ff" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M57 91c-3 12-1 21 7 31 8-10 10-19 7-31" fill="url(#rocket-flame)" opacity=".96"/>
+    <path d="M64 101c-3 7-2 12 0 16 3-5 4-9 0-16" fill="#fff4c5"/>
+    <path d="M64 13c-17 18-25 43-25 69l25 19 25-19c0-26-8-51-25-69z" fill="url(#rocket-body)" stroke="#fff" stroke-width="2.5" stroke-linejoin="round"/>
+    <path d="M64 22c-11 16-17 37-17 57l17 13 17-13c0-20-6-41-17-57z" fill="#3166b8"/>
+    <path d="M64 23v67" stroke="#b9e8ff" stroke-opacity=".65" stroke-width="2"/>
+    <circle cx="64" cy="54" r="12" fill="#101d3b" stroke="#88e3f6" stroke-width="4"/>
+    <circle cx="64" cy="54" r="6" fill="#294780"/>
+    <path d="M57 49c2-3 5-4 8-4" fill="none" stroke="#dffaff" stroke-width="2" stroke-linecap="round"/>
+    <path d="M42 69l-3 12m47-12 3 12" stroke="#f6c85f" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="64" cy="64" r="62.5" fill="none" stroke="#8db8ff" stroke-opacity=".36"/>
+  </g>
+</svg>

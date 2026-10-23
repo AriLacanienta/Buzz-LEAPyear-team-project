@@ -2,7 +2,7 @@
   <main class="account-layout">
     <aside class="settings-sidebar" aria-label="Account settings">
       <div class="profile-card" *ngIf="userProfile && !loading">
-        <img src="assets/images/joanna.jpg" alt="Profile photo" class="avatar">
+        <img [src]="preferences.profilePicture" alt="Selected profile photo" class="avatar">
         <div class="profile-card-copy"><strong>{{ userProfile.firstName }} {{ userProfile.lastName }}</strong><span>Personal account</span></div>
       </div>
       <div class="profile-card profile-card-loading" *ngIf="loading"><div class="avatar avatar-placeholder"></div><span>Loading profile...</span></div>
@@ -20,12 +20,18 @@
         <section class="settings-panel" *ngIf="userProfile && !loading">
           <div class="panel-heading"><div><p class="eyebrow">Account</p><h1>Personal information</h1></div><span class="status-pill">Active</span></div>
           <div class="field-grid">
-            <label><span>First name</span><input [value]="userProfile.firstName"></label>
-            <label><span>Last name</span><input [value]="userProfile.lastName"></label>
-            <label><span>Email</span><input [value]="userProfile.email" type="email"></label>
-            <label><span>Username</span><input [value]="userProfile.username"></label>
-            <label><span>Phone</span><input value="Not provided"></label>
-            <label><span>Country</span><input value="United States"></label>
+            <label><span>First name</span><input [value]="userProfile.firstName" readonly></label>
+            <label><span>Last name</span><input [value]="userProfile.lastName" readonly></label>
+            <label><span>Email</span><input [value]="userProfile.email" type="email" readonly></label>
+            <label><span>Username</span><input [value]="userProfile.username" readonly></label>
+            <label><span>Phone</span><input type="tel" [(ngModel)]="phoneNumber" placeholder="Please enter your phone number"></label>
+            <label><span>Country</span><select [(ngModel)]="country"><option value="" disabled>Select a country</option><option *ngFor="let countryOption of countryOptions" [value]="countryOption">{{ countryOption }}</option></select></label>
+          </div>
+          <div class="avatar-picker">
+            <span class="avatar-picker-label">Profile picture</span>
+            <button *ngFor="let picture of profilePictures" type="button" class="avatar-choice" [class.selected]="preferences.profilePicture === picture.path" [attr.aria-label]="picture.label" [attr.aria-pressed]="preferences.profilePicture === picture.path" (click)="preferences.profilePicture = picture.path">
+              <img [src]="picture.path" [alt]="picture.label">
+            </button>
           </div>
           <button type="button" class="primary-button" (click)="saveChanges()">Save changes</button>
         </section>
@@ -41,7 +47,7 @@
           <div class="preference-row"><div><strong>Two-factor authentication</strong><span>Require an extra verification code when signing in.</span></div><button type="button" class="toggle" [class.on]="preferences.twoFactor" (click)="togglePreference('twoFactor')"><span></span></button></div>
           <div class="preference-row"><div><strong>Biometric login</strong><span>Use Face ID or fingerprint on supported devices.</span></div><button type="button" class="toggle" [class.on]="preferences.biometrics" (click)="togglePreference('biometrics')"><span></span></button></div>
         </div>
-        <div class="subsection password-section"><p class="eyebrow">Password</p><div class="field-grid"><label><strong>Current password</strong><input type="password" placeholder="Enter current password"></label><label><strong>New password</strong><input type="password" placeholder="Enter new password"></label></div><button type="button" class="primary-button" (click)="saveChanges()">Update password</button></div>
+        <div class="subsection password-section"><p class="eyebrow">Password</p><div class="field-grid"><label><strong>Current password</strong><input type="password" [(ngModel)]="currentPassword" placeholder="Enter current password"></label><label><strong>New password</strong><input type="password" [(ngModel)]="newPassword" placeholder="Enter new password" minlength="8"></label></div><button type="button" class="primary-button" (click)="updatePassword()">Update password</button></div>
       </section>
 
       <section class="settings-panel" *ngIf="activeSection === 'notifications'">
@@ -54,7 +60,8 @@
       <section class="settings-panel" *ngIf="activeSection === 'preferences'">
         <div class="panel-heading"><div><p class="eyebrow">Workspace</p><h1>Display preferences</h1></div></div>
         <div class="preference-list"><div class="preference-row"><div><strong>Dark mode</strong><span>Use the dark colour scheme across the platform.</span></div><button type="button" class="toggle" [class.on]="preferences.darkMode" (click)="togglePreference('darkMode')"><span></span></button></div><div class="preference-row"><div><strong>Compact view</strong><span>Reduce spacing for denser information display.</span></div><button type="button" class="toggle" [class.on]="preferences.compactView" (click)="togglePreference('compactView')"><span></span></button></div><div class="preference-row"><div><strong>Show P&amp;L on holdings</strong><span>Display unrealised gain and loss figures.</span></div><button type="button" class="toggle" [class.on]="preferences.showPnl" (click)="togglePreference('showPnl')"><span></span></button></div></div>
-        <div class="field-grid preference-fields"><label><span>Base currency</span><select><option>USD ($)</option><option>EUR (€)</option><option>GBP (£)</option></select></label><label><span>Time zone</span><select><option>America/New_York</option><option>Europe/London</option><option>Asia/Kolkata</option></select></label></div>
+        <div class="field-grid preference-fields"><label><span>Base currency</span><select [(ngModel)]="preferences.baseCurrency"><option value="USD">USD ($)</option><option value="EUR">EUR (€)</option><option value="GBP">GBP (£)</option></select></label><label><span>Time zone</span><select [(ngModel)]="preferences.timeZone"><option value="America/New_York">America/New_York</option><option value="Europe/London">Europe/London</option><option value="Asia/Kolkata">Asia/Kolkata</option></select></label></div>
+        <button type="button" class="primary-button" (click)="saveChanges()">Save preferences</button>
       </section>
 
       <section class="settings-panel" *ngIf="activeSection === 'billing'">

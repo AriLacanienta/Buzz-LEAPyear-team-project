@@ -17,6 +17,7 @@ import { Observable } from 'rxjs';
 })
 export class NavbarComponent implements OnInit {
   accountName = this.accountService.accountName;
+  accountAvatar = this.accountService.accountAvatar;
 
   isMarketOpen$: Observable<boolean> = this.marketStatusService.isMarketOpen();
   formattedDate$: Observable<string> = this.marketStatusService.getFormattedDate();
@@ -49,6 +50,12 @@ export class NavbarComponent implements OnInit {
 
       this.accountService.getUserProfile(username).subscribe(profile => {
         this.accountService.setAccountName(`${profile.firstName} ${profile.lastName}`);
+      });
+      this.accountService.getMySettings().subscribe(settings => {
+        const picture = settings.preferences['profilePicture'];
+        if (typeof picture === 'string') {
+          this.accountService.setAccountAvatar(picture);
+        }
       });
     } catch {
       // Keep the existing account label when the token cannot be read.
