@@ -1,6 +1,19 @@
 <div class="register-container">
+  <div class="register-orbit" aria-hidden="true"><span></span></div>
   <div class="register-card">
-    <h1>Create Account</h1>
+    <div class="brand-lockup">
+      <span class="register-logo" aria-hidden="true">
+        <span class="register-logo-icon"><mat-icon>rocket_launch</mat-icon></span>
+        <span class="register-logo-square"></span>
+      </span>
+      <span>BUZZ <strong>TRADER</strong></span>
+    </div>
+
+    <header class="register-heading">
+      <span class="eyebrow">GET STARTED</span>
+      <h1>Create your account</h1>
+      <p>A few details and you’re ready to explore.</p>
+    </header>
     
     <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
       <div class="form-group">
@@ -77,7 +90,7 @@
         </div>
       </div>
 
-      <div class="form-group">
+      <div class="form-group password-group">
         <label for="password">Password</label>
         <input 
           type="password" 
