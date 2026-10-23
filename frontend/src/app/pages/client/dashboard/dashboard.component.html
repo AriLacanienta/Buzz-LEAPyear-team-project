@@ -1,6 +1,17 @@
 <div class="container">
   <main>
-    <section class="portfolio-chart-section">
+    <div class="dashboard-heading">
+      <div>
+        <p class="dashboard-kicker">Client portfolio</p>
+        <h1>Dashboard</h1>
+      </div>
+      <button class="reset-layout" type="button" (click)="resetWidgetOrder()">Reset layout</button>
+    </div>
+
+    <div class="dashboard-grid" cdkDropList cdkDropListOrientation="vertical" [cdkDropListData]="widgetOrder" (cdkDropListDropped)="dropWidget($event)">
+    <section class="dashboard-widget" cdkDrag [style.order]="widgetPosition('portfolio')">
+      <div class="widget-drag-bar" cdkDragHandle><span>⋮⋮</span> Portfolio value</div>
+      <section class="portfolio-chart-section">
       <p class="portfolio-label">Total Portfolio Value</p>
       <div class="total-balance">
         <span class="value">${{ totalPortfolioValue.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) }}</span>
@@ -20,16 +31,23 @@
           [(update)]="updateFlag">
         </highcharts-chart>
       </div>
+      </section>
     </section>
 
-    <section class="portfolio-section">
+    <section class="dashboard-widget" cdkDrag [style.order]="widgetPosition('holdings')">
+      <div class="widget-drag-bar" cdkDragHandle><span>⋮⋮</span> Holdings</div>
+      <section class="portfolio-section">
       <app-portfolio-holdings-container
         [title]="'Portfolio Holdings'"
         [holdings]="holdings"
         [isLoading]="isLoading">
       </app-portfolio-holdings-container>
+      </section>
     </section>
-    <section class="market-section">
+
+    <section class="dashboard-widget" cdkDrag [style.order]="widgetPosition('markets')">
+      <div class="widget-drag-bar" cdkDragHandle><span>⋮⋮</span> Markets</div>
+      <section class="market-section">
       <div class="cards-container">
         <app-market-info-card 
           title="WATCHLIST"
@@ -48,12 +66,22 @@
         </app-market-info-card>
 
       </div>
+      </section>
+    </section>
+
+    <section class="dashboard-widget" cdkDrag [style.order]="widgetPosition('orders')">
+      <div class="widget-drag-bar" cdkDragHandle><span>⋮⋮</span> Recent orders</div>
       <section class="trade-content">
         <app-recent-orders></app-recent-orders>
       </section>
+    </section>
+
+    <section class="dashboard-widget" cdkDrag [style.order]="widgetPosition('current-holdings')">
+      <div class="widget-drag-bar" cdkDragHandle><span>⋮⋮</span> Current holdings</div>
       <section class="trade-content">
         <app-current-holdings></app-current-holdings>
       </section>
     </section>
+    </div>
   </main>
 </div>

@@ -8,7 +8,6 @@ import { environment } from '@environments/environment';
 })
 export class HoldingService {
   private apiUrl = `${environment.apiUrl}/holdings`;
-  //private apiUrl = `${environment.apiUrl}/accounts`;
 
   constructor(private http: HttpClient) {}
 

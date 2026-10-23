@@ -76,7 +76,7 @@ Therefore, `AUDITOR` becomes `ROLE_AUDITOR`. Keep the prefix in the authority ma
 
 ### Step 5: Return the role in the auth contract
 
-The login and registration response includes role names in [`AuthResponse`](../frontend/src/app/models/auth-response.model.ts):
+Login, registration, and token refresh responses include role names in [`AuthResponse`](../frontend/src/app/models/auth-response.model.ts):
 
 ```json
 {
@@ -94,6 +94,13 @@ Update the backend response only with canonical enum names. The Angular model in
 
 uses the same string values.
 
+[`AuthController`](../backend/src/main/java/com/buzzleapyear/trading_api/controller/AuthController.java)
+uses a shared response builder to include every assigned role without the Spring
+`ROLE_` prefix. A manager receives `"roles": ["MANAGER"]`, which the frontend uses
+to select the manager dashboard. Users without role assignments receive an empty
+list; registration assigns `CLIENT`. Access tokens remain in the response body,
+and refresh tokens remain in the HttpOnly cookie, not the response body.
+
 ### Step 6: Add role-focused tests
 
 At minimum, test that:
@@ -103,6 +110,7 @@ At minimum, test that:
 3. A user with the role receives `ROLE_<NAME>`.
 4. Login returns the role name.
 5. A new registration still receives only the intended default role.
+6. Token refresh returns all current role names and keeps the refresh token cookie-only.
 
 Run the focused backend tests:
 

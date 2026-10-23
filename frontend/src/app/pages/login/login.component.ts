@@ -55,8 +55,10 @@ export class LoginComponent {
         console.log('Login successful!', response);
 
         const landingPage = this.authService.hasRole('MANAGER')
-          ? '/manager'
-          : '/dashboard';
+          ? '/admin'
+          : this.authService.hasRole('ANALYST')
+            ? '/analyst'
+            : '/dashboard';
         this.router.navigate([landingPage]);
       },
       //error response

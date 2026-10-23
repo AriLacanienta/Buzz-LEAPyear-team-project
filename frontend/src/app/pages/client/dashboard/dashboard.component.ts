@@ -16,6 +16,7 @@ import { RecentOrdersComponent } from '@app/components/client/trade/recent-order
 import { CurrentHoldingsComponent } from '@app/components/client/trade/current-holdings/current-holdings/current-holdings.component';
 import { forkJoin, interval, Subscription } from 'rxjs';
 import { switchMap, startWith } from 'rxjs/operators';
+import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 
 export interface QuoteResponse {
   symbol: string;
@@ -34,11 +35,14 @@ export interface QuoteResponse {
     PortfolioHoldingsContainerComponent,
     MarketInfoCardComponent,
     RecentOrdersComponent,
-    CurrentHoldingsComponent
+    CurrentHoldingsComponent,
+    DragDropModule
   ],
   standalone: true
 })
 export class DashboardComponent implements OnInit, OnDestroy {
+  readonly defaultWidgetOrder = ['portfolio', 'holdings', 'markets', 'orders', 'current-holdings'];
+  widgetOrder = [...this.defaultWidgetOrder];
   title = 'Buzz Trader';
   holdings: any[] = [];
   topGainers: QuoteResponse[] = [];
@@ -84,6 +88,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
  
 
   ngOnInit(): void {
+    this.loadWidgetOrder();
     this.portfolioChartOptions = {
       chart: { type: 'areaspline', backgroundColor: 'transparent', height: 300 },
       series: [{ type: 'areaspline', data: [] }],
@@ -101,6 +106,34 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.isLoading = false;
       }
     });
+  }
+
+  dropWidget(event: CdkDragDrop<string[]>): void {
+    if (event.previousIndex === event.currentIndex) {
+      return;
+    }
+    moveItemInArray(this.widgetOrder, event.previousIndex, event.currentIndex);
+    localStorage.setItem('client-dashboard-widget-order', JSON.stringify(this.widgetOrder));
+  }
+
+  resetWidgetOrder(): void {
+    this.widgetOrder = [...this.defaultWidgetOrder];
+    localStorage.removeItem('client-dashboard-widget-order');
+  }
+
+  widgetPosition(widget: string): number {
+    return this.widgetOrder.indexOf(widget);
+  }
+
+  private loadWidgetOrder(): void {
+    try {
+      const saved = JSON.parse(localStorage.getItem('client-dashboard-widget-order') || 'null');
+      if (Array.isArray(saved) && this.defaultWidgetOrder.every(widget => saved.includes(widget))) {
+        this.widgetOrder = saved;
+      }
+    } catch {
+      this.widgetOrder = [...this.defaultWidgetOrder];
+    }
   }
 
   private startDataRefresh(): void {
