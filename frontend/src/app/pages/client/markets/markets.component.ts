@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, signal } from '@angular/core';
 import { InstrumentService } from '@app/services/instrument.service';
+import { WatchlistService } from '@app/services/watchlist.service';
 import { Subscription } from 'rxjs';
 import { InstrumentsTableComponent } from '@app/components/client//markets/instruments-table/instruments-table.component';
 import { AssetTypeFilterComponent } from '@app/components/client//markets/asset-type-filter/asset-type-filter.component';
@@ -15,19 +16,25 @@ import { CommonModule } from '@angular/common';
 })
 export class MarketsComponent implements OnInit, OnDestroy {
   instruments = signal<any[]>([]);
-  displayedColumns: string[] = ['instrumentSymbol', 'instrumentName', 'currentPrice', 'changePercent', 'volume', 'marketCap'];
+  displayedColumns: string[] = ['instrumentSymbol', 'instrumentName', 'currentPrice', 'changePercent', 'volume', 'marketCap', 'watchlist'];
   selectedMarket = signal('US');
   selectedAssetType = signal('EQUITY');
   markets: string[] = ['US', 'UK', 'India'];
   assetTypes: string[] = ['EQUITY', 'BOND', 'CRYPTO', 'ETF'];
   private refreshSubscription: Subscription | null = null;
 
-  constructor(private instrumentService: InstrumentService) {
+  constructor(
+    private instrumentService: InstrumentService,
+    private watchlistService: WatchlistService
+  ) {
     console.log('MarketsComponent initialized');
   }
 
   ngOnInit(): void {
     this.loadInstruments();
+    this.watchlistService.getWatchlist().subscribe({
+      error: (error) => console.error('Error loading watchlist:', error)
+    });
     this.startAutoRefresh();
   }
 
