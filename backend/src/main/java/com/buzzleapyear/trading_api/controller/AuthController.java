@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import com.buzzleapyear.trading_api.entity.Account;
 import com.buzzleapyear.trading_api.entity.Client;
 import com.buzzleapyear.trading_api.entity.LoginAttempt;
+import com.buzzleapyear.trading_api.util.SupportedCountries;
 
 import java.math.BigDecimal;
 import jakarta.servlet.http.HttpServletRequest;
@@ -160,7 +161,7 @@ public class AuthController {
                 //returning access token in body and refresh token in secure HttpOnly cookie
                 return ResponseEntity.ok()
                     .header(HttpHeaders.SET_COOKIE, buildRefreshCookie(refreshToken, request).toString())
-                    .body(new AuthResponse(accessToken, null, user.getUsername(), user.getEmail()));
+                    .body(createAuthResponse(accessToken, user));
 
         } catch (Exception e) {
             // If any unexpected error occurs, return 401 Unauthorized
@@ -212,6 +213,11 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegistrationRequest registrationRequest, HttpServletRequest request) {
         try {
+            if (registrationRequest.getCountry() != null
+                    && !SupportedCountries.contains(registrationRequest.getCountry())) {
+                return ResponseEntity.badRequest().body(new ErrorResponse("Please select a supported country"));
+            }
+
             //REGISTERING
             // Check if username already exists
             if (userRepository.findByUsername(registrationRequest.getUsername()).isPresent()) {
@@ -231,6 +237,7 @@ public class AuthController {
             newUser.setEmail(registrationRequest.getEmail());
             newUser.setFirstName(registrationRequest.getFirstName());
             newUser.setLastName(registrationRequest.getLastName());
+            newUser.setCountry(registrationRequest.getCountry());
 
             // IMPORTANT!!!!!!! we hash the password before it is saved to our database
             // We are not storing raw passwords in our database. We are using passwordEncoder.encode()
@@ -267,7 +274,7 @@ public class AuthController {
                 //returning access token in body and refresh token in secure HttpOnly cookie
             return ResponseEntity.status(HttpStatus.CREATED)
                     .header(HttpHeaders.SET_COOKIE, buildRefreshCookie(refreshToken, request).toString())
-                    .body(new AuthResponse(accessToken, null, savedUser.getUsername(), savedUser.getEmail()));
+                    .body(createAuthResponse(accessToken, savedUser));
 
         } catch (Exception e) {
             // If any error occurs during registration, return 400 Bad Request
@@ -316,11 +323,18 @@ public class AuthController {
 
             return ResponseEntity.ok()
                     .header(HttpHeaders.SET_COOKIE, buildRefreshCookie(newRefreshToken, request).toString())
-                    .body(new AuthResponse(newAccessToken, null, user.getUsername(), user.getEmail()));
+                    .body(createAuthResponse(newAccessToken, user));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(new ErrorResponse("Refresh failed: " + e.getMessage()));
         }
+    }
+
+    private AuthResponse createAuthResponse(String accessToken, User user) {
+        return new AuthResponse(accessToken, user.getUsername(), user.getEmail(),
+                user.getUserRoles().stream()
+                        .map(userRole -> userRole.getRole().getRoleName().name())
+                        .toList());
     }
 
     @PostMapping("/logout")

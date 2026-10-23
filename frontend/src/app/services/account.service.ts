@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
-import { Observable } from 'rxjs';
 import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { BalanceResponse } from '@app/models/balance-response.model';
 import { CurrentAccountResponse } from '@app/models/current-account-response.model';
@@ -8,13 +8,34 @@ import { RecentTradeOrderResponse, SpringPage } from '@app/models/recent-trade-o
 import { FundsRequest } from '@app/models/funds-request.model';
 import { PortfolioSummaryResponse } from '@app/models/portfolio-summary-response.model';
 
+export interface UserProfile {
+  username: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+}
+
+export interface UserSettings {
+  phoneNumber: string | null;
+  country: string | null;
+  preferences: Record<string, boolean | string>;
+}
+
+export interface PasswordChange {
+  currentPassword: string;
+  newPassword: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class AccountService {
-  private apiUrl = `${environment.apiUrl}/accounts`;
+  private readonly apiUrl = `${environment.apiUrl}/accounts`;
+  private readonly userApiUrl = `${environment.apiUrl}/user`;
   private accountNameState = signal('');
+  private accountAvatarState = signal('assets/images/space_avatar_astronaut.svg');
   accountName = this.accountNameState.asReadonly();
+  accountAvatar = this.accountAvatarState.asReadonly();
 
   constructor(private http: HttpClient) {}
 
@@ -28,6 +49,10 @@ export class AccountService {
 
   getAccountName(): string {
     return this.accountNameState();
+  }
+
+  setAccountAvatar(path: string): void {
+    this.accountAvatarState.set(path);
   }
 
   getAccountBalance(id: string): Observable<BalanceResponse> {
@@ -48,5 +73,20 @@ export class AccountService {
       .set('size', String(size));
     const url = `${this.apiUrl}/${encodeURIComponent(accountId)}/tradeorders`;
     return this.http.get<SpringPage<RecentTradeOrderResponse>>(url, { params });
+  }
+  getUserProfile(username: string): Observable<UserProfile> {
+    return this.http.get<UserProfile>(`${this.userApiUrl}/profile/${username}`);
+  }
+
+  getMySettings(): Observable<UserSettings> {
+    return this.http.get<UserSettings>(`${this.userApiUrl}/me/settings`);
+  }
+
+  updateMySettings(settings: UserSettings): Observable<UserSettings> {
+    return this.http.put<UserSettings>(`${this.userApiUrl}/me/settings`, settings);
+  }
+
+  changeMyPassword(passwordChange: PasswordChange): Observable<void> {
+    return this.http.put<void>(`${this.userApiUrl}/me/password`, passwordChange);
   }
 }
