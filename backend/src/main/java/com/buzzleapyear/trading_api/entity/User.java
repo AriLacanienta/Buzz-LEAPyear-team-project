@@ -31,6 +31,15 @@ public class User {
     
     @Column(nullable = false, unique = true)
     private String email;
+
+    @Column(name = "phone_number", length = 32)
+    private String phoneNumber;
+
+    @Column(name = "country", length = 80)
+    private String country;
+
+    @Column(name = "preferences_json", nullable = false, columnDefinition = "TEXT")
+    private String preferencesJson = "{}";
     
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
@@ -78,6 +87,15 @@ public class User {
     
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
+
+    public String getPhoneNumber() { return phoneNumber; }
+    public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
+
+    public String getCountry() { return country; }
+    public void setCountry(String country) { this.country = country; }
+
+    public String getPreferencesJson() { return preferencesJson; }
+    public void setPreferencesJson(String preferencesJson) { this.preferencesJson = preferencesJson; }
     
     public String getPasswordHash() { return passwordHash; }
     public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }

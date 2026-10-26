@@ -1,29 +1,47 @@
 <div class="register-container">
   <div class="register-card">
-    <h1>Create Account</h1>
-    
+    <div class="brand-lockup">
+      <span class="register-logo" aria-hidden="true">
+        <span class="register-logo-icon"
+          ><mat-icon>rocket_launch</mat-icon></span
+        >
+        <span class="register-logo-square"></span>
+      </span>
+      <span>BUZZ <strong>TRADER</strong></span>
+    </div>
+
+    <header class="register-heading">
+      <span class="eyebrow">GET STARTED</span>
+      <h1>Create your account</h1>
+      <p>A few details and you’re ready to explore.</p>
+    </header>
+
     <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
       <div class="form-group">
         <label for="username">Username</label>
-        <input 
-          type="text" 
-          id="username" 
-          formControlName="username" 
+        <input
+          type="text"
+          id="username"
+          formControlName="username"
           class="form-control"
           [class.is-invalid]="submitted && f['username'].errors"
         />
         <div *ngIf="submitted && f['username'].errors" class="error-text">
-          <small *ngIf="f['username'].errors['required']">Username is required</small>
-          <small *ngIf="f['username'].errors['minlength']">Username must be at least 3 characters</small>
+          <small *ngIf="f['username'].errors['required']"
+            >Username is required</small
+          >
+          <small *ngIf="f['username'].errors['minlength']"
+            >Username must be at least 3 characters</small
+          >
         </div>
       </div>
 
       <div class="form-group">
         <label for="email">Email</label>
-        <input 
-          type="email" 
-          id="email" 
-          formControlName="email" 
+        <input
+          type="email"
+          id="email"
+          formControlName="email"
           class="form-control"
           [class.is-invalid]="submitted && f['email'].errors"
         />
@@ -35,10 +53,10 @@
 
       <div class="form-group">
         <label for="firstName">First Name</label>
-        <input 
-          type="text" 
-          id="firstName" 
-          formControlName="firstName" 
+        <input
+          type="text"
+          id="firstName"
+          formControlName="firstName"
           class="form-control"
           [class.is-invalid]="submitted && f['firstName'].errors"
         />
@@ -49,10 +67,10 @@
 
       <div class="form-group">
         <label for="lastName">Last Name</label>
-        <input 
-          type="text" 
-          id="lastName" 
-          formControlName="lastName" 
+        <input
+          type="text"
+          id="lastName"
+          formControlName="lastName"
           class="form-control"
           [class.is-invalid]="submitted && f['lastName'].errors"
         />
@@ -62,18 +80,43 @@
       </div>
 
       <div class="form-group">
+        <label for="country">Country</label>
+        <select
+          id="country"
+          formControlName="country"
+          class="form-control"
+          [class.is-invalid]="submitted && f['country'].errors"
+        >
+          <option value="" disabled>Select a country</option>
+          <option *ngFor="let country of countryOptions" [value]="country">
+            {{ country }}
+          </option>
+        </select>
+        <div *ngIf="submitted && f['country'].errors" class="error-text">
+          <small>Please select a country</small>
+        </div>
+      </div>
+
+      <div class="form-group password-group">
         <label for="password">Password</label>
-        <input 
-          type="password" 
-          id="password" 
-          formControlName="password" 
+        <input
+          type="password"
+          id="password"
+          formControlName="password"
           class="form-control"
           [class.is-invalid]="submitted && f['password'].errors"
         />
         <div *ngIf="submitted && f['password'].errors" class="error-text">
-          <small *ngIf="f['password'].errors['required']">Password is required</small>
-          <small *ngIf="f['password'].errors['minlength']">Password must be at least 8 characters</small>
-          <small *ngIf="f['password'].errors['pattern']">Password must include uppercase, lowercase, number, and a special character.</small>
+          <small *ngIf="f['password'].errors['required']"
+            >Password is required</small
+          >
+          <small *ngIf="f['password'].errors['minlength']"
+            >Password must be at least 8 characters</small
+          >
+          <small *ngIf="f['password'].errors['pattern']"
+            >Password must include uppercase, lowercase, number, and a special
+            character.</small
+          >
         </div>
       </div>
 
@@ -82,12 +125,13 @@
       </div>
 
       <button type="submit" class="btn btn-primary" [disabled]="loading">
-        {{ loading ? 'Creating Account...' : 'Register' }}
+        {{ loading ? "Creating Account..." : "Register" }}
       </button>
     </form>
 
     <p class="login-link">
-      Already have an account? <a (click)="goToLogin()" class="link">Login here</a>
+      Already have an account?
+      <a (click)="goToLogin()" class="link">Login here</a>
     </p>
   </div>
 </div>
