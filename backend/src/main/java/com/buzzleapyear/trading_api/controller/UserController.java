@@ -107,8 +107,9 @@ public class UserController {
     public ResponseEntity<?> updateMySettings(
             @RequestBody UserSettingsRequest request,
             Authentication authentication) {
-        if (request.phoneNumber() != null && request.phoneNumber().trim().length() > 32) {
-            return ResponseEntity.badRequest().body(new ErrorResponse("Phone number must be 32 characters or fewer"));
+        if (request.phoneNumber() != null && !request.phoneNumber().isBlank()
+                && !request.phoneNumber().trim().matches("[0-9]{10}")) {
+            return ResponseEntity.badRequest().body(new ErrorResponse("Phone number must contain exactly 10 digits"));
         }
         if (request.country() != null && request.country().trim().length() > 80) {
             return ResponseEntity.badRequest().body(new ErrorResponse("Country must be 80 characters or fewer"));
@@ -118,6 +119,10 @@ public class UserController {
             return ResponseEntity.badRequest().body(new ErrorResponse("Please select a supported country"));
         }
         Object profilePicture = request.preferences() == null ? null : request.preferences().get("profilePicture");
+        if (request.preferences() != null && request.preferences().containsKey("baseCurrency")
+                && !"USD".equals(request.preferences().get("baseCurrency"))) {
+            return ResponseEntity.badRequest().body(new ErrorResponse("Base currency is fixed to USD"));
+        }
         if (profilePicture != null
                 && (!(profilePicture instanceof String path) || !PROFILE_PICTURES.contains(path))) {
             return ResponseEntity.badRequest().body(new ErrorResponse("Please select one of the available profile pictures"));
@@ -133,13 +138,14 @@ public class UserController {
                 ? null : request.phoneNumber().trim());
         user.setCountry(request.country() == null || request.country().isBlank()
             ? null : request.country().trim());
-        if (request.preferences() != null) {
-            try {
-                user.setPreferencesJson(objectMapper.writeValueAsString(request.preferences()));
-            } catch (Exception e) {
-                return ResponseEntity.internalServerError()
-                        .body(new ErrorResponse("Could not save preferences"));
-            }
+        try {
+            var preferences = new java.util.HashMap<String, Object>(request.preferences() == null
+                    ? toSettingsResponse(user).preferences() : request.preferences());
+            preferences.put("baseCurrency", "USD");
+            user.setPreferencesJson(objectMapper.writeValueAsString(preferences));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(new ErrorResponse("Could not save preferences"));
         }
 
         userRepository.save(user);
@@ -167,6 +173,11 @@ public class UserController {
                     .body(new ErrorResponse("Current password is incorrect"));
         }
 
+        if (passwordEncoder.matches(request.newPassword(), user.getPasswordHash())) {
+            return ResponseEntity.badRequest()
+                .body(new ErrorResponse("Your new password must be different from your current password."));
+        }
+
         user.setPasswordHash(passwordEncoder.encode(request.newPassword()));
         userRepository.save(user);
         return ResponseEntity.noContent().build();
@@ -176,9 +187,10 @@ public class UserController {
         try {
             var preferences = objectMapper.readValue(
                     user.getPreferencesJson(), new TypeReference<java.util.Map<String, Object>>() {});
+            preferences.put("baseCurrency", "USD");
             return new UserSettingsResponse(user.getPhoneNumber(), user.getCountry(), preferences);
         } catch (Exception e) {
-            return new UserSettingsResponse(user.getPhoneNumber(), user.getCountry(), java.util.Map.of());
+            return new UserSettingsResponse(user.getPhoneNumber(), user.getCountry(), java.util.Map.of("baseCurrency", "USD"));
         }
     }
 
