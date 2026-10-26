@@ -7,6 +7,7 @@ import com.buzzleapyear.trading_api.entity.DisputeSeverity;
 import com.buzzleapyear.trading_api.service.DisputeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -27,6 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -84,9 +86,30 @@ class DisputeControllerTests {
     }
 
     @Test
+    void searchRejectsUnknownStatus() throws Exception {
+        MockMvcBuilders.standaloneSetup(disputeController).build()
+            .perform(get("/api/v1/dispute/search").param("status", "INVALID").principal(manager))
+            .andExpect(status().isBadRequest());
+        verifyNoInteractions(disputeService);
+    }
+
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.EnumSource(DisputeStatus.class)
+    void searchForwardsStatusFilter(DisputeStatus filter) throws Exception {
+        when(disputeService.search(eq("manager"), eq(true), isNull(), isNull(), isNull(),
+            isNull(), isNull(), eq(filter), isNull(), any(Pageable.class)))
+            .thenReturn(new PageImpl<>(List.of(), org.springframework.data.domain.PageRequest.of(0, 20), 0));
+        MockMvcBuilders.standaloneSetup(disputeController).build()
+            .perform(get("/api/v1/dispute/search").param("status", filter.name()).principal(manager))
+            .andExpect(status().isOk());
+        verify(disputeService).search(eq("manager"), eq(true), isNull(), isNull(), isNull(),
+            isNull(), isNull(), eq(filter), isNull(), any(Pageable.class));
+    }
+
+    @Test
     void searchRejectsInvalidSortField() {
         var result = disputeController.search(
-            0, 20, "invalid", "desc", null, null, null, null, null, client);
+            0, 20, "invalid", "desc", null, null, null, null, null, null, null, client);
 
         assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
         verifyNoInteractions(disputeService);
@@ -98,7 +121,7 @@ class DisputeControllerTests {
             0, 20, "createdAt", "desc", null,
             LocalDateTime.of(2026, 10, 23, 0, 0),
             LocalDateTime.of(2026, 10, 22, 0, 0),
-            BigDecimal.TEN, BigDecimal.ONE, client);
+            BigDecimal.TEN, BigDecimal.ONE, null, null, client);
 
         assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
         verifyNoInteractions(disputeService);
@@ -107,15 +130,15 @@ class DisputeControllerTests {
     @Test
     void clientSearchUsesOwnerScopeAndDefaults() {
         when(disputeService.search(eq("client"), eq(false), isNull(), isNull(), isNull(),
-            isNull(), isNull(), any(Pageable.class)))
+            isNull(), isNull(), isNull(), isNull(), any(Pageable.class)))
             .thenReturn(new PageImpl<>(List.of(response(4L, DisputeStatus.OPEN))));
 
         var result = disputeController.search(
-            0, 20, "createdAt", "desc", null, null, null, null, null, client);
+            0, 20, "createdAt", "desc", null, null, null, null, null, null, null, client);
 
         assertEquals(HttpStatus.OK, result.getStatusCode());
         verify(disputeService).search(eq("client"), eq(false), isNull(), isNull(), isNull(),
-            isNull(), isNull(), argThat(pageable ->
+            isNull(), isNull(), isNull(), isNull(), argThat(pageable ->
                 pageable.getPageNumber() == 0
                     && pageable.getPageSize() == 20
                     && pageable.getSort().getOrderFor("createdAt").isDescending()));
@@ -124,15 +147,88 @@ class DisputeControllerTests {
     @Test
     void managerSearchUsesGlobalScope() {
         when(disputeService.search(eq("manager"), eq(true), eq(11L), any(), any(),
-            eq(BigDecimal.ONE), eq(BigDecimal.TEN), any(Pageable.class)))
+            eq(BigDecimal.ONE), eq(BigDecimal.TEN), isNull(), isNull(), any(Pageable.class)))
             .thenReturn(new PageImpl<>(List.of()));
 
         disputeController.search(1, 10, "tradeValue", "asc", 11L,
-            LocalDateTime.MIN, LocalDateTime.MAX, BigDecimal.ONE, BigDecimal.TEN, manager);
+            LocalDateTime.MIN, LocalDateTime.MAX, BigDecimal.ONE, BigDecimal.TEN, null, null, manager);
 
         verify(disputeService).search(eq("manager"), eq(true), eq(11L), any(), any(),
-            eq(BigDecimal.ONE), eq(BigDecimal.TEN), argThat(pageable ->
+            eq(BigDecimal.ONE), eq(BigDecimal.TEN), isNull(), isNull(), argThat(pageable ->
                 pageable.getSort().getOrderFor("tradeOrder.tradeValue") != null));
+    }
+
+    @Test
+    void searchScopesByUserAcrossAccountsAndOrdersOpenFirstBeforePagination() throws Exception {
+        when(disputeService.search(eq("manager"), eq(true), isNull(), isNull(), isNull(),
+            isNull(), isNull(), isNull(), eq(42L), any(Pageable.class)))
+            .thenReturn(new PageImpl<>(List.of(), org.springframework.data.domain.PageRequest.of(1, 20), 0));
+
+        MockMvcBuilders.standaloneSetup(disputeController).build()
+            .perform(get("/api/v1/dispute/search").param("userId", "42")
+                .param("sortBy", "status").param("sortDirection", "asc")
+                .param("page", "1").principal(manager))
+            .andExpect(status().isOk());
+
+        verify(disputeService).search(eq("manager"), eq(true), isNull(), isNull(), isNull(),
+            isNull(), isNull(), isNull(), eq(42L), argThat(pageable ->
+                pageable.getPageNumber() == 1
+                    && pageable.getSort().getOrderFor("status").isAscending()
+                    && pageable.getSort().getOrderFor("id").isAscending()));
+    }
+
+    @ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(strings = {"0", "-1", "invalid"})
+    void searchRejectsInvalidUserId(String userId) throws Exception {
+        MockMvcBuilders.standaloneSetup(disputeController).build()
+            .perform(get("/api/v1/dispute/search").param("userId", userId).principal(manager))
+            .andExpect(status().isBadRequest());
+        verifyNoInteractions(disputeService);
+    }
+
+    @Test
+    void resolveAcceptsRequiredTextAndSerializesSavedResolution() throws Exception {
+        DisputeResponse response = new DisputeResponse(4L, 7L, "NAME", 11L,
+            BigDecimal.TEN, "Original", DisputeStatus.RESOLVED, DisputeSeverity.NORMAL,
+            LocalDateTime.now(), LocalDateTime.now(), "Reviewed");
+        when(disputeService.resolve(4L, "Reviewed", manager)).thenReturn(response);
+        MockMvcBuilders.standaloneSetup(disputeController).build()
+            .perform(patch("/api/v1/dispute/4/resolve").principal(manager)
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .content("{\"resolutionMessage\":\"Reviewed\"}"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.resolutionMessage").value("Reviewed"))
+            .andExpect(jsonPath("$.message").value("Original"))
+            .andExpect(jsonPath("$.status").value("RESOLVED"));
+    }
+
+    @ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(strings = {
+        "", "{}", "{\"resolutionMessage\":null}", "{\"resolutionMessage\":\"\"}",
+        "{\"resolutionMessage\":\"   \"}"
+    })
+    void resolveRejectsMissingAndBlankBody(String body) throws Exception {
+        MockMvcBuilders.standaloneSetup(disputeController).build()
+            .perform(patch("/api/v1/dispute/4/resolve").principal(manager)
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON).content(body))
+            .andExpect(status().isBadRequest());
+        verifyNoInteractions(disputeService);
+    }
+
+    @Test
+    void resolveValidatesLengthBoundary() throws Exception {
+        var mvc = MockMvcBuilders.standaloneSetup(disputeController).build();
+        mvc.perform(patch("/api/v1/dispute/4/resolve").principal(manager)
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .content("{\"resolutionMessage\":\"" + "x".repeat(2001) + "\"}"))
+            .andExpect(status().isBadRequest());
+        verifyNoInteractions(disputeService);
+        when(disputeService.resolve(4L, "x".repeat(2000), manager))
+            .thenReturn(response(4L, DisputeStatus.RESOLVED));
+        mvc.perform(patch("/api/v1/dispute/4/resolve").principal(manager)
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .content("{\"resolutionMessage\":\"" + "x".repeat(2000) + "\"}"))
+            .andExpect(status().isOk());
     }
 
     private UsernamePasswordAuthenticationToken authentication(String username, String role) {
@@ -141,8 +237,8 @@ class DisputeControllerTests {
     }
 
     private DisputeResponse response(Long id, DisputeStatus status) {
-        return new DisputeResponse(id, 7L, 11L, new BigDecimal("10000.00"), "details", status,
+        return new DisputeResponse(id, 7L, "NAME", 11L, new BigDecimal("10000.00"), "details", status,
             DisputeSeverity.CRITICAL,
-            LocalDateTime.now(), null);
+            LocalDateTime.now(), null, null);
     }
 }

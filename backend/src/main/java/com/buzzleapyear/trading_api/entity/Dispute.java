@@ -18,6 +18,9 @@ public class Dispute {
     @Column(name = "dispute_message", length = 2000)
     private String message;
 
+    @Column(name = "resolution_message", length = 2000)
+    private String resolutionMessage;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private DisputeStatus status = DisputeStatus.OPEN;
@@ -46,6 +49,8 @@ public class Dispute {
     public void setTradeOrder(TradeOrder tradeOrder) { this.tradeOrder = tradeOrder; }
     public String getMessage() { return message; }
     public void setMessage(String message) { this.message = message; }
+    public String getResolutionMessage() { return resolutionMessage; }
+    public void setResolutionMessage(String resolutionMessage) { this.resolutionMessage = resolutionMessage; }
     public DisputeStatus getStatus() { return status; }
     public void setStatus(DisputeStatus status) { this.status = status; }
     public LocalDateTime getCreatedAt() { return createdAt; }

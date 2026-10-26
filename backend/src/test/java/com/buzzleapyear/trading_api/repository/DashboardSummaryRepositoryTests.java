@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@Testcontainers
+@Testcontainers(disabledWithoutDocker = true)
 class DashboardSummaryRepositoryTests {
     @Container
     private static final PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:16-alpine");
@@ -38,6 +38,24 @@ class DashboardSummaryRepositoryTests {
     @BeforeEach
     void resetFixtures() {
         jdbc.execute("TRUNCATE users, instruments CASCADE");
+    }
+
+    @Test
+    void resolutionColumnSupportsLegacyRowsAndSeparateResolutionText() {
+        long owner = account("client");
+        long orderId = order(owner, "USD", "BUY", "1", "100");
+        dispute(orderId, "RESOLVED");
+        assertNull(jdbc.queryForObject(
+            "SELECT resolution_message FROM disputes WHERE trade_order_id = ?", String.class, orderId));
+        jdbc.update("UPDATE disputes SET dispute_message = ?, resolution_message = ? WHERE trade_order_id = ?",
+            "Original dispute", "x".repeat(2000), orderId);
+        assertEquals("Original dispute", jdbc.queryForObject(
+            "SELECT dispute_message FROM disputes WHERE trade_order_id = ?", String.class, orderId));
+        assertEquals("x".repeat(2000), jdbc.queryForObject(
+            "SELECT resolution_message FROM disputes WHERE trade_order_id = ?", String.class, orderId));
+        assertThrows(org.springframework.dao.DataIntegrityViolationException.class,
+            () -> jdbc.update("UPDATE disputes SET resolution_message = ? WHERE trade_order_id = ?",
+                "x".repeat(2001), orderId));
     }
 
     @Test

@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import com.buzzleapyear.trading_api.entity.Account;
 import com.buzzleapyear.trading_api.entity.Client;
 import com.buzzleapyear.trading_api.entity.LoginAttempt;
+import com.buzzleapyear.trading_api.util.SupportedCountries;
 
 import java.math.BigDecimal;
 import jakarta.servlet.http.HttpServletRequest;
@@ -213,6 +214,11 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegistrationRequest registrationRequest, HttpServletRequest request) {
         try {
+            if (registrationRequest.getCountry() != null
+                    && !SupportedCountries.contains(registrationRequest.getCountry())) {
+                return ResponseEntity.badRequest().body(new ErrorResponse("Please select a supported country"));
+            }
+
             //REGISTERING
             // Check if username already exists
             if (userRepository.findByUsername(registrationRequest.getUsername()).isPresent()) {
@@ -232,6 +238,7 @@ public class AuthController {
             newUser.setEmail(registrationRequest.getEmail());
             newUser.setFirstName(registrationRequest.getFirstName());
             newUser.setLastName(registrationRequest.getLastName());
+            newUser.setCountry(registrationRequest.getCountry());
 
             // IMPORTANT!!!!!!! we hash the password before it is saved to our database
             // We are not storing raw passwords in our database. We are using passwordEncoder.encode()
