@@ -20,7 +20,6 @@
       <a routerLink="/manager/clients" routerLinkActive="active" class="tab">Clients</a>
       <a routerLink="/manager/disputes" routerLinkActive="active" class="tab disputes-tab">
         <span>Disputes</span>
-        <span class="dispute-badge" [class.dispute]="(disputeStatusDisplay$ | async)?.class === 'dispute'">2</span>
       </a>
     </nav>
 
@@ -46,7 +45,5 @@
     {{ getPageDescription() }}
   </span>
   <div class="navbar-bottom-right">
-    <span class="status-dot" [class.dispute]="(disputeStatusDisplay$ | async)?.class === 'dispute'"></span>
-    2 critical disputes require attention
   </div>
 </div>

@@ -82,7 +82,7 @@ export class AuthService {
   refreshAccessToken(): Observable<AuthApiResponse> {
     return this.http.post<AuthApiResponse>(`${this.apiUrl}/refresh`, {}, {
       withCredentials: true
-    });
+    }).pipe(tap(response => this.storeAuthResponse(response)));
   }
 
   restoreSession(): Observable<boolean> {
@@ -91,7 +91,6 @@ export class AuthService {
     }
 
     return this.refreshAccessToken().pipe(
-      tap(response => this.storeAuthResponse(response)),
       map(() => this.isLoggedIn()),
       catchError(() => {
         localStorage.removeItem('auth_roles');

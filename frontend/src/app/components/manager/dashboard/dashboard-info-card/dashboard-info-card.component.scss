@@ -15,12 +15,12 @@ $spacing-sm: 0.5rem;
 .dashboard-info-card {
     display: flex;
     width: 100%;
-    height: clamp(6rem, 18vh, 22rem);
+    min-height: 9rem;
+    height: 100%;
     box-sizing: border-box;
     padding: 1rem;
     font-size: 1rem;
     font-weight: 700;
-    margin-bottom: clamp(0.55rem, 1.8vw, 1rem);
     align-items: center;
     flex-shrink: 0;
     border-bottom: 0.1rem solid $border-dark;
@@ -39,6 +39,12 @@ $spacing-sm: 0.5rem;
     font-weight: 700;
     color: white;
     font-size: clamp(1.5rem, 2vw, 2.25rem);
+    overflow-wrap: anywhere;
+}
+
+.currency-total {
+    display: block;
+    font-size: clamp(1rem, 1.5vw, 1.5rem);
 }
 
 .header-wrapper {

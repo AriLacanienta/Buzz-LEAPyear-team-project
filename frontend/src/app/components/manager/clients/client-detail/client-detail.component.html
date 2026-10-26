@@ -59,10 +59,9 @@
         <p class="eyebrow">Resolution center</p>
         <h3>Disputes</h3>
       </div>
-      <span>No dispute feed connected</span>
     </div>
 
-    <p>Dispute records will appear here when they are assigned to this client.</p>
+    <app-manager-disputes [userId]="selectedClient.id" />
   </section>
 
   <section class="detail-section access-section">

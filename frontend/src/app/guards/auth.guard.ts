@@ -17,15 +17,13 @@ export const authGuard: CanActivateFn = (route, state) => {
       }
 
       return authService.validateToken().pipe(
-    map(response => {
-      // Token is valid
-      console.log('Token validated successfully');
-      if (!requiredRoles?.length || requiredRoles.some(role => authService.hasRole(role))) {
-        return true;
-      }
+        map(() => {
+          if (!requiredRoles?.length || requiredRoles.some(role => authService.hasRole(role))) {
+            return true;
+          }
 
-      return router.createUrlTree(['/dashboard']);
-    })
+          return router.createUrlTree(['/dashboard']);
+        })
       );
     }),
     catchError(error => {

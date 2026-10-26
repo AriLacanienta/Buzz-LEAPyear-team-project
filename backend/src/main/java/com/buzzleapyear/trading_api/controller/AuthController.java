@@ -31,7 +31,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Base64;
 import java.util.Optional;
 
@@ -325,10 +324,10 @@ public class AuthController {
     }
 
     private AuthResponse createAuthResponse(String accessToken, User user) {
-        List<String> roles = user.getUserRoles().stream()
-                .map(userRole -> userRole.getRole().getRoleName().name())
-                .toList();
-        return new AuthResponse(accessToken, null, user.getUsername(), user.getEmail(), roles);
+        return new AuthResponse(accessToken, user.getUsername(), user.getEmail(),
+                user.getUserRoles().stream()
+                        .map(userRole -> userRole.getRole().getRoleName().name())
+                        .toList());
     }
 
     @PostMapping("/logout")
