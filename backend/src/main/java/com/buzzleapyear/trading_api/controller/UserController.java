@@ -9,6 +9,9 @@ import com.buzzleapyear.trading_api.entity.User;
 import com.buzzleapyear.trading_api.repository.UserRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -53,6 +56,8 @@ public class UserController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    private Logger logger = LoggerFactory.getLogger(UserController.class);
+
     /*
      * GET /api/v1/user/profile/{username}
      * Get user profile information by username
@@ -60,9 +65,12 @@ public class UserController {
      * @return UserProfileResponse with user details
      */
     @GetMapping("/profile/{username}")
-    public ResponseEntity<?> getUserProfile(@PathVariable String username) {
+    public ResponseEntity<?> getUserProfile(@PathVariable String username, Authentication authentication) {
         try {
-            Optional<User> userOptional = userRepository.findByUsername(username);
+            Optional<User> userOptional = userRepository.findByUsername(authentication.getName());
+
+            if (!username.equals(authentication.getName()))
+                logger.warn("{} attempted to get profile info for {}", authentication.getName(), username);
 
             if (userOptional.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -70,6 +78,7 @@ public class UserController {
             }
 
             User user = userOptional.get();
+
 
             //Returns user profile data
             return ResponseEntity.ok(new UserProfileResponse(
@@ -185,7 +194,7 @@ public class UserController {
         }
     }
 
-   
+
     private final UserService userService;
 
     public UserController(UserService userService) {
