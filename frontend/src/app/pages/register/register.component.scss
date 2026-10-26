@@ -7,9 +7,14 @@
   place-items: center;
   overflow: hidden;
   padding: 28px 18px;
-  background: radial-gradient(ellipse at 50% 44%, #152746 0, #0c1422 45%, #080c14 80%);
+  background: radial-gradient(
+    ellipse at 50% 44%,
+    #152746 0,
+    #0c1422 45%,
+    #080c14 80%
+  );
   color: #f8fafc;
-  font-family: Inter, 'Segoe UI', sans-serif;
+  font-family: Inter, "Segoe UI", sans-serif;
 }
 
 .register-container::before {
@@ -20,46 +25,18 @@
   width: 150vmax;
   height: 150vmax;
   background:
-    radial-gradient(circle at 29px 43px, #e4efff 0 1px, transparent 1.7px) 0 0 / 173px 211px,
-    radial-gradient(circle at 81px 107px, #9ecaff 0 .8px, transparent 1.5px) 0 0 / 257px 193px,
-    radial-gradient(circle at 137px 67px, #ffffff 0 1.3px, transparent 2px) 0 0 / 359px 307px,
+    radial-gradient(circle at 29px 43px, #e4efff 0 1px, transparent 1.7px) 0 0 /
+      173px 211px,
+    radial-gradient(circle at 81px 107px, #9ecaff 0 0.8px, transparent 1.5px) 0
+      0 / 257px 193px,
+    radial-gradient(circle at 137px 67px, #ffffff 0 1.3px, transparent 2px) 0
+      0 / 359px 307px,
     radial-gradient(ellipse at 28% 45%, #4567a838, transparent 28%),
     radial-gradient(ellipse at 72% 60%, #6951a32b, transparent 30%);
-  content: '';
-  opacity: .65;
+  content: "";
+  opacity: 0.65;
   transform: translate(-50%, -50%) rotate(0deg);
-  animation: register-space-turn 180s linear infinite;
-  animation-play-state: paused;
   pointer-events: none;
-}
-
-.register-container.background-moving::before {
-  animation-play-state: running;
-}
-
-.background-motion-toggle {
-  position: absolute;
-  right: 20px;
-  bottom: 16px;
-  z-index: 2;
-  padding: 8px 12px;
-  border: 1px solid #b7d0ff30;
-  border-radius: 6px;
-  background: #0b111dcc;
-  color: #b8c8df;
-  font: inherit;
-  font-size: 11px;
-  cursor: pointer;
-}
-
-.background-motion-toggle:focus-visible {
-  outline: 2px solid #83aef1;
-  outline-offset: 3px;
-}
-
-@keyframes register-space-turn {
-  from { transform: translate(-50%, -50%) rotate(0deg); }
-  to { transform: translate(-50%, -50%) rotate(360deg); }
 }
 
 .register-card {
@@ -70,7 +47,9 @@
   border: 1px solid #b7d0ff1b;
   border-radius: 15px;
   background: linear-gradient(145deg, #111b2de8, #0b111de8);
-  box-shadow: 0 20px 65px #0006, 0 1px 0 #ffffff0a inset;
+  box-shadow:
+    0 20px 65px #0006,
+    0 1px 0 #ffffff0a inset;
   backdrop-filter: blur(16px);
 }
 
@@ -82,7 +61,7 @@
   height: 2px;
   border-radius: 2px;
   background: #5b94e8;
-  content: '';
+  content: "";
 }
 
 .brand-lockup {
@@ -94,10 +73,12 @@
   color: #f8fafc;
   font-size: 10px;
   font-weight: 600;
-  letter-spacing: .12em;
+  letter-spacing: 0.12em;
 }
 
-.brand-lockup strong { color: #75aaff; }
+.brand-lockup strong {
+  color: #75aaff;
+}
 
 .register-logo {
   position: relative;
@@ -110,8 +91,17 @@
   color: #3b82f6;
 }
 
-.register-logo-icon { z-index: 1; display: grid; place-items: center; }
-.register-logo-icon mat-icon { width: 16px; height: 16px; font-size: 16px; line-height: 16px; }
+.register-logo-icon {
+  z-index: 1;
+  display: grid;
+  place-items: center;
+}
+.register-logo-icon mat-icon {
+  width: 16px;
+  height: 16px;
+  font-size: 16px;
+  line-height: 16px;
+}
 .register-logo-square {
   position: absolute;
   inset: 2px;
@@ -120,10 +110,27 @@
   background: #51a2ff22;
 }
 
-.register-heading { margin: 0 0 24px; text-align: center; }
-.register-heading .eyebrow { color: #83aef1; font-size: 9px; font-weight: 600; letter-spacing: .15em; }
-.register-heading h1 { margin: 8px 0 5px; font-size: 24px; font-weight: 600; letter-spacing: -.035em; }
-.register-heading p { margin: 0; color: #8999b1; font-size: 12px; }
+.register-heading {
+  margin: 0 0 24px;
+  text-align: center;
+}
+.register-heading .eyebrow {
+  color: #83aef1;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+}
+.register-heading h1 {
+  margin: 8px 0 5px;
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+}
+.register-heading p {
+  margin: 0;
+  color: #8999b1;
+  font-size: 12px;
+}
 
 .register-card form {
   display: grid;
@@ -132,8 +139,17 @@
   column-gap: 18px;
 }
 
-.form-group { min-width: 0; margin-bottom: 14px; }
-.form-group label { display: block; margin-bottom: 6px; color: #c3cede; font-size: 10px; font-weight: 500; }
+.form-group {
+  min-width: 0;
+  margin-bottom: 14px;
+}
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  color: #c3cede;
+  font-size: 10px;
+  font-weight: 500;
+}
 .form-control {
   width: 100%;
   height: 41px;
@@ -145,14 +161,32 @@
   color: #e5e7eb;
   font: inherit;
   font-size: 12px;
-  transition: border-color .2s, box-shadow .2s, background-color .2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s,
+    background-color 0.2s;
 }
 
-.form-control:focus { border-color: #5794f5; box-shadow: 0 0 0 3px #3b82f624; background: #101b2b; }
-.form-control::placeholder { color: #586a83; }
-.form-control.is-invalid { border-color: #f87171; }
-.error-text { margin-top: 5px; color: #f87171; font-size: 10px; line-height: 1.35; }
-.password-group { grid-column: auto; }
+.form-control:focus {
+  border-color: #5794f5;
+  box-shadow: 0 0 0 3px #3b82f624;
+  background: #101b2b;
+}
+.form-control::placeholder {
+  color: #586a83;
+}
+.form-control.is-invalid {
+  border-color: #f87171;
+}
+.error-text {
+  margin-top: 5px;
+  color: #f87171;
+  font-size: 10px;
+  line-height: 1.35;
+}
+.password-group {
+  grid-column: auto;
+}
 
 .error-alert {
   grid-column: 1 / -1;
@@ -177,25 +211,51 @@
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color .2s, transform .2s;
+  transition:
+    background-color 0.2s,
+    transform 0.2s;
 }
 
-.btn.btn-primary:hover:not(:disabled) { background: #4387ef; transform: translateY(-1px); }
-.btn.btn-primary:disabled { background: #4b5563; cursor: not-allowed; }
-.login-link { margin: 18px 0 0; color: #8291a8; font-size: 11px; text-align: center; }
-.login-link .link { color: #8bb5ff; font-weight: 600; text-decoration: none; cursor: pointer; }
-.login-link .link:hover { color: #c0d8ff; }
+.btn.btn-primary:hover:not(:disabled) {
+  background: #4387ef;
+  transform: translateY(-1px);
+}
+.btn.btn-primary:disabled {
+  background: #4b5563;
+  cursor: not-allowed;
+}
+.login-link {
+  margin: 18px 0 0;
+  color: #8291a8;
+  font-size: 11px;
+  text-align: center;
+}
+.login-link .link {
+  color: #8bb5ff;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+.login-link .link:hover {
+  color: #c0d8ff;
+}
 
 @media (max-width: 560px) {
-  .register-card { padding: 26px 22px 22px; }
+  .register-card {
+    padding: 26px 22px 22px;
+  }
 }
 
 @media (max-width: 420px) {
-  .register-container { padding: 16px; }
-  .register-card form { grid-template-columns: 1fr; }
-  .password-group, .error-alert, .btn.btn-primary { grid-column: 1; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .register-orbit { animation: none; }
+  .register-container {
+    padding: 16px;
+  }
+  .register-card form {
+    grid-template-columns: 1fr;
+  }
+  .password-group,
+  .error-alert,
+  .btn.btn-primary {
+    grid-column: 1;
+  }
 }
