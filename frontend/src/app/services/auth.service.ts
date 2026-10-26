@@ -72,9 +72,9 @@ export class AuthService {
    * @returns Observable<any> - Response with token, username, email
    */
   register(username: string, email: string, firstName: string,
-           lastName: string, password: string): Observable<AuthApiResponse> {
+           lastName: string, country: string, password: string): Observable<AuthApiResponse> {
     return this.http.post<AuthApiResponse>(`${this.apiUrl}/register`, {
-      username, email, firstName, lastName, password
+      username, email, firstName, lastName, country, password
     }, {
       withCredentials: true
     }).pipe(tap(response => this.storeAuthResponse(response)));

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Blue ringed planet in space">
+  <defs>
+    <radialGradient id="planet-bg" cx="30%" cy="22%" r="100%"><stop stop-color="#493985"/><stop offset=".5" stop-color="#1d2855"/><stop offset="1" stop-color="#080c14"/></radialGradient>
+    <linearGradient id="planet-body" x1=".18" y1=".12" x2=".82" y2=".9"><stop stop-color="#a5f3fc"/><stop offset=".35" stop-color="#3b9be8"/><stop offset=".72" stop-color="#3656b4"/><stop offset="1" stop-color="#22275d"/></linearGradient>
+    <linearGradient id="planet-ring" x1="0" y1="0" x2="1" y2=".4"><stop stop-color="#d8b4fe"/><stop offset=".28" stop-color="#f3e8ff"/><stop offset=".58" stop-color="#7dd3fc"/><stop offset="1" stop-color="#818cf8"/></linearGradient>
+    <clipPath id="planet-clip"><circle cx="64" cy="64" r="63"/></clipPath>
+  </defs>
+  <g clip-path="url(#planet-clip)">
+    <circle cx="64" cy="64" r="64" fill="url(#planet-bg)"/>
+    <circle cx="29" cy="31" r="17" fill="#6d5bd0" opacity=".15"/>
+    <circle cx="23" cy="54" r="1.2" fill="#fff"/><circle cx="36" cy="21" r="1.1" fill="#fff"/><circle cx="103" cy="29" r="1.4" fill="#fff"/><circle cx="102" cy="91" r="1.1" fill="#fff"/><circle cx="30" cy="97" r="1.5" fill="#fff"/><circle cx="79" cy="108" r="1" fill="#fff"/>
+    <path d="M4 69c21-31 93-37 121-9 6 6 3 13-5 11-37-8-72-2-105 17-9 5-17-10-11-19z" fill="none" stroke="#111b3c" stroke-width="16" opacity=".8"/>
+    <circle cx="63" cy="62" r="31" fill="url(#planet-body)"/>
+    <path d="M40 50c9-9 19-11 29-8-5 5-6 10-2 14-9 4-17 2-27-6zm31-4c7-3 14-1 18 4-3 6-9 9-16 8-3-4-4-8-2-12zM44 74c8-5 15-5 22-1 1 7-2 12-8 16-8-3-12-8-14-15z" fill="#c7f6ff" opacity=".57"/>
+    <path d="M41 55c13 5 30 5 45-1M39 65c15 6 32 6 48 0" fill="none" stroke="#d5f6ff" stroke-opacity=".35" stroke-width="2"/>
+    <path d="M4 69c21-24 92-30 121-9" fill="none" stroke="url(#planet-ring)" stroke-width="5"/>
+    <path d="M11 81c29-17 73-24 107-13" fill="none" stroke="#8cc9ff" stroke-width="2" opacity=".75"/>
+    <circle cx="94" cy="38" r="8" fill="#f5ce7a"/><circle cx="94" cy="38" r="12" fill="none" stroke="#ffe7ad" stroke-opacity=".34" stroke-width="2"/>
+    <circle cx="64" cy="64" r="62.5" fill="none" stroke="#a6baff" stroke-opacity=".32"/>
+  </g>
+</svg>
