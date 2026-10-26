@@ -57,22 +57,24 @@ export class RegisterComponent {
     const { username, email, firstName, lastName, country, password } =
       this.registerForm.value;
 
-    this.authService
-      .register(username, email, firstName, lastName, country, password)
+    this.authService.register(username, email, firstName, lastName, country, password)
       .subscribe(
         (response) => {
           this.authService.setAuthSessionFromResponse(response);
           this.loading = false;
-          this.router.navigate(["/dashboard"]);
+
+          const landingPage = this.authService.hasRole('MANAGER')
+            ? '/manager'
+            : '/dashboard';
+          this.router.navigate([landingPage]);
         },
         (error) => {
           this.loading = false;
-          this.errorMessage =
-            error.error?.message ||
-            "Registration failed. Please check your details and try again.";
-          console.error("Registration error:", error);
-        },
-      );
+          this.errorMessage = error.error?.message ||
+            'Registration failed. Please check your details and try again.';
+          console.error('Registration error:', error);
+        }
+    );
   }
 
   goToLogin() {

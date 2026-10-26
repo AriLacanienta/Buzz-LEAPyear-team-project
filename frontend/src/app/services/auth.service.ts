@@ -26,8 +26,6 @@ interface AuthApiResponse {
   providedIn: 'root'
 })
 export class AuthService {
-
-  // Backend API endpoint for authentication
   private apiUrl = `${environment.apiUrl}/auth`;
   private accessToken: string | null = null;
 
@@ -80,7 +78,7 @@ export class AuthService {
     }).pipe(tap(response => this.storeAuthResponse(response)));
   }
 
-  //Exchanging refresh cookie for a new access token.
+  // Exchange the HttpOnly refresh cookie for a fresh access token.
   refreshAccessToken(): Observable<AuthApiResponse> {
     return this.http.post<AuthApiResponse>(`${this.apiUrl}/refresh`, {}, {
       withCredentials: true
@@ -93,8 +91,11 @@ export class AuthService {
     }
 
     return this.refreshAccessToken().pipe(
-      map(() => true),
-      catchError(() => of(false))
+      map(() => this.isLoggedIn()),
+      catchError(() => {
+        localStorage.removeItem('auth_roles');
+        return of(false);
+      })
     );
   }
 
@@ -102,7 +103,7 @@ export class AuthService {
   * Store access token in memory for the current tab session
    * 
    * Called after successful login/register
-   * Token is persisted even after browser closes
+  * The access token stays in memory; the HttpOnly cookie restores it after reload.
    * 
    * @param token - JWT token from backend
    */
@@ -191,7 +192,7 @@ export class AuthService {
       ...(headers ? { headers } : {})
     }).subscribe({
       error: () => {
-        // Ignore logout API errors; client-side token is already cleared.
+        // The local session is already cleared if the API call fails.
       }
     });
   }
@@ -210,7 +211,7 @@ export class AuthService {
       throw new Error('No token found');
     }
     return this.http.get(`${this.apiUrl}/validate`, {
-      headers: { 'Authorization': `Bearer ${token}` }
+      headers: { Authorization: `Bearer ${token}` }
     });
   }
 }
