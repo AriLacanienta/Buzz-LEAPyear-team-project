@@ -57,7 +57,7 @@ export class RegisterComponent {
     const { username, email, firstName, lastName, country, password } =
       this.registerForm.value;
 
-    this.authService.register(username, email, firstName, lastName, country. password)
+    this.authService.register(username, email, firstName, lastName, country, password)
       .subscribe(
         (response) => {
           this.authService.setAuthSessionFromResponse(response);
