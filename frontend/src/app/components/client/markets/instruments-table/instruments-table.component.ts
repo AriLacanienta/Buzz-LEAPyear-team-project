@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
+import { WatchlistService } from '@app/services/watchlist.service';
 
 @Component({
   selector: 'app-instruments-table',
@@ -12,7 +13,21 @@ import { MatTableModule } from '@angular/material/table';
 export class InstrumentsTableComponent {
   @Input() instruments: any[] = [];
   @Input() selectedMarket: string = 'US';
-  @Input() displayedColumns: string[] = ['instrumentSymbol', 'instrumentName', 'currentPrice', 'changePercent', 'volume', 'marketCap'];
+  @Input() displayedColumns: string[] = ['instrumentSymbol', 'instrumentName', 'currentPrice', 'changePercent', 'volume', 'marketCap', 'watchlist'];
+
+  constructor(private watchlistService: WatchlistService) {}
+
+  isInWatchlist(symbol: string): boolean {
+    return this.watchlistService.isInWatchlist(symbol);
+  }
+
+  toggleWatchlist(symbol: string): void {
+    if (this.isInWatchlist(symbol)) {
+      this.watchlistService.remove(symbol).subscribe();
+    } else {
+      this.watchlistService.add(symbol).subscribe();
+    }
+  }
 
   formatChangePercent(value: number): string {
     const isPositive = value >= 0;

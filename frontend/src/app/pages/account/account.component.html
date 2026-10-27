@@ -1,16 +1,395 @@
-<div class="container">
-  <main>
-    <section class="profile-section">
-      <ul>
-          <li>Profile Photo</li>
-          <li>Name</li>
-          <li>Email</li>
-          <li>Phone Number</li>
-          <li>Address</li>
-        </ul>
-    </section>
-    <section class="funds-section">
-      <app-funds></app-funds>
+<div class="account-page">
+  <main class="account-layout">
+    <aside class="settings-sidebar" aria-label="Account settings">
+      <div class="profile-card" *ngIf="userProfile && !loading">
+        <img
+          [src]="preferences.profilePicture"
+          alt="Selected profile photo"
+          class="avatar"
+        />
+        <div class="profile-card-copy">
+          <strong>{{ userProfile.firstName }} {{ userProfile.lastName }}</strong
+          ><span>Personal account</span>
+        </div>
+      </div>
+      <div class="profile-card profile-card-loading" *ngIf="loading">
+        <div class="avatar avatar-placeholder"></div>
+        <span>Loading profile...</span>
+      </div>
+      <nav class="settings-nav">
+        <button
+          *ngFor="let section of sections"
+          type="button"
+          [class.active]="activeSection === section.key"
+          (click)="setSection(section.key)"
+        >
+          <span
+            class="section-icon"
+            [attr.data-icon]="section.key"
+            aria-hidden="true"
+          ></span
+          ><span>{{ section.label }}</span>
+        </button>
+      </nav>
+      <button type="button" class="sidebar-logout" (click)="openLogoutDialog()">
+        <span class="logout-icon" aria-hidden="true"></span>Log out
+      </button>
+    </aside>
+
+    <section class="settings-content">
+      <ng-template #feedback>
+        <div
+          *ngIf="errorMessage && !loading"
+          class="error-container"
+          role="alert"
+        >
+          <mat-icon aria-hidden="true">error_outline</mat-icon
+          ><span>{{ errorMessage }}</span>
+        </div>
+        <div *ngIf="savedMessage" class="saved-state" role="status">
+          {{ savedMessage }}
+        </div>
+      </ng-template>
+      <ng-container *ngIf="!userProfile && !loading"
+        ><ng-container *ngTemplateOutlet="feedback"></ng-container
+      ></ng-container>
+
+      <ng-container *ngIf="activeSection === 'profile'">
+        <section class="settings-panel" *ngIf="userProfile && !loading">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Account</p>
+              <h1>Personal information</h1>
+            </div>
+            <span class="status-pill">Active</span>
+          </div>
+          <div class="field-grid">
+            <label
+              ><span>First name</span
+              ><input [value]="userProfile.firstName" readonly
+            /></label>
+            <label
+              ><span>Last name</span
+              ><input [value]="userProfile.lastName" readonly
+            /></label>
+            <label
+              ><span>Email</span
+              ><input [value]="userProfile.email" type="email" readonly
+            /></label>
+            <label
+              ><span>Username</span
+              ><input [value]="userProfile.username" readonly
+            /></label>
+            <label
+              ><span>Phone</span
+              ><input
+                type="tel"
+                inputmode="numeric"
+                autocomplete="tel"
+                maxlength="10"
+                pattern="[0-9]{10}"
+                [ngModel]="phoneNumber"
+                (beforeinput)="onPhoneBeforeInput($event)"
+                (input)="onPhoneInput($event)"
+                [attr.aria-invalid]="!phoneValid"
+                [attr.aria-describedby]="!phoneValid ? 'phone-error' : null"
+                placeholder="Phone number"
+              /><small
+                *ngIf="!phoneValid"
+                id="phone-error"
+                class="field-hint field-error"
+                role="alert"
+                >Phone number must contain exactly 10 digits.</small
+              ></label
+            >
+            <label
+              ><span>Country</span
+              ><select [(ngModel)]="country">
+                <option value="" disabled>Select a country</option>
+                <option
+                  *ngFor="let countryOption of countryOptions"
+                  [value]="countryOption"
+                >
+                  {{ countryOption }}
+                </option>
+              </select></label
+            >
+          </div>
+          <div class="avatar-picker">
+            <span class="avatar-picker-label">Profile picture</span>
+            <button
+              *ngFor="let picture of profilePictures"
+              type="button"
+              class="avatar-choice"
+              [class.selected]="preferences.profilePicture === picture.path"
+              [attr.aria-label]="picture.label"
+              [attr.aria-pressed]="preferences.profilePicture === picture.path"
+              (click)="preferences.profilePicture = picture.path"
+            >
+              <img [src]="picture.path" [alt]="picture.label" />
+            </button>
+          </div>
+          <ng-container *ngTemplateOutlet="feedback"></ng-container>
+          <button
+            type="button"
+            class="primary-button"
+            [disabled]="!hasChanges || !phoneValid || saving"
+            (click)="saveChanges()"
+          >
+            {{ saving ? "Saving..." : "Save changes" }}
+          </button>
+        </section>
+        <section
+          class="settings-panel status-panel"
+          *ngIf="userProfile && !loading"
+        >
+          <div class="panel-heading compact-heading">
+            <div>
+              <p class="eyebrow">Overview</p>
+              <h2>Account status</h2>
+            </div>
+          </div>
+          <div class="status-grid">
+            <div>
+              <span>KYC status</span><strong class="positive">Verified</strong>
+            </div>
+            <div>
+              <span>Account tier</span><strong class="accent">Standard</strong>
+            </div>
+            <div><span>Member since</span><strong>2025</strong></div>
+            <div>
+              <span>Account ID</span
+              ><strong>{{
+                accountInfo ? "#" + accountInfo.accountId : "Loading..."
+              }}</strong>
+            </div>
+          </div>
+        </section>
+      </ng-container>
+
+      <section class="settings-panel" *ngIf="activeSection === 'security'">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Protection</p>
+            <h1>Security settings</h1>
+          </div>
+        </div>
+        <div class="preference-list">
+          <div class="preference-row">
+            <div>
+              <strong>Two-factor authentication</strong
+              ><span>Require an extra verification code when signing in.</span>
+            </div>
+            <button
+              type="button"
+              class="toggle"
+              [class.on]="preferences.twoFactor"
+              (click)="togglePreference('twoFactor')"
+            >
+              <span></span>
+            </button>
+          </div>
+          <div class="preference-row">
+            <div>
+              <strong>Biometric login</strong
+              ><span>Use Face ID or fingerprint on supported devices.</span>
+            </div>
+            <button
+              type="button"
+              class="toggle"
+              [class.on]="preferences.biometrics"
+              (click)="togglePreference('biometrics')"
+            >
+              <span></span>
+            </button>
+          </div>
+        </div>
+        <div class="subsection password-section">
+          <p class="eyebrow">Password</p>
+          <div class="field-grid">
+            <label
+              ><strong>Current password</strong
+              ><input
+                type="password"
+                autocomplete="current-password"
+                [(ngModel)]="currentPassword"
+                placeholder="Enter current password"
+                [disabled]="updatingPassword" /></label
+            ><label
+              ><strong>New password</strong
+              ><input
+                type="password"
+                autocomplete="new-password"
+                [(ngModel)]="newPassword"
+                placeholder="Enter new password"
+                minlength="8"
+                [disabled]="updatingPassword"
+            /></label>
+          </div>
+          <ng-container *ngTemplateOutlet="feedback"></ng-container
+          ><button
+            type="button"
+            class="primary-button"
+            [disabled]="updatingPassword"
+            (click)="updatePassword()"
+          >
+            {{ updatingPassword ? "Updating..." : "Update password" }}
+          </button>
+        </div>
+      </section>
+
+      <section class="settings-panel" *ngIf="activeSection === 'notifications'">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Stay informed</p>
+            <h1>Notification preferences</h1>
+          </div>
+        </div>
+        <div class="preference-list">
+          <div class="preference-row" *ngFor="let item of notificationSettings">
+            <div>
+              <strong>{{ item.label }}</strong
+              ><span>{{ item.description }}</span>
+            </div>
+            <button
+              type="button"
+              class="toggle"
+              [class.on]="preferences[item.key]"
+              (click)="togglePreference(item.key)"
+            >
+              <span></span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section class="settings-panel" *ngIf="activeSection === 'preferences'">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Workspace</p>
+            <h1>Display preferences</h1>
+          </div>
+        </div>
+        <div class="preference-list">
+          <div class="preference-row">
+            <div>
+              <strong>Dark mode</strong
+              ><span>Use the dark colour scheme across the platform.</span>
+            </div>
+            <button
+              type="button"
+              class="toggle"
+              [class.on]="preferences.darkMode"
+              (click)="togglePreference('darkMode')"
+            >
+              <span></span>
+            </button>
+          </div>
+          <div class="preference-row">
+            <div>
+              <strong>Compact view</strong
+              ><span>Reduce spacing for denser information display.</span>
+            </div>
+            <button
+              type="button"
+              class="toggle"
+              [class.on]="preferences.compactView"
+              (click)="togglePreference('compactView')"
+            >
+              <span></span>
+            </button>
+          </div>
+          <div class="preference-row">
+            <div>
+              <strong>Show P&amp;L on holdings</strong
+              ><span>Display unrealised gain and loss figures.</span>
+            </div>
+            <button
+              type="button"
+              class="toggle"
+              [class.on]="preferences.showPnl"
+              (click)="togglePreference('showPnl')"
+            >
+              <span></span>
+            </button>
+          </div>
+        </div>
+        <div class="field-grid preference-fields">
+          <label
+            ><span>Base currency</span><input value="USD ($)" readonly /></label
+          ><label
+            ><span>Time zone</span
+            ><select [(ngModel)]="preferences.timeZone">
+              <option value="America/New_York">America/New_York</option>
+              <option value="Europe/London">Europe/London</option>
+              <option value="Asia/Kolkata">Asia/Kolkata</option>
+            </select></label
+          >
+        </div>
+        <ng-container *ngTemplateOutlet="feedback"></ng-container>
+        <button
+          type="button"
+          class="primary-button"
+          [disabled]="!hasChanges || !phoneValid || saving"
+          (click)="saveChanges()"
+        >
+          {{ saving ? "Saving..." : "Save preferences" }}
+        </button>
+      </section>
+
+      <section class="settings-panel" *ngIf="activeSection === 'billing'">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Plan and payments</p>
+            <h1>Billing</h1>
+          </div>
+        </div>
+        <div class="billing-summary">
+          <div>
+            <strong>Standard account</strong
+            ><span>Your current trading account plan</span>
+          </div>
+          <span class="status-pill">Active</span>
+        </div>
+        <section class="funds-section" aria-label="Manage funds">
+          <app-funds></app-funds>
+        </section>
+        <div class="subsection">
+          <p class="eyebrow">Account history</p>
+          <div
+            class="billing-row"
+            *ngFor="let bill of ['Account opened', 'Trading account activated']"
+          >
+            <span>{{ bill }}</span
+            ><strong>Completed</strong>
+          </div>
+        </div>
+      </section>
     </section>
   </main>
+
+  <div
+    class="logout-dialog-backdrop"
+    *ngIf="showLogoutDialog"
+    (click)="cancelLogout()"
+  >
+    <section
+      class="logout-dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="logout-dialog-title"
+      (click)="$event.stopPropagation()"
+    >
+      <h2 id="logout-dialog-title">Log out?</h2>
+      <p>Are you sure you want to log out of your account?</p>
+      <div class="logout-dialog-actions">
+        <button type="button" class="dialog-cancel" (click)="cancelLogout()">
+          Cancel
+        </button>
+        <button type="button" class="dialog-confirm" (click)="confirmLogout()">
+          Log out
+        </button>
+      </div>
+    </section>
+  </div>
 </div>

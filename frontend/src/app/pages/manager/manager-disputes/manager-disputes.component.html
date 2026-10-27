@@ -1,4 +1,129 @@
-<main>
-  <h1>Disputes</h1>
-  <p>Clients dispute workflows will appear here.</p>
-</main>
+<section class="disputes" [class.embedded]="userId !== undefined">
+  <h1 *ngIf="userId === undefined">Disputes</h1>
+  <form *ngIf="userId === undefined" [formGroup]="filters" (ngSubmit)="applyFilters()" aria-label="Search disputes">
+    <label>Status
+      <select formControlName="status">
+        <option value="OPEN">Open</option>
+        <option value="RESOLVED">Resolved</option>
+        <option value="">All</option>
+      </select>
+    </label>
+    <label>Account ID
+      <input type="text" inputmode="numeric" formControlName="accountId" />
+    </label>
+    <label>Created from (inclusive)
+      <input type="datetime-local" step="1" formControlName="fromDate" />
+    </label>
+    <label>Created to (inclusive)
+      <input type="datetime-local" step="1" formControlName="toDate" />
+    </label>
+    <label>Minimum trade value
+      <input type="text" inputmode="decimal" formControlName="minTradeValue" />
+    </label>
+    <label>Maximum trade value
+      <input type="text" inputmode="decimal" formControlName="maxTradeValue" />
+    </label>
+    <label>Sort by
+      <select formControlName="sortBy">
+        <option value="createdAt">Created date</option>
+        <option value="status">Status</option>
+        <option value="tradeValue">Trade value</option>
+      </select>
+    </label>
+    <label>Direction
+      <select formControlName="sortDirection">
+        <option value="desc">Descending</option>
+        <option value="asc">Ascending</option>
+      </select>
+    </label>
+    <label>Results per page
+      <select formControlName="size">
+        <option [ngValue]="10">10</option>
+        <option [ngValue]="20">20</option>
+        <option [ngValue]="50">50</option>
+        <option [ngValue]="100">100</option>
+      </select>
+    </label>
+    <div class="actions">
+      <button type="submit">Search</button>
+      <button type="button" (click)="clearFilters()">Clear filters</button>
+    </div>
+  </form>
+  <p class="hint">Dates use server-local time. Trade values are shown in their original denomination; currency is not provided by this endpoint.</p>
+  <p *ngIf="validationError" role="alert">{{ validationError }}</p>
+  <section aria-live="polite" [attr.aria-busy]="loading">
+    <p *ngIf="loading">Loading disputes...</p>
+    <div *ngIf="error" role="alert">
+      {{ error }} <button type="button" (click)="retry()">Retry</button>
+    </div>
+    <ng-container *ngIf="result as page">
+      <p>{{ page.totalElements | number }} disputes found</p>
+      <p *ngIf="!page.content.length">{{ userId === undefined ? 'No disputes match these filters.' : 'No disputes for this client.' }}</p>
+      <div class="table-wrapper" *ngIf="page.content.length">
+        <table>
+          <caption>Disputes</caption>
+          <thead>
+            <tr>
+              <th scope="col">Dispute ID</th>
+              <th scope="col">Client Name</th>
+              <th scope="col">Status</th>
+              <th scope="col">Severity</th>
+              <th scope="col">Message</th>
+              <th scope="col">Resolved</th>
+              <th scope="col">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <ng-container *ngFor="let dispute of page.content; trackBy: trackById">
+              <tr class="dispute-summary" (click)="toggleDispute(dispute.id)">
+                <td>
+                  <button type="button" class="expand-toggle"
+                    [attr.aria-expanded]="expandedDisputeIds.has(dispute.id)"
+                    [attr.aria-controls]="'dispute-details-' + dispute.id"
+                    [attr.aria-label]="(expandedDisputeIds.has(dispute.id) ? 'Collapse' : 'Expand') + ' dispute ' + dispute.id"
+                    (click)="$event.stopPropagation(); toggleDispute(dispute.id)">
+                    <span aria-hidden="true">{{ expandedDisputeIds.has(dispute.id) ? '-' : '+' }}</span>
+                    {{ dispute.id }}
+                  </button>
+                </td>
+                <td>{{ dispute.clientName }}</td>
+                <td>{{ dispute.status }}</td>
+                <td [class.critical]="dispute.severity === 'CRITICAL'">{{ dispute.severity }}</td>
+                <td class="message">{{ dispute.message ? ((dispute.message | slice:0:50) + (dispute.message.length > 50 ? '...' : '')) : 'No additional details' }}</td>
+                <td>{{ dispute.resolvedAt ? (dispute.resolvedAt | date:'medium') : 'Not resolved' }}</td>
+                <td>
+                  <button *ngIf="dispute.status === 'OPEN'" type="button" class="resolve-button"
+                    [attr.aria-label]="'Resolve dispute ' + dispute.id"
+                    (click)="$event.stopPropagation(); openResolution(dispute)">Resolve</button>
+                </td>
+              </tr>
+              <tr class="dispute-details" [id]="'dispute-details-' + dispute.id"
+                [hidden]="!expandedDisputeIds.has(dispute.id)">
+                <td colspan="7">
+                  <dl *ngIf="expandedDisputeIds.has(dispute.id)">
+                    <div><dt>Dispute ID</dt><dd>{{ dispute.id }}</dd></div>
+                    <div><dt>Client Name</dt><dd>{{ dispute.clientName }}</dd></div>
+                    <div><dt>Account ID</dt><dd>{{ dispute.accountId }}</dd></div>
+                    <div><dt>Order ID</dt><dd>{{ dispute.tradeOrderId }}</dd></div>
+                    <div><dt>Trade value</dt><dd>{{ dispute.tradeValue | number:'1.2-2' }}</dd></div>
+                    <div><dt>Status</dt><dd>{{ dispute.status }}</dd></div>
+                    <div><dt>Severity</dt><dd [class.critical]="dispute.severity === 'CRITICAL'">{{ dispute.severity }}</dd></div>
+                    <div><dt>Created</dt><dd>{{ dispute.createdAt | date:'medium' }}</dd></div>
+                    <div><dt>Resolved</dt><dd>{{ dispute.resolvedAt ? (dispute.resolvedAt | date:'medium') : 'Not resolved' }}</dd></div>
+                    <div class="full-message"><dt>Message</dt><dd class="message">{{ dispute.message || 'No additional details' }}</dd></div>
+                    <div class="full-message"><dt>Resolution message</dt><dd class="message">{{ dispute.resolutionMessage || 'No resolution message' }}</dd></div>
+                  </dl>
+                </td>
+              </tr>
+            </ng-container>
+          </tbody>
+        </table>
+      </div>
+      <nav aria-label="Dispute pagination">
+        <button type="button" (click)="changePage(-1)" [disabled]="page.number === 0">Previous</button>
+        <span>Page {{ page.totalPages ? page.number + 1 : 0 }} of {{ page.totalPages }}</span>
+        <button type="button" (click)="changePage(1)" [disabled]="page.number + 1 >= page.totalPages">Next</button>
+      </nav>
+    </ng-container>
+  </section>
+</section>

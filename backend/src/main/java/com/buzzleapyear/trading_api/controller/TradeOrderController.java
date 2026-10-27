@@ -232,8 +232,15 @@ public class TradeOrderController {
     @GetMapping("/accounts/{accountId}/orders")
     public ResponseEntity<List<RecentOrderResponseDTO>> getRecentOrders(
         @PathVariable Long accountId,
-        @RequestParam(defaultValue = "20") int limit) {
-        
+        @RequestParam(defaultValue = "20") int limit,
+        // Only return orders if the account belongs to the logged in user
+        // Returns 404 so other users can't tell which account IDs exist
+        Authentication authentication) {
+
+        if (accountService.findAccountByIdForUser(accountId, authentication.getName()).isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
         List<RecentOrderResponseDTO> orders = tradeOrderService.getRecentOrdersByAccountId(accountId, limit);
         return ResponseEntity.ok(orders);
     }

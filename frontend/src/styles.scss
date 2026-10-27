@@ -42,3 +42,73 @@ p {
   line-height: 1.6;
   color: var(--text-color);
 }
+
+// Account page status and billing primitives share the settings panel rhythm
+.account-page .status-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.account-page .status-grid > div,
+.account-page .billing-summary {
+  background: #141c2e;
+  border: 1px solid #1e2d45;
+  border-radius: 7px;
+  padding: 12px;
+}
+
+.account-page .status-grid span,
+.account-page .billing-summary > div > span,
+.account-page .billing-row {
+  color: #62748e;
+  font-size: 10px;
+}
+
+.account-page .status-grid strong {
+  display: block;
+  color: #dbe4f2;
+  font-size: 11px;
+  margin-top: 7px;
+}
+
+.account-page .status-grid .positive,
+.account-page .billing-row strong {
+  color: #4ade80;
+}
+
+.account-page .status-grid .accent,
+.account-page .billing-summary strong {
+  color: #60a5fa;
+}
+
+.account-page .billing-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.account-page .billing-summary > div > span {
+  display: block;
+  margin-top: 5px;
+}
+
+.account-page .billing-summary > .status-pill {
+  display: inline-flex;
+  margin-top: 0;
+  color: #4ade80;
+  font-size: 10px;
+}
+
+.account-page .billing-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid #1e2d45;
+}
+
+@media (max-width: 760px) {
+  .account-page .status-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
