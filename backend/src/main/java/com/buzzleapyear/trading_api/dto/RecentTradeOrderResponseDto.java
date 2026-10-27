@@ -14,5 +14,6 @@ public record RecentTradeOrderResponseDto(
     LocalDateTime orderDate,
     OrderStatus status,
     LocalDateTime timeUpdated,
-    String reasonText
+    String reasonText,
+    boolean hasOpenDispute
 ){}

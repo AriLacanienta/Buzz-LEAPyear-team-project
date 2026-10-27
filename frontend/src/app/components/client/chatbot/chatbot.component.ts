@@ -145,7 +145,7 @@ export class ChatbotComponent implements AfterViewChecked {
   }
 
   openDisputeForm(order?: RecentTradeOrderResponse): void {
-    if (order && order.status !== 'FILLED') return;
+    if (order && (order.status !== 'FILLED' || order.hasOpenDispute)) return;
     if (!this.activeDispute) {
       const selectedOrder = order ? { ...order } : undefined;
       this.activeDispute = {
@@ -182,7 +182,7 @@ export class ChatbotComponent implements AfterViewChecked {
     ).subscribe({
       next: response => {
         if (card !== this.activeDispute) return;
-        const orders = response.content.filter(order => order.status === 'FILLED');
+        const orders = response.content.filter(order => order.status === 'FILLED' && !order.hasOpenDispute);
         card.pageOrderCount = orders.length;
         card.pageIndex = response.number;
         card.totalPages = response.totalPages;
@@ -190,9 +190,24 @@ export class ChatbotComponent implements AfterViewChecked {
         if (card.selectedOrder) {
           const selected = orders.find(order => order.orderId === card.selectedOrder?.orderId);
           if (selected) card.selectedOrder = selected;
-          else orders.unshift(card.selectedOrder);
+          else {
+            const selectedInResponse = response.content.find(order => order.orderId === card.selectedOrder?.orderId);
+            if (selectedInResponse && (selectedInResponse.status !== 'FILLED' || selectedInResponse.hasOpenDispute)) {
+              card.selectedOrder = undefined;
+            } else {
+              orders.unshift(card.selectedOrder);
+            }
+          }
         }
         card.orders = orders;
+        if (!orders.length && !card.selectedOrder && response.totalPages <= 1) {
+          const message = this.messages.find(item => item.dispute === card);
+          if (message) {
+            message.text = 'No eligible executed orders found.';
+            delete message.dispute;
+          }
+          this.activeDispute = undefined;
+        }
         this.shouldScrollToBottom = true;
       },
       error: (error: HttpErrorResponse) => {

@@ -282,6 +282,21 @@ tbody {
     background: rgba(255, 255, 255, 0.04);
   }
 
+  &.pending-dispute,
+  &:disabled {
+    color: #fbbf24;
+    border-color: rgba(251, 191, 36, 0.35);
+    background: rgba(251, 191, 36, 0.08);
+    cursor: default;
+  }
+
+  &.pending-dispute:hover,
+  &:disabled:hover {
+    color: #fbbf24;
+    border-color: rgba(251, 191, 36, 0.35);
+    background: rgba(251, 191, 36, 0.08);
+  }
+
   &:focus-visible {
     outline: 2px solid #93c5fd;
     outline-offset: 2px;

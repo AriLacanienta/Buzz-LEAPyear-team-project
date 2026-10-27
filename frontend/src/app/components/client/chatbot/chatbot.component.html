@@ -34,7 +34,7 @@
   </header>
 
   <div class="chatbot-shortcuts">
-    <button type="button" (click)="openDisputeForm()" [disabled]="loading">
+    <button type="button" (click)="sendMessage(activeDispute ? 'view current dispute' : 'raise a dispute')" [disabled]="loading">
       {{ activeDispute ? 'View current dispute' : 'Raise a dispute' }}
     </button>
     <button type="button" class="portfolio-summary-shortcut" (click)="sendMessage('portfolio summary')" [disabled]="loading">
@@ -68,7 +68,7 @@
             <button type="button" [disabled]="dispute.ordersLoading" (click)="loadDisputeOrders(dispute, dispute.pageIndex)">Retry loading orders</button>
           </div>
           <small *ngIf="!dispute.ordersLoading && !dispute.ordersError && !dispute.pageOrderCount">
-            {{ dispute.totalPages ? 'No executed orders on this page. Try another page.' : 'No orders found. Place a trade before raising a dispute.' }}
+            No eligible executed orders found.
           </small>
           <div *ngIf="dispute.totalPages > 1" class="dispute-pagination" aria-label="Order history pages">
             <button type="button" [disabled]="dispute.ordersLoading || dispute.pageIndex === 0"

@@ -20,11 +20,13 @@ describe('ChatbotComponent inline disputes', () => {
   let composer: DisputeComposerService;
   const filledOrder = {
     orderId: 7, instrumentSymbol: 'AAPL', side: 'BUY', quantity: 5, price: 20,
-    orderDate: '2026-10-22T11:00:00', status: 'FILLED', timeUpdated: null, reasonText: null
+    orderDate: '2026-10-22T11:00:00', status: 'FILLED', timeUpdated: null, reasonText: null,
+    hasOpenDispute: false
   } as RecentTradeOrderResponse;
+  const disputedOrder = { ...filledOrder, orderId: 9, hasOpenDispute: true };
   const rejectedOrder = { ...filledOrder, orderId: 8, status: 'REJECTED' } as RecentTradeOrderResponse;
   const page: SpringPage<RecentTradeOrderResponse> = {
-    content: [filledOrder, rejectedOrder], number: 0, size: 10, totalElements: 2, totalPages: 1, first: true, last: true
+    content: [filledOrder, disputedOrder, rejectedOrder], number: 0, size: 10, totalElements: 3, totalPages: 1, first: true, last: true
   };
   const result: DisputeResponse = {
     id: 12, tradeOrderId: 7, accountId: 3, tradeValue: 100,
@@ -84,6 +86,7 @@ describe('ChatbotComponent inline disputes', () => {
     fixture.nativeElement.querySelector('.chatbot-shortcuts button').click();
     fixture.detectChanges();
     expect(component.activeDispute?.state).toBe('draft');
+    expect(component.messages.some(message => message.role === 'user' && message.text === 'raise a dispute')).toBeTrue();
     expect(chatbot.sendMessage).not.toHaveBeenCalled();
     expect(disputes.create).not.toHaveBeenCalled();
   });
@@ -160,7 +163,7 @@ describe('ChatbotComponent inline disputes', () => {
     expect(disputes.create).not.toHaveBeenCalled();
   });
 
-  it('loads only filled choices using the authenticated account and displays order details', () => {
+  it('loads only filled orders without an open dispute using the authenticated account', () => {
     const card = openForm();
     expect(accounts.getMyAccount).toHaveBeenCalled();
     expect(accounts.getRecentTradeOrders).toHaveBeenCalledWith('3', 0, 10);
@@ -170,6 +173,24 @@ describe('ChatbotComponent inline disputes', () => {
     expect(select.options[1].textContent).toContain('#7');
     expect(select.options[1].textContent).toContain('AAPL');
     expect(fixture.nativeElement.querySelector('input[name="orderId"]')).toBeNull();
+  });
+
+  it('does not open a dispute form for an order that already has an open dispute', () => {
+    component.openDisputeForm(disputedOrder);
+    expect(component.activeDispute).toBeUndefined();
+  });
+
+  it('replies with a plain message when no eligible dispute orders exist', () => {
+    accounts.getRecentTradeOrders.and.returnValue(of({
+      ...page, content: [disputedOrder, rejectedOrder], totalElements: 2, totalPages: 1
+    }));
+
+    const card = openForm();
+
+    expect(component.activeDispute).toBeUndefined();
+    expect(component.messages.at(-1)?.text).toBe('No eligible executed orders found.');
+    expect(component.messages.at(-1)?.dispute).toBeUndefined();
+    expect(fixture.nativeElement.querySelector('.dispute-form')).toBeNull();
   });
 
   it('opens the minimized chatbot with a row action preselected without creating a dispute', () => {
@@ -218,12 +239,12 @@ describe('ChatbotComponent inline disputes', () => {
     accounts.getRecentTradeOrders.and.returnValue(of({ ...page, content: [rejectedOrder], totalPages: 2 }));
     const card = openForm();
     expect(card.orders).toEqual([]);
-    expect(fixture.nativeElement.textContent).toContain('No executed orders on this page');
+    expect(fixture.nativeElement.textContent).toContain('No eligible executed orders found.');
     expect(fixture.nativeElement.querySelector('.dispute-actions button').disabled).toBeTrue();
     accounts.getRecentTradeOrders.and.returnValue(of({ ...page, content: [], totalElements: 0, totalPages: 0 }));
     component.loadDisputeOrders(card);
     fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).toContain('No orders found');
+    expect(fixture.nativeElement.textContent).toContain('No eligible executed orders found');
   });
 
   it('shows a retryable order-load error and preserves a row-preselected order', () => {

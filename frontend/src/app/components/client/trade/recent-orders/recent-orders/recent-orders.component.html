@@ -6,7 +6,7 @@
         <table *ngIf="orders && orders.length > 0; else noOrders">
             <thead>
                 <tr>
-                    <th>Order reference</th>
+                    <th>Order</th>
                     <th>Date</th>
                     <th>Side</th>
                     <th>Instrument</th>
@@ -39,8 +39,10 @@
                     <td>
                         <button *ngIf="order.status === 'FILLED'; else disputeUnavailable"
                             class="raise-dispute" type="button" (click)="raiseDispute(order)"
-                            [attr.aria-label]="'Raise dispute for order #' + order.orderId + ' ' + order.instrumentSymbol">
-                            Raise dispute
+                            [disabled]="order.hasOpenDispute"
+                            [class.pending-dispute]="order.hasOpenDispute"
+                            [attr.aria-label]="(order.hasOpenDispute ? 'Pending dispute for order #' : 'Raise dispute for order #') + order.orderId + ' ' + order.instrumentSymbol">
+                            {{ order.hasOpenDispute ? 'Pending dispute' : 'Raise dispute' }}
                         </button>
                         <ng-template #disputeUnavailable>
                             <span class="dispute-unavailable" title="Only successfully executed orders can be disputed">—</span>

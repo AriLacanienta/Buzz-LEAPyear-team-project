@@ -5,6 +5,8 @@ import com.buzzleapyear.trading_api.repository.ClientRepository;
 import com.buzzleapyear.trading_api.repository.TradeOrderRepository;
 import com.buzzleapyear.trading_api.entity.TradeOrderStatus;
 import com.buzzleapyear.trading_api.repository.TradeOrderStatusRepository;
+import com.buzzleapyear.trading_api.repository.DisputeRepository;
+import com.buzzleapyear.trading_api.entity.DisputeStatus;
 import com.buzzleapyear.trading_api.dto.CurrentAccountResponseDto;
 import com.buzzleapyear.trading_api.dto.RecentTradeOrderResponseDto;
 import org.springframework.web.server.ResponseStatusException;
@@ -38,6 +40,7 @@ public class AccountService {
     private final ClientRepository clientRepository;
     private TradeOrderRepository tradeOrderRepository;
     private TradeOrderStatusRepository tradeOrderStatusRepository;
+    private final DisputeRepository disputeRepository;
 
     public AccountService(
         AccountRepository accountRepository, 
@@ -45,13 +48,15 @@ public class AccountService {
         UserRepository userRepository, 
         ClientRepository clientRepository,
         TradeOrderRepository tradeOrderRepository, 
-        TradeOrderStatusRepository tradeOrderStatusRepository) {
+        TradeOrderStatusRepository tradeOrderStatusRepository,
+        DisputeRepository disputeRepository) {
         this.accountRepository = accountRepository;
         this.holdingService = holdingService;
         this.userRepository = userRepository;
         this.clientRepository = clientRepository;
         this.tradeOrderRepository = tradeOrderRepository;
         this.tradeOrderStatusRepository = tradeOrderStatusRepository;
+        this.disputeRepository = disputeRepository;
     }
 
     // Configured to only find a single user account at the moment
@@ -211,7 +216,8 @@ public class AccountService {
                     order.getOrderDate(),
                     status == null ? null : status.getStatus(),
                     status == null ? null : status.getTimeUpdated(),
-                    status == null ? null : status.getReasonText()
+                    status == null ? null : status.getReasonText(),
+                    disputeRepository.existsByTradeOrderIdAndStatus(order.getId(), DisputeStatus.OPEN)
                 );
             }));
     }

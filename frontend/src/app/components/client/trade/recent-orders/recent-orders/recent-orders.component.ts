@@ -7,6 +7,7 @@ import { AccountService } from '@app/services/account.service';
 import { RecentTradeOrderResponse } from '@app/models/recent-trade-order-response.model';
 import { TradeOrderService } from '@app/services/trade-order.service';
 import { DisputeComposerService } from '@app/services/dispute-composer.service';
+import { DisputeService } from '@app/services/dispute.service';
 
 @Component({
   selector: 'app-recent-orders',
@@ -28,6 +29,7 @@ export class RecentOrdersComponent implements OnInit {
   constructor(
     private accountService: AccountService,
     private tradeOrderService: TradeOrderService,
+    private disputeService: DisputeService,
     private destroyRef: DestroyRef
   ) {}
 
@@ -49,6 +51,9 @@ export class RecentOrdersComponent implements OnInit {
   private fetchRecentOrders(): void {
     this.tradeOrderService.orderPlaced$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.pageIndex = 0;
+      this.pageChanged$.next();
+    });
+    this.disputeService.disputeCreated$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.pageChanged$.next();
     });
 
