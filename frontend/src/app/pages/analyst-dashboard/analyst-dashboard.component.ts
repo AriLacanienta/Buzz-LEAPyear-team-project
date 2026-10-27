@@ -6,11 +6,11 @@ import { Subject, interval, merge, of } from 'rxjs';
 import { catchError, map, startWith, switchMap, takeUntil } from 'rxjs/operators';
 import { AnalystTrade, AnalystTradePage } from '../../models/analyst-trade.model';
 import { AnalystTradeService } from '../../services/analyst-trade.service';
+import { AuthService } from '../../services/auth.service';
+import { Router } from '@angular/router';
 import { HighchartsChartModule } from 'highcharts-angular';
 import * as Highcharts from 'highcharts';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
-import { Router } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-analyst-dashboard',
@@ -40,7 +40,7 @@ export class AnalystDashboardComponent implements OnInit, OnDestroy {
   private readonly refresh$ = new Subject<void>();
   private requestVersion = 0;
 
-  constructor(
+constructor(
     private analystTradeService: AnalystTradeService,
     private authService: AuthService,
     private router: Router
@@ -52,21 +52,16 @@ export class AnalystDashboardComponent implements OnInit, OnDestroy {
   }
 
   dropWidget(event: CdkDragDrop<string[]>): void {
-    moveItemInArray(this.widgetOrder, event.previousIndex, event.currentIndex);
-    try {
-      localStorage.setItem('analyst-dashboard-widget-order', JSON.stringify(this.widgetOrder));
-    } catch {
-      // Keep the layout usable when browser storage is unavailable.
+    if (event.previousIndex === event.currentIndex) {
+      return;
     }
+    moveItemInArray(this.widgetOrder, event.previousIndex, event.currentIndex);
+    localStorage.setItem('analyst-dashboard-widget-order', JSON.stringify(this.widgetOrder));
   }
 
   resetWidgetOrder(): void {
     this.widgetOrder = [...this.defaultWidgetOrder];
-    try {
-      localStorage.removeItem('analyst-dashboard-widget-order');
-    } catch {
-      // The default layout still applies for the current session.
-    }
+    localStorage.removeItem('analyst-dashboard-widget-order');
   }
 
   widgetPosition(widget: string): number {
@@ -75,16 +70,16 @@ export class AnalystDashboardComponent implements OnInit, OnDestroy {
 
   private loadWidgetOrder(): void {
     try {
-      const saved: unknown = JSON.parse(localStorage.getItem('analyst-dashboard-widget-order') || 'null');
-      if (Array.isArray(saved) && saved.length === this.defaultWidgetOrder.length &&
-          new Set(saved).size === this.defaultWidgetOrder.length &&
-          saved.every(widget => this.defaultWidgetOrder.includes(widget))) {
+      const saved = JSON.parse(localStorage.getItem('analyst-dashboard-widget-order') || 'null');
+      if (Array.isArray(saved) && this.defaultWidgetOrder.every(widget => saved.includes(widget))) {
         this.widgetOrder = saved;
       }
     } catch {
-      // Ignore invalid or unavailable saved layout data.
+      this.widgetOrder = [...this.defaultWidgetOrder];
     }
   }
+
+  
 
   get buyCount(): number {
     return this.trades.filter(trade => trade.side === 'BUY').length;
