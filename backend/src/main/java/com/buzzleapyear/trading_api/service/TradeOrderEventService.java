@@ -80,7 +80,7 @@ public class TradeOrderEventService {
             order.getSide().name(),
             order.getQuantity(),
             order.getPrice(),
-            order.getValue(),
+            order.getTradeValue(),
             order.getOrderDate(),
             statusRecord == null ? null : statusRecord.getStatus().name(),
             statusRecord == null ? null : statusRecord.getTimeUpdated(),
