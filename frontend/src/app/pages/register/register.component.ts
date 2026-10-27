@@ -57,25 +57,28 @@ export class RegisterComponent {
     const { username, email, firstName, lastName, country, password } =
       this.registerForm.value;
 
-    this.authService.register(username, email, firstName, lastName, country, password)
-      .subscribe(
-        (response) => {
-          this.authService.setAuthSessionFromResponse(response);
-          this.loading = false;
+      this.authService.register(username, email, firstName, lastName, country, password).subscribe(
+      (response) => {
+        this.authService.setAuthSessionFromResponse(response);
+        this.loading = false;
+        console.log('Registration successful!', response);
 
-          const landingPage = this.authService.hasRole('MANAGER')
-            ? '/manager'
+        const landingPage = this.authService.hasRole('MANAGER')
+          ? '/admin'
+          : this.authService.hasRole('ANALYST')
+            ? '/analyst'
             : '/dashboard';
-          this.router.navigate([landingPage]);
-        },
-        (error) => {
-          this.loading = false;
-          this.errorMessage = error.error?.message ||
-            'Registration failed. Please check your details and try again.';
-          console.error('Registration error:', error);
-        }
+        this.router.navigate([landingPage]);
+      },
+      (error) => {
+        this.loading = false;
+        this.errorMessage = error.error?.message ||
+          'Registration failed. Please check your details and try again.';
+        console.error('Registration error:', error);
+      }
     );
   }
+
 
   goToLogin() {
     this.router.navigate(["/login"]);

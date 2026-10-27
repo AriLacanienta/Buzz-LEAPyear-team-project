@@ -16,6 +16,8 @@ import { RecentOrdersComponent } from '@app/components/client/trade/recent-order
 import { CurrentHoldingsComponent } from '@app/components/client/trade/current-holdings/current-holdings/current-holdings.component';
 import { forkJoin, interval, Subscription } from 'rxjs';
 import { switchMap, startWith } from 'rxjs/operators';
+import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
+import { ChartHistoryService, ChartSample } from '@app/services/chart-history.service';
 
 export interface QuoteResponse {
   symbol: string;
@@ -34,11 +36,14 @@ export interface QuoteResponse {
     PortfolioHoldingsContainerComponent,
     MarketInfoCardComponent,
     RecentOrdersComponent,
-    CurrentHoldingsComponent
+    CurrentHoldingsComponent,
+    DragDropModule
   ],
   standalone: true
 })
 export class DashboardComponent implements OnInit, OnDestroy {
+  readonly defaultWidgetOrder = ['portfolio', 'holdings', 'markets', 'orders', 'current-holdings'];
+  widgetOrder = [...this.defaultWidgetOrder];
   title = 'Buzz Trader';
   holdings: any[] = [];
   topGainers: QuoteResponse[] = [];
@@ -59,6 +64,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private recentOrderService: RecentOrderService,
     private accountService: AccountService,
     private watchlistService: WatchlistService,
+    private chartHistory: ChartHistoryService,
     private cdr: ChangeDetectorRef
   ) {
   }
@@ -69,7 +75,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   Highcharts: typeof Highcharts = Highcharts;
   portfolioChartOptions: Highcharts.Options = {};
   updateFlag = false;
-  private portfolioBalanceHistory: number[] = [];
+  private portfolioBalanceHistory: ChartSample[] = [];
   totalPortfolioValue: number = 0;
   private currentPortfolioId: string = 'all-holdings';
 
@@ -84,6 +90,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
  
 
   ngOnInit(): void {
+    this.loadWidgetOrder();
     this.portfolioChartOptions = {
       chart: { type: 'areaspline', backgroundColor: 'transparent', height: 300 },
       series: [{ type: 'areaspline', data: [] }],
@@ -93,6 +100,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.accountService.getMyAccount().subscribe({
       next: (account) => {
         this.accountId = Number(account.accountId);
+        this.portfolioBalanceHistory = this.chartHistory.read(this.accountId, 'portfolio-value');
+        if (this.portfolioBalanceHistory.length) this.generatePortfolioChartOptions();
         this.startDataRefresh();
         this.loadRecentOrders();
       },
@@ -101,6 +110,34 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.isLoading = false;
       }
     });
+  }
+
+  dropWidget(event: CdkDragDrop<string[]>): void {
+    if (event.previousIndex === event.currentIndex) {
+      return;
+    }
+    moveItemInArray(this.widgetOrder, event.previousIndex, event.currentIndex);
+    localStorage.setItem('client-dashboard-widget-order', JSON.stringify(this.widgetOrder));
+  }
+
+  resetWidgetOrder(): void {
+    this.widgetOrder = [...this.defaultWidgetOrder];
+    localStorage.removeItem('client-dashboard-widget-order');
+  }
+
+  widgetPosition(widget: string): number {
+    return this.widgetOrder.indexOf(widget);
+  }
+
+  private loadWidgetOrder(): void {
+    try {
+      const saved = JSON.parse(localStorage.getItem('client-dashboard-widget-order') || 'null');
+      if (Array.isArray(saved) && this.defaultWidgetOrder.every(widget => saved.includes(widget))) {
+        this.widgetOrder = saved;
+      }
+    } catch {
+      this.widgetOrder = [...this.defaultWidgetOrder];
+    }
   }
 
   private startDataRefresh(): void {
@@ -119,6 +156,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
       )
       .subscribe({
         next: ({ holdings, summary }) => {
+          const observedAt = Date.now();
+          (Array.isArray(holdings) ? holdings : []).forEach(holding => {
+            if (holding.instrumentSymbol) {
+              this.chartHistory.record(accountId, `holding-value:${holding.instrumentSymbol}`,
+                Number(holding.totalValue), observedAt);
+            }
+          });
           this.holdings = (Array.isArray(holdings) ? holdings : [])
             .sort((a: any, b: any) => b.totalValue - a.totalValue)
             .slice(0, 10);
@@ -210,49 +254,38 @@ trackBySymbol(index: number, item: any): string {
 }
 
   private updatePortfolioChart(): void {
-    const portfolioId = 'all-holdings';
-
-    if (this.portfolioBalanceHistory.length === 0 || this.currentPortfolioId !== portfolioId) {
-      this.currentPortfolioId = portfolioId;
-
-      // Initialize with 6 data points like holding cards do
-      const randomFactor = 0.004;
-      const baseVariations = [-4, -2, -3.5, 1, -1.5, 0];
-
-      this.portfolioBalanceHistory = baseVariations.map(variant => {
-        const simulatedValue = this.totalPortfolioValue * (1 + (variant * randomFactor));
-        return Number(simulatedValue.toFixed(2));
-      });
-
-      // Force final point to be the real current value
-      this.portfolioBalanceHistory[this.portfolioBalanceHistory.length - 1] = this.totalPortfolioValue;
-      this.generatePortfolioChartOptions();
-    } else {
-      // Real time updates - append new value if different
-      const lastSavedValue = this.portfolioBalanceHistory[this.portfolioBalanceHistory.length - 1];
-      if (this.totalPortfolioValue !== lastSavedValue) {
-        this.portfolioBalanceHistory.push(this.totalPortfolioValue);
-
-        // Keep last 8 data points like holding cards
-        if (this.portfolioBalanceHistory.length > 8) {
-          this.portfolioBalanceHistory.shift();
-        }
-
-        this.generatePortfolioChartOptions();
-      }
-    }
+    if (this.accountId === null) return;
+    this.portfolioBalanceHistory = this.chartHistory.record(
+      this.accountId, 'portfolio-value', this.totalPortfolioValue);
+    if (this.portfolioBalanceHistory.length) this.generatePortfolioChartOptions();
   }
 
-  private generatePortfolioChartOptions(): void {
-    const times = this.portfolioBalanceHistory.map((_, i) => {
-      const now = new Date();
-      const time = new Date(now.getTime() - (this.portfolioBalanceHistory.length - i - 1) * 5 * 60000);
-      return time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-    });
+    private averageByMinute(samples: ChartSample[]): ChartSample[] {
+      const buckets = new Map<number, { total: number; count: number }>();
 
-    // Dynamic range scaling - exact pattern from holding cards
-    const minBalance = Math.min(...this.portfolioBalanceHistory);
-    const maxBalance = Math.max(...this.portfolioBalanceHistory);
+      for (const [timestamp, value] of samples) {
+        const minute = Math.floor(timestamp / 5000) * 5000;
+        const bucket = buckets.get(minute) ?? { total: 0, count: 0 };
+
+        bucket.total += value;
+        bucket.count++;
+        buckets.set(minute, bucket);
+      }
+
+      return Array.from(buckets.entries())
+        .sort(([a], [b]) => a - b)
+        .map(([timestamp, bucket]): ChartSample => [
+          timestamp,
+          bucket.total / bucket.count
+        ]);
+    }
+
+  private generatePortfolioChartOptions(): void {
+    const chartSamples = this.averageByMinute(this.portfolioBalanceHistory);
+    const values = chartSamples.map(([, value]) => value);
+        // Dynamic range scaling - exact pattern from holding cards
+    const minBalance = Math.min(...values);
+    const maxBalance = Math.max(...values);
     const balanceRange = maxBalance - minBalance;
     const paddingBuffer = balanceRange > 0 ? balanceRange * 0.10 : 1.0;
 
@@ -262,15 +295,19 @@ trackBySymbol(index: number, item: any): string {
         type: 'areaspline',
         backgroundColor: 'transparent',
         height: 300,
-        margin: [15, 0, 15, 50],
+        margin: [15, 10, 60, 60],
         spacing: [0, 0, 0, 0]
       },
       title: { text: '' },
+      time: { timezone: Intl.DateTimeFormat().resolvedOptions().timeZone },
       xAxis: {
-        categories: times,
-        visible: false,
+        type: 'datetime',
+        title: { text: 'Time (local)', style: { color: '#62748E', fontSize: '11px' } },
+        labels: {  format: '{value:%H:%M}', style: { color: '#62748E', fontSize: '10px' }},
+        lineColor: '#1E2D45',
+        tickColor: '#1E2D45',
         minPadding: 0,
-        maxPadding: 0,
+        maxPadding: 0, 
         startOnTick: false,
         endOnTick: false
       },
@@ -290,7 +327,7 @@ trackBySymbol(index: number, item: any): string {
       },
       tooltip: {
         pointFormat: '<b>${point.y:.2f}</b>',
-        headerFormat: '<b>Portfolio Value</b><br>',
+        xDateFormat: '%b %e, %Y %H:%M:%S',
         backgroundColor: 'rgba(15, 21, 32, 0.95)',
         borderColor: '#1E2D45',
         style: { color: '#FFFFFF' }
@@ -306,7 +343,7 @@ trackBySymbol(index: number, item: any): string {
       series: [{
         type: 'areaspline' as any,
         name: 'Portfolio Balance',
-        data: [...this.portfolioBalanceHistory],
+        data: chartSamples,
         color: '#6366F1',
         lineWidth: 3,
         marker: {

@@ -15,10 +15,15 @@
         <img [src]="accountAvatar()" alt="Account"/>
         <span class="account-name">{{ accountName() }}</span>
       </a>
-      <a routerLink="/portfolio" routerLinkActive="active" class="tab">Portfolio</a>
-      <a routerLink="/markets" routerLinkActive="active" class="tab">Markets</a>
-      <a routerLink="/trade" routerLinkActive="active" class="tab">Trade</a>
-      <a routerLink="/account" routerLinkActive="active" class="tab">Account</a>
+      <ng-container *ngIf="!isAnalystOnly; else analystNavigation">
+        <a routerLink="/portfolio" routerLinkActive="active" class="tab">Portfolio</a>
+        <a routerLink="/markets" routerLinkActive="active" class="tab">Markets</a>
+        <a routerLink="/trade" routerLinkActive="active" class="tab">Trade</a>
+        <a routerLink="/account" routerLinkActive="active" class="tab">Account</a>
+      </ng-container>
+      <ng-template #analystNavigation>
+        <a routerLink="/analyst" routerLinkActive="active" class="tab">Analyst</a>
+      </ng-template>
     </nav>
 
     <div class="navbar-right">

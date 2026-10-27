@@ -21,6 +21,7 @@ import { HoldingService } from './services/holding.service';
 import { HighchartsChartModule } from 'highcharts-angular';
 import { FundsComponent } from './components/trade/funds/funds.component';
 import { AdminComponent } from './pages/admin/admin.component';
+import { AnalystDashboardComponent } from './pages/analyst-dashboard/analyst-dashboard.component';
 import { authGuard } from './guards/auth.guard';
 
 const routes: Routes = [
@@ -29,6 +30,7 @@ const routes: Routes = [
   ...managerRoutes,
   ...clientRoutes,
   { path: 'admin', component: AdminComponent, canActivate: [authGuard], data: { roles: ['MANAGER'] } },
+  { path: 'analyst', component: AnalystDashboardComponent, canActivate: [authGuard] },
   { path: '', redirectTo: '/login', pathMatch: 'full' }
 ];
 
@@ -52,6 +54,7 @@ const routes: Routes = [
     MatIconModule,
     PortfolioHoldingCardComponent,
     FundsComponent,
+    AnalystDashboardComponent,
     HighchartsChartModule
   ],
   providers: [

@@ -1,0 +1,170 @@
+<main class="analyst-page">
+  <section class="page-heading">
+    <div>
+      <p class="eyebrow">Operations / Execution monitor</p>
+      <h1>Analyst trade activity</h1>
+      <p class="subheading">All client orders from the trading database, refreshed every two seconds.</p>
+    </div>
+    <div class="heading-actions">
+      <div class="live-state"><span class="pulse"></span> LIVE <small *ngIf="lastUpdated">{{ lastUpdated | date:'HH:mm:ss' }}</small></div>
+      <button class="reset-layout" type="button" (click)="resetWidgetOrder()">Reset layout</button>
+      <button class="logout-button" type="button" (click)="logout()">Logout</button>
+    </div>
+  </section>
+
+  <section class="toolbar">
+    <div class="presets" aria-label="Date presets">
+      <button [class.active]="selectedPreset === 'today'" (click)="choosePreset('today')">Today</button>
+      <button [class.active]="selectedPreset === 'week'" (click)="choosePreset('week')">Last 7 days</button>
+      <button [class.active]="selectedPreset === 'custom'" (click)="selectedPreset = 'custom'">Custom</button>
+    </div>
+    <div class="date-fields">
+      <label>From <input type="date" [(ngModel)]="fromDate" (change)="applyCustomRange()"></label>
+      <span>to</span>
+      <label>To <input type="date" [(ngModel)]="toDate" (change)="applyCustomRange()"></label>
+    </div>
+  </section>
+
+  <section class="search-strip">
+    <span class="search-icon">⌕</span>
+    <input
+      class="trade-search"
+      type="search"
+      [(ngModel)]="searchTerm"
+      (keyup.enter)="applySearch()"
+      placeholder="Search order ID, client, username, account, or stock symbol"
+      aria-label="Search trades">
+    <button class="search-button" (click)="applySearch()">Search</button>
+    <button class="clear-button" *ngIf="searchTerm" (click)="clearSearch()">Clear</button>
+  </section>
+
+  <div class="dashboard-grid" cdkDropList cdkDropListOrientation="vertical" [cdkDropListData]="widgetOrder" (cdkDropListDropped)="dropWidget($event)">
+  <section class="dashboard-widget" cdkDrag [style.order]="widgetPosition('summary')" *ngIf="!errorMessage && (!isLoading || trades.length)">
+    <div class="widget-drag-bar" cdkDragHandle><span class="drag-grip">⋮⋮</span> Summary</div>
+    <div class="widget-content">
+  <section class="summary-grid">
+    <article class="summary-card buy-card">
+      <div class="summary-label">Buy orders</div>
+      <div class="summary-value">{{ buyCount | number }}</div>
+      <div class="summary-detail">{{ fromDate === toDate ? 'Today' : 'Selected range' }}</div>
+    </article>
+    <article class="summary-card sell-card">
+      <div class="summary-label">Sell orders</div>
+      <div class="summary-value">{{ sellCount | number }}</div>
+      <div class="summary-detail">{{ fromDate === toDate ? 'Today' : 'Selected range' }}</div>
+    </article>
+    <article class="summary-card">
+      <div class="summary-label">Total trades</div>
+      <div class="summary-value">{{ (page?.totalElements || 0) | number }}</div>
+      <div class="summary-detail">Orders in date range</div>
+    </article>
+    <article class="summary-card">
+      <div class="summary-label">Units traded</div>
+      <div class="summary-value">{{ totalQuantity | number:'1.0-2' }}</div>
+      <div class="summary-detail">Loaded live results</div>
+    </article>
+  </section>
+    </div>
+  </section>
+
+  <section class="dashboard-widget" cdkDrag [style.order]="widgetPosition('market-insights')" *ngIf="!errorMessage && (!isLoading || trades.length)">
+    <div class="widget-drag-bar" cdkDragHandle><span class="drag-grip">⋮⋮</span> Market insights</div>
+    <div class="widget-content">
+  <section class="insight-grid">
+    <article class="insight-panel">
+      <div class="panel-heading"><div><p class="panel-kicker">Market concentration</p><h2>Most traded stocks</h2></div><span class="panel-period">{{ fromDate === toDate ? 'TODAY' : 'RANGE' }}</span></div>
+      <div class="stock-list" *ngIf="mostTradedStocks.length; else noStocks">
+        <div class="stock-row" *ngFor="let stock of mostTradedStocks">
+          <div class="stock-name"><strong>{{ stock.symbol }}</strong><small>{{ stock.quantity | number:'1.0-2' }} units</small></div>
+          <div class="stock-bar"><span [style.width.%]="(stock.trades / maxStockTrades) * 100"></span></div>
+          <strong class="stock-count">{{ stock.trades }}</strong>
+        </div>
+      </div>
+      <ng-template #noStocks><div class="panel-empty">No stock activity in this range.</div></ng-template>
+    </article>
+    <article class="insight-panel split-panel">
+      <p class="panel-kicker">Order flow</p><h2>Buy / sell balance</h2>
+      <div class="flow-bar"><span class="buy-flow" [style.width.%]="trades.length ? (buyCount / trades.length) * 100 : 0"></span><span class="sell-flow"></span></div>
+      <div class="flow-legend"><span><i class="buy-dot"></i> Buys <strong>{{ buyCount }}</strong></span><span><i class="sell-dot"></i> Sells <strong>{{ sellCount }}</strong></span></div>
+      <p class="panel-note">Calculated from the live results currently loaded for this filter.</p>
+    </article>
+  </section>
+    </div>
+  </section>
+
+  <section class="dashboard-widget" cdkDrag [style.order]="widgetPosition('charts')" *ngIf="!errorMessage && (!isLoading || trades.length)">
+    <div class="widget-drag-bar" cdkDragHandle><span class="drag-grip">⋮⋮</span> Charts</div>
+    <div class="widget-content">
+  <section class="chart-grid">
+    <article class="insight-panel chart-panel">
+      <div class="panel-heading">
+        <div><p class="panel-kicker">Asset allocation</p><h2>Trade mix by asset</h2></div>
+        <span class="panel-period">{{ fromDate === toDate ? 'TODAY' : 'RANGE' }}</span>
+      </div>
+      <highcharts-chart
+        [Highcharts]="Highcharts"
+        [options]="assetMixChartOptions"
+        class="insight-chart">
+      </highcharts-chart>
+    </article>
+    <article class="insight-panel chart-panel">
+      <div class="panel-heading">
+        <div><p class="panel-kicker">Execution pace</p><h2>Buys vs sells over time</h2></div>
+        <span class="panel-period">LIVE</span>
+      </div>
+      <highcharts-chart
+        [Highcharts]="Highcharts"
+        [options]="orderFlowChartOptions"
+        class="insight-chart">
+      </highcharts-chart>
+    </article>
+  </section>
+    </div>
+  </section>
+
+  <div class="error-state" *ngIf="errorMessage">{{ errorMessage }}</div>
+  <div class="loading-state" *ngIf="isLoading && !trades.length">Loading live trades...</div>
+
+  <section class="dashboard-widget" cdkDrag [style.order]="widgetPosition('trades')" *ngIf="!errorMessage && (!isLoading || trades.length)">
+    <div class="widget-drag-bar" cdkDragHandle><span class="drag-grip">⋮⋮</span> Trade history</div>
+    <div class="widget-content">
+  <section class="table-shell">
+    <div class="table-meta">
+      <span><strong>{{ page?.totalElements || 0 }}</strong> trades in range</span>
+      <span *ngIf="page">Page {{ page.number + 1 }} of {{ page.totalPages || 1 }}</span>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Order</th><th>Client / account</th><th>Instrument</th><th>Side</th>
+            <th>Quantity</th><th>Price</th><th>Value</th><th>Order time</th>
+            <th>Status</th><th>Updated</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let trade of trades; trackBy: trackByOrderId">
+            <td class="order-id">#{{ trade.orderId }}</td>
+            <td><strong>{{ trade.clientName || 'Unknown client' }}</strong><small>{{ trade.accountName || 'Unknown account' }} · {{ trade.accountId }}</small></td>
+            <td><strong>{{ trade.instrumentSymbol }}</strong><small>{{ trade.assetType }} · {{ trade.currencyCode || 'USD' }}</small></td>
+            <td><span class="side" [class.sell]="trade.side === 'SELL'">{{ trade.side }}</span></td>
+            <td>{{ trade.quantity | number:'1.0-4' }}</td>
+            <td>{{ formatMoney(trade.price, trade.currencyCode) }}</td>
+            <td class="value">{{ formatMoney(trade.tradeValue, trade.currencyCode) }}</td>
+            <td>{{ trade.orderDate | date:'MMM d, HH:mm:ss' }}</td>
+            <td><span class="status" [ngClass]="statusClass(trade.status)">{{ trade.status || 'UNKNOWN' }}</span><small class="reason" *ngIf="trade.reasonText">{{ trade.reasonText }}</small></td>
+            <td>{{ trade.timeUpdated ? (trade.timeUpdated | date:'HH:mm:ss') : '—' }}</td>
+          </tr>
+          <tr *ngIf="!isLoading && !trades.length"><td colspan="10" class="empty-state">No trades found for this date range.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="pagination">
+      <button (click)="previousPage()" [disabled]="!page || page.first">Previous</button>
+      <button (click)="nextPage()" [disabled]="!page || page.last">Next</button>
+    </div>
+  </section>
+    </div>
+  </section>
+  </div>
+</main>

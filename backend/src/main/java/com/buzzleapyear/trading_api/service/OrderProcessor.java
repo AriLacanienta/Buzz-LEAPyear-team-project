@@ -27,6 +27,7 @@ import com.buzzleapyear.trading_api.dto.TradeOrderPreviewResponseDto;
 import com.buzzleapyear.trading_api.entity.Instrument;
 import com.buzzleapyear.trading_api.entity.Holding;
 import org.springframework.beans.factory.annotation.Value;
+import com.buzzleapyear.trading_api.service.TradeOrderEventService;
 
 /**
  * OrderProcessor handles order preview and processing workflow
@@ -46,6 +47,7 @@ public class OrderProcessor {
     private final HoldingRepository holdingRepository;
     private final AccountRepository accountRepository;
     private final QuoteService quoteService;
+    private final TradeOrderEventService tradeOrderEventService;
     private final ExchangeRateService exchangeRateService;
 
     // Maximum allowed drift between quoted price and the live price
@@ -64,6 +66,7 @@ public class OrderProcessor {
             HoldingRepository holdingRepository,
             AccountRepository accountRepository,
             QuoteService quoteService,
+            TradeOrderEventService tradeOrderEventService,
             ExchangeRateService exchangeRateService) {
         this.orderValidator = orderValidator;
         this.orderExecutor = orderExecutor;
@@ -72,6 +75,7 @@ public class OrderProcessor {
         this.holdingRepository = holdingRepository;
         this.accountRepository = accountRepository;
         this.quoteService = quoteService;
+        this.tradeOrderEventService = tradeOrderEventService;
         this.exchangeRateService = exchangeRateService;
     }
 
@@ -419,13 +423,8 @@ public class OrderProcessor {
      * @param reason the reason for the status (if applicable)
      */
     private void logOrderStatus(TradeOrder order, OrderStatus status, String reason) {
-        TradeOrderStatus orderStatus = new TradeOrderStatus();
-        orderStatus.setTradeOrder(order);
-        orderStatus.setStatus(status);
-        orderStatus.setTimeUpdated(LocalDateTime.now());
-        orderStatus.setReasonText(reason);
+        tradeOrderEventService.recordStatus(order, status, reason);
         
-        tradeOrderStatusRepository.save(orderStatus);
         logger.debug("Order ID: {} status logged: {} {}", 
             order.getId(), status, reason != null ? "- " + reason : "");
     }

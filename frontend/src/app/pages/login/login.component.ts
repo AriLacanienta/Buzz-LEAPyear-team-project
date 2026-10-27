@@ -53,9 +53,11 @@ export class LoginComponent {
 
         this.loading = false;
 
-        const landingPage = this.authService.hasRole("MANAGER")
-          ? "/manager"
-          : "/dashboard";
+        const landingPage = this.authService.hasRole('MANAGER')
+          ? '/manager'
+          : (this.authService.hasRole('ANALYST')
+            ? '/analyst'
+            : '/dashboard');
         this.router.navigate([landingPage]);
       },
       //error response

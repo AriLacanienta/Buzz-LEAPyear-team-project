@@ -1,11 +1,11 @@
-import { inject, Injectable } from '@angular/core';
+import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { of } from 'rxjs';
 
 export const authGuard: CanActivateFn = (route, state) => {
-  const authService = inject(AuthService)
+  const authService = inject(AuthService);
   const router = inject(Router);
   const requiredRoles = route.data?.['roles'] as string[] | undefined;
 
@@ -18,6 +18,15 @@ export const authGuard: CanActivateFn = (route, state) => {
 
       return authService.validateToken().pipe(
         map(() => {
+          // Analyst-only users should stay within their analyst workspace.
+          if (
+            authService.hasRole('ANALYST') &&
+            !authService.hasRole('MANAGER') &&
+            state.url !== '/analyst'
+          ) {
+            return router.createUrlTree(['/analyst']);
+          }
+
           if (!requiredRoles?.length || requiredRoles.some(role => authService.hasRole(role))) {
             return true;
           }
@@ -27,7 +36,6 @@ export const authGuard: CanActivateFn = (route, state) => {
       );
     }),
     catchError(error => {
-      // Token validation failed (likely 401 Unauthorized)
       console.warn('Token validation failed, logging out', error);
       authService.logout();
       return of(router.createUrlTree(['/login']));

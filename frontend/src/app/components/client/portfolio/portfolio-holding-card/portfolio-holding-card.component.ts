@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { HighchartsChartModule } from 'highcharts-angular';
 import * as Highcharts from 'highcharts';
+import { ChartHistoryService, ChartSample } from '../../../../services/chart-history.service';
 
 @Component({
   selector: 'app-portfolio-holding-card',
@@ -14,6 +15,7 @@ import * as Highcharts from 'highcharts';
 export class PortfolioHoldingCardComponent implements OnDestroy, OnChanges {
   @Input() holding: any;
   @Input() index: number = 0;
+  @Input() accountId: number | null = null;
   Math = Math;
 
   Highcharts: typeof Highcharts = Highcharts;
@@ -24,47 +26,27 @@ export class PortfolioHoldingCardComponent implements OnDestroy, OnChanges {
   private colors = ['#6366F1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
   
   // Rolling window of price data points (max 8 points) for trend visualization
-  private priceHistory: number[] = [];
+  private priceHistory: ChartSample[] = [];
   
   // Track current symbol to detect when holding changes and reinitialize chart data 
   private currentSymbol: string = '';
   
 
-  constructor(private cdr: ChangeDetectorRef) {}
+  constructor(private cdr: ChangeDetectorRef, private chartHistory: ChartHistoryService) {}
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['holding']) {
-      const currentValue = this.holding?.totalValue || 0;
+    if (changes['holding'] || changes['accountId']) {
+      const currentValue = Number(this.holding?.totalValue);
       const targetSymbol = this.holding?.instrumentSymbol || '';
 
-      if (currentValue > 0 && targetSymbol) {
+      if (Number.isFinite(currentValue) && currentValue >= 0 && targetSymbol && this.accountId !== null) {
         const parsedValue = Number(currentValue.toFixed(2));
 
-        if (this.priceHistory.length === 0 || this.currentSymbol !== targetSymbol) {
-          this.currentSymbol = targetSymbol;
-
-          const randomFactor = 0.004 * (this.index + 1);
-          const baseVariations = [-4, -2, -3.5, 1, -1.5, 0];
-
-          this.priceHistory = baseVariations.map(variant => {
-            const simulatedValue = parsedValue * (1 + (variant * randomFactor));
-            return Number(simulatedValue.toFixed(2));
-          });
-
-          this.priceHistory[this.priceHistory.length - 1] = parsedValue;
-          this.generateChartOptions();
-        } else {
-          const lastSavedPrice = this.priceHistory[this.priceHistory.length - 1];
-          if (parsedValue !== lastSavedPrice) {
-            this.priceHistory.push(parsedValue);
-
-            if (this.priceHistory.length > 8) {
-              this.priceHistory.shift();
-            }
-
-            this.generateChartOptions();
-          }
+        this.priceHistory = this.chartHistory.read(this.accountId, `holding-value:${targetSymbol}`);
+        if (!this.priceHistory.length) {
+          this.priceHistory = this.chartHistory.record(this.accountId, `holding-value:${targetSymbol}`, parsedValue);
         }
+        this.generateChartOptions();
 
         this.cdr.detectChanges();
       }
@@ -72,14 +54,10 @@ export class PortfolioHoldingCardComponent implements OnDestroy, OnChanges {
   }
 
   generateChartOptions(): void {
-    const times = this.priceHistory.map((_, i) => {
-      const now = new Date();
-      const time = new Date(now.getTime() - (this.priceHistory.length - i - 1) * 5 * 60000);
-      return time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-    });
+    const values = this.priceHistory.map(([, value]) => value);
 
-    const minPrice = Math.min(...this.priceHistory);
-    const maxPrice = Math.max(...this.priceHistory);
+    const minPrice = Math.min(...values);
+    const maxPrice = Math.max(...values);
     const priceRange = maxPrice - minPrice;
 
     const paddingBuffer = priceRange > 0 ? priceRange * 0.10 : 1.0;
@@ -93,8 +71,9 @@ export class PortfolioHoldingCardComponent implements OnDestroy, OnChanges {
         spacing: [0, 0, 0, 0]
       },
       title: { text: '' },
+      time: { timezone: Intl.DateTimeFormat().resolvedOptions().timeZone },
       xAxis: {
-        categories: times,
+        type: 'datetime',
         visible: false,
         minPadding: 0,
         maxPadding: 0,
@@ -114,7 +93,7 @@ export class PortfolioHoldingCardComponent implements OnDestroy, OnChanges {
       },
       tooltip: {
         pointFormat: '<b>\${point.y:.2f}</b>',
-        headerFormat: '',
+        xDateFormat: '%b %e, %Y %H:%M:%S',
         backgroundColor: 'rgba(15, 21, 32, 0.95)',
         borderColor: '#1E2D45',
         style: { color: '#FFFFFF' }
@@ -123,7 +102,7 @@ export class PortfolioHoldingCardComponent implements OnDestroy, OnChanges {
       plotOptions: {
         areaspline: {
           dataLabels: {
-            enabled: true,
+            enabled: false,
             format: '\${point.y:.2f}',
             style: {
               fontSize: '10px',

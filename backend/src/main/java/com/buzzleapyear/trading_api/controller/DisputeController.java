@@ -8,6 +8,9 @@ import com.buzzleapyear.trading_api.dto.ManagerDashboardSummary;
 import com.buzzleapyear.trading_api.service.DisputeService;
 import com.buzzleapyear.trading_api.service.ManagerDashboardService;
 import jakarta.validation.Valid;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.*;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +28,8 @@ public class DisputeController {
     private final DisputeService disputeService;
     private final ManagerDashboardService dashboardService;
 
+    private Logger logger = LoggerFactory.getLogger(DisputeController.class);
+
     public DisputeController(DisputeService disputeService, ManagerDashboardService dashboardService) {
         this.disputeService = disputeService;
         this.dashboardService = dashboardService;
@@ -32,6 +37,7 @@ public class DisputeController {
 
     @GetMapping("/summary")
     public ManagerDashboardSummary summary(Authentication authentication) {
+        logger.debug("Got here");
         return dashboardService.summary(authentication.getName());
     }
 

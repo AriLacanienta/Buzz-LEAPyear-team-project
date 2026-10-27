@@ -149,14 +149,17 @@ export class AuthService {
 
     try {
       const roles = JSON.parse(storedRoles);
-      return Array.isArray(roles) ? roles : [];
+      return Array.isArray(roles)
+        ? roles.map(role => String(role).replace(/^ROLE_/, '').toUpperCase())
+        : [];
     } catch {
       return [];
     }
   }
 
   hasRole(role: string): boolean {
-    return this.getRoles().includes(role);
+    return this.getRoles().includes(role.replace(/^ROLE_/, '').toUpperCase());
+    //return this.getRoles().includes(role);
   }
 
   /**
