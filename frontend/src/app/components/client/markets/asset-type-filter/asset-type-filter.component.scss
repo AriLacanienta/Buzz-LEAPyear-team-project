@@ -12,27 +12,32 @@ $spacing-xs: 0.5rem;
 $spacing-sm: 0.75rem;
 
 .asset-tab {
-  padding: $spacing-xs 1.25rem;
+  padding: 0.55rem 0.8rem;
   gap: $spacing-xs;
-  background-color: $bg-dark;
-  border: 0.025rem solid $border-dark;
-  color: $color-slate-400;
-  border-radius: $radius-sm;
+  background-color: transparent;
+  border: 1px solid transparent;
+  color: #8ea0b8;
+  border-radius: 0.6rem;
   cursor: pointer;
-  font-size: $text-sm;
+  font-size: 0.75rem;
   font-weight: $font-weight-semibold;
-  transition: all 0.3s ease;
+  transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
 
   &:hover {
     color: $color-white;
+    background-color: rgba(255, 255, 255, 0.055);
   }
 
   &.active {
-    background-color: $color-primary;
-    border-color: $color-primary-dark;
+    background-color: rgba(43, 127, 255, 0.16);
+    border-color: rgba(81, 162, 255, 0.25);
     color: $color-white;
-    border-bottom-color: $border-dark;
     font-weight: $font-weight-bold;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #51a2ff;
+    outline-offset: 2px;
   }
 }
 
@@ -44,5 +49,6 @@ $spacing-sm: 0.75rem;
   .asset-tabs {
     display: flex;
     gap: $spacing-xs;
+    flex-wrap: wrap;
   }
 }

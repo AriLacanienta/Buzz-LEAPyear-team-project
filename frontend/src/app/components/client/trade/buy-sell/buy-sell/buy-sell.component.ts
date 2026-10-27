@@ -1,32 +1,17 @@
-import {
-  Component,
-  DestroyRef,
-  HostListener,
-  OnInit,
-  ViewChild,
-} from "@angular/core";
-import { HoldingService } from "@app/services/holding.service";
-import { TradeOrderService } from "@app/services/trade-order.service";
-import {
-  QuantityMode,
-  TradeOrderPreviewRequest,
-  TradeOrderPreviewResponse,
-} from "@app/models/trade-order.model";
-import { SearchComponent } from "../search/search.component";
-import { SearchResultDetailComponent } from "../search-result-detail/search-result-detail.component";
-import { CommonModule, CurrencyPipe } from "@angular/common";
-import { InstrumentSearchResponse } from "@app/models/instrument-search-response.model";
-import { AccountService } from "@app/services/account.service";
-import { merge, switchMap, timer, of, Subject, Subscription } from "rxjs";
-import {
-  catchError,
-  debounceTime,
-  filter,
-  finalize,
-  take,
-  tap,
-} from "rxjs/operators";
-import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+  import { Component, DestroyRef, HostListener, OnInit, ViewChild } from '@angular/core';
+import { HoldingService } from '@app/services/holding.service';
+import { TradeOrderService } from '@app/services/trade-order.service';
+import { QuantityMode, TradeOrderPreviewRequest, TradeOrderPreviewResponse } from '@app/models/trade-order.model';
+import { SearchComponent } from '../search/search.component';
+import { SearchResultDetailComponent } from '../search-result-detail/search-result-detail.component';
+import { CommonModule, CurrencyPipe } from '@angular/common';
+import { InstrumentSearchResponse } from '@app/models/instrument-search-response.model';
+import { AccountService } from '@app/services/account.service';
+import { merge, switchMap, timer, of, Subject, Subscription } from 'rxjs';
+import { catchError, debounceTime, filter, finalize, take, tap } from 'rxjs/operators';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { InstrumentService } from '@app/services/instrument.service';
+import { ActivatedRoute } from '@angular/router';
 
 type OrderType = "BUY" | "SELL";
 type AssetTag = "Stock" | "Crypto" | "Foreign";
@@ -71,6 +56,7 @@ export class BuySellComponent implements OnInit {
 
   private accountId: string | null = null;
   private ownsSelected: boolean | null = null;
+  private openPresetConfirmation = false;
   private previewTrigger$ = new Subject<void>();
   private errorDismissal?: Subscription;
 
@@ -80,21 +66,23 @@ export class BuySellComponent implements OnInit {
     private accountService: AccountService,
     private holdingService: HoldingService,
     private tradeOrderService: TradeOrderService,
-    private destroyRef: DestroyRef,
+    private instrumentService: InstrumentService,
+    private route: ActivatedRoute,
+    private destroyRef: DestroyRef
   ) {}
 
   ngOnInit(): void {
-    this.accountService
-      .getMyAccount()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (account) => {
-          this.accountId = account.accountId;
-          this.loadCashAvailable();
-          this.checkOwnership();
-          this.requestPreview();
-        },
-      });
+    this.applyTradePreset();
+    this.accountService.getMyAccount().pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: account => {
+        this.accountId = account.accountId;
+        this.loadCashAvailable();
+        this.checkOwnership();
+        this.requestPreview();
+      }
+    })
 
     merge(
       this.previewTrigger$.pipe(debounceTime(300)),
@@ -116,8 +104,41 @@ export class BuySellComponent implements OnInit {
         this.preview = preview;
         if (preview) {
           this.cashAvailable = preview.cashAvailable;
+
+        if (preview.valid && this.openPresetConfirmation) {
+          this.isConfirmationOpen = true;
+          this.openPresetConfirmation = false;
+        }
+      }
+      });
+  }
+
+  private applyTradePreset(): void {
+    this.route.queryParams.pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(params => {
+      const symbol = params['symbol'];
+      const quantity = Number(params['quantity']);
+      const side = params['side'];
+      this.openPresetConfirmation = params['confirm'] === 'true';
+
+      if (!symbol || !Number.isInteger(quantity) || quantity <= 0) {
+        return;
+      }
+
+      this.isBuy = side !== 'SELL';
+      this.quantity = quantity;
+
+      this.instrumentService.searchInstruments(symbol).pipe(
+        take(1),
+        catchError(() => of([]))
+      ).subscribe(results => {
+        const instrument = results.find(item => item.instrumentSymbol === symbol);
+        if (instrument) {
+          this.onSearchItemSelected(instrument);
         }
       });
+    });
   }
 
   toggleOrderType(side: OrderType): void {
@@ -378,12 +399,11 @@ export class BuySellComponent implements OnInit {
 
   private isPreviewRejected(side: "BUY" | "SELL"): boolean {
     const preview = this.preview;
-    const matchesInput =
-      preview &&
-      preview.side === side &&
-      preview.instrumentSymbol === this.selectedResult?.instrumentSymbol &&
-      preview.quantityMode === this.quantityMode &&
-      (this.quantityMode === "AMOUNT"
+    const matchesInput = preview
+      && preview.side === side
+      && preview.instrumentSymbol === this.selectedResult?.instrumentSymbol
+      && preview.quantityMode === this.quantityMode
+      && (this.quantityMode === "AMOUNT"
         ? Number(preview.requestedAmount) === this.amount
         : Number(preview.quantity) === this.quantity);
 

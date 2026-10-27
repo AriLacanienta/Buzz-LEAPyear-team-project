@@ -4,7 +4,7 @@ import { Dialog, DialogModule } from '@angular/cdk/dialog';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { EMPTY, Subject, catchError, of, startWith, switchMap, tap } from 'rxjs';
-import { Dispute, DisputePage, DisputeSearch } from '../../../models/dispute.model';
+import { DisputeResponse, DisputePage, DisputeSearch } from '../../../models/dispute.model';
 import { DisputeResolutionComponent } from '../../../components/manager/dispute-resolution/dispute-resolution.component';
 import { DisputeService } from '../../../services/dispute.service';
 
@@ -127,7 +127,7 @@ export class ManagerDisputesComponent implements OnInit, OnChanges {
     this.requests.next();
   }
 
-  openResolution(dispute: Dispute): void {
+  openResolution(dispute: DisputeResponse): void {
     if (dispute.status !== 'OPEN') {
       return;
     }

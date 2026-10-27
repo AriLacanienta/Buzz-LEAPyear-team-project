@@ -34,6 +34,7 @@ import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * This Authentication Controller handles login, registration, and token validation

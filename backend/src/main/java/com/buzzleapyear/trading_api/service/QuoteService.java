@@ -205,6 +205,26 @@ public class QuoteService {
         return responses;
     }
 
+    public List<QuoteResponseDto> getTopGainers(int limit) {
+        return getAllLatestQuotes().stream()
+            .sorted(Comparator.comparing(
+                QuoteResponseDto::changePercent,
+                Comparator.nullsLast(Comparator.reverseOrder())
+            ))
+            .limit(limit)
+            .toList();
+    }
+
+    public List<QuoteResponseDto> getTopLosers(int limit) {
+        return getAllLatestQuotes().stream()
+            .sorted(Comparator.comparing(
+                QuoteResponseDto::changePercent,
+                Comparator.nullsLast(Comparator.naturalOrder())
+            ))
+            .limit(limit)
+            .toList();
+    }
+
     public Optional<QuoteResponseDto> getLatestQuoteBySymbol(String symbol) {
         Optional<Instrument> instrument = instrumentService.getInstrumentBySymbol(symbol);
         if (instrument.isEmpty()) {

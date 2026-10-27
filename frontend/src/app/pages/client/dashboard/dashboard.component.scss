@@ -1,11 +1,9 @@
 $spacing-md: 1rem;
 $spacing-xl: 1.875rem;
 $spacing-lg: 1.25rem;
-$max-width: 85%;
-
 main {
+  width: 85%;
   padding: clamp(0.875rem, 4vw, $spacing-xl) clamp(0.875rem, 3vw, $spacing-lg);
-  max-width: $max-width;
   margin: 0 auto;
 }
 

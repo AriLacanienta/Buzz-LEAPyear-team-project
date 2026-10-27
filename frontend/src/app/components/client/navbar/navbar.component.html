@@ -1,6 +1,6 @@
 <header>
   <div class="header-content">
-    <div class="buzz-trader">
+    <a class="buzz-trader" routerLink="/portfolio" aria-label="Buzz Trader home">
       <div class="rocket">
         <div class="rocket-icon">
           <mat-icon>rocket_launch</mat-icon>
@@ -8,7 +8,7 @@
         <div class="rocket-square"></div>
       </div>
       <span [style.color]="getAppNameColor('buzz')">Buzz </span> <span [style.color]="getAppNameColor('trader')">Trader</span>
-    </div>
+    </a>
     <div class="divider">|</div>
     <nav class="tabs">
       <a routerLink="/account" routerLinkActive="active" class="account-tab">

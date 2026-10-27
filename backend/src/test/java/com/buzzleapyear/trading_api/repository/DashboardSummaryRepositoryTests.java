@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@Testcontainers
+@Testcontainers(disabledWithoutDocker = true)
 class DashboardSummaryRepositoryTests {
     @Container
     private static final PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:16-alpine");
