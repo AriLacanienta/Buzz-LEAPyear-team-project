@@ -15,6 +15,7 @@ import com.buzzleapyear.trading_api.repository.HoldingRepository;
 import com.buzzleapyear.trading_api.entity.Account;
 import com.buzzleapyear.trading_api.entity.TradeOrder;
 import com.buzzleapyear.trading_api.entity.TradeOrder.OrderSide;
+import com.buzzleapyear.trading_api.entity.TradeOrder.QuantityMode;
 import com.buzzleapyear.trading_api.entity.TradeOrderStatus;
 import com.buzzleapyear.trading_api.entity.TradeOrderStatus.OrderStatus;
 import com.buzzleapyear.trading_api.repository.AccountRepository;
@@ -45,10 +46,12 @@ public class OrderProcessor {
     private final HoldingRepository holdingRepository;
     private final AccountRepository accountRepository;
     private final QuoteService quoteService;
+    private final ExchangeRateService exchangeRateService;
 
     // Maximum allowed drift between quoted price and the live price
     private static final BigDecimal PRICE_TOLERANCE = new BigDecimal("0.01");
     private static final Duration MAX_QUOTE_AGE = Duration.ofSeconds(10);
+    private static final BigDecimal ONE_CENT = new BigDecimal("0.01");
 
     @Value("${ORDER_EXECUTION_DELAY_MS:1000}")
     private long orderExecutionDelayMs;
@@ -60,7 +63,8 @@ public class OrderProcessor {
             TradeOrderStatusRepository tradeOrderStatusRepository,
             HoldingRepository holdingRepository,
             AccountRepository accountRepository,
-            QuoteService quoteService) {
+            QuoteService quoteService,
+            ExchangeRateService exchangeRateService) {
         this.orderValidator = orderValidator;
         this.orderExecutor = orderExecutor;
         this.tradeOrderRepository = tradeOrderRepository;
@@ -68,6 +72,7 @@ public class OrderProcessor {
         this.holdingRepository = holdingRepository;
         this.accountRepository = accountRepository;
         this.quoteService = quoteService;
+        this.exchangeRateService = exchangeRateService;
     }
 
     /**
@@ -108,7 +113,22 @@ public class OrderProcessor {
             }
 
             order.setPrice(marketPrice);
-            order.setValue(marketPrice.multiply(order.getQuantity()).setScale(2, RoundingMode.HALF_UP));
+            if (order.getQuantityMode() == QuantityMode.AMOUNT) {
+                BigDecimal resolvedQuantity = resolveQuantity(order.getInstrument(), QuantityMode.AMOUNT, order.getQuantity(),
+                    order.getRequestedAmount(), marketPrice, order.getSide(), getHeldQuantity(account, order.getInstrument()));
+                if (resolvedQuantity == null || resolvedQuantity.signum() <= 0) {
+                    String reason = "Order amount is too small to buy any quantity at the current price";
+                    logOrderStatus(order, OrderStatus.REJECTED, reason);
+                    logger.warn("Order ID: {} rejected: {}", order.getId(), reason);
+                    return;
+                }
+                order.setQuantity(resolvedQuantity);
+            }
+            BigDecimal exchangeRate = exchangeRateService.getToUsdRate(order.getInstrument().getCurrencyCode());
+            order.setNativeCurrency(order.getInstrument().getCurrencyCode());
+            order.setExchangeRate(exchangeRate);
+            order.setTradeValue(exchangeRateService.toUsd(
+                marketPrice.multiply(order.getQuantity()), order.getNativeCurrency()));
             tradeOrderRepository.save(order);
 
             // Step 2: Validate order against business rules
@@ -121,9 +141,9 @@ public class OrderProcessor {
 
             // Step 3: Reserve buy cash before acceptance
             logger.info("Order ID: {} passed validation", order.getId());
-            
+
             if (order.getSide() == OrderSide.BUY) {
-                BigDecimal requiredCash = order.getPrice().multiply(order.getQuantity());
+                BigDecimal requiredCash = order.getTradeValue();
                 account.setCashAvailable(account.getCashAvailable().subtract(requiredCash));
                 account.setCashReserved(account.getCashReserved().add(requiredCash));
                 accountRepository.save(account);
@@ -153,7 +173,34 @@ public class OrderProcessor {
         executeValidOrder(order, account, acceptedPrice);
     }
 
-    public TradeOrderPreviewResponseDto previewOrder(Account account, Instrument instrument, OrderSide side, BigDecimal quantity) {
+    public BigDecimal resolveQuantity(Instrument instrument, QuantityMode mode, BigDecimal quantity, BigDecimal amount, BigDecimal price, OrderSide side, BigDecimal heldQuantity) {
+        if (mode != QuantityMode.AMOUNT) {
+            return quantity;
+        }
+        if (amount == null || price == null || price.signum() <= 0) {
+            return null;
+        }
+        BigDecimal usdPrice = price.multiply(exchangeRateService.getToUsdRate(instrument.getCurrencyCode()));
+        int quantityPrecision = instrument.getQuantityPrecision();
+        BigDecimal resolved = amount.divide(usdPrice, quantityPrecision, RoundingMode.DOWN);
+        if(side == OrderSide.SELL && heldQuantity != null && heldQuantity.signum() > 0) {
+            BigDecimal heldValue = exchangeRateService.toUsd(
+                heldQuantity.multiply(price), instrument.getCurrencyCode());
+            if (heldValue.subtract(amount).abs().compareTo(ONE_CENT) <= 0) {
+                resolved = heldQuantity;
+            }
+        }
+        return resolved.setScale(quantityPrecision, RoundingMode.DOWN);
+    }
+
+    private BigDecimal getHeldQuantity(Account account, Instrument instrument) {
+        return holdingRepository.findByAccountIdAndInstrumentId(account.getId(), instrument.getId())
+            .map(Holding::getQuantity)
+            .orElse(BigDecimal.ZERO);
+    }
+
+    public TradeOrderPreviewResponseDto previewOrder(Account account, Instrument instrument, OrderSide side, 
+            QuantityMode mode, BigDecimal requestedQuantity, BigDecimal requestedAmount) {
         Holding holding = holdingRepository.findByAccountIdAndInstrumentId(account.getId(), instrument.getId()).orElse(null);
 
         BigDecimal heldQuantity = holding != null ? holding.getQuantity() : BigDecimal.ZERO;
@@ -165,7 +212,9 @@ public class OrderProcessor {
             return new TradeOrderPreviewResponseDto(
                 instrument.getInstrumentSymbol(),
                 side,
-                quantity,
+                mode,
+                requestedQuantity,
+                requestedAmount,
                 null,
                 null,
                 cashAvailable,
@@ -175,19 +224,30 @@ public class OrderProcessor {
                 null,
                 null,
                 false,
-                "No market quote available for " + instrument.getInstrumentSymbol());
+                "No market quote available for " + instrument.getInstrumentSymbol(),
+                instrument.getCurrencyCode(),
+                null,
+                null);
         }
 
-        BigDecimal estimatedValue = livePrice.multiply(quantity).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal quantity = resolveQuantity(instrument, mode, requestedQuantity, requestedAmount, livePrice, side, heldQuantity);
+        if (quantity == null) {
+            quantity = BigDecimal.ZERO;
+        }
+        BigDecimal nativeValue = livePrice.multiply(quantity);
+        BigDecimal exchangeRate = exchangeRateService.getToUsdRate(instrument.getCurrencyCode());
+        BigDecimal estimatedValue = nativeValue.multiply(exchangeRate).setScale(2, RoundingMode.HALF_UP);
 
         TradeOrder draft = new TradeOrder();
         draft.setAccount(account);
         draft.setInstrument(instrument);
         draft.setSide(side);
+        draft.setQuantityMode(mode);
+        draft.setRequestedAmount(requestedAmount);
         draft.setQuantity(quantity);
         draft.setPrice(livePrice);
         
-        OrderValidator.ValidationResult result = orderValidator.validate(draft, account);
+        OrderValidator.ValidationResult result = orderValidator.validatePreview(draft, account);
 
         BigDecimal cashAfter;
         BigDecimal holdingQuantityAfter;
@@ -197,7 +257,9 @@ public class OrderProcessor {
         if (side == OrderSide.BUY) {
             cashAfter = cashAvailable.subtract(estimatedValue);
             holdingQuantityAfter = heldQuantity.add(quantity);
-            averageCostAfter = heldCost.add(estimatedValue).divide(holdingQuantityAfter, 4, RoundingMode.HALF_UP);
+            if (holdingQuantityAfter.signum() > 0) {
+                averageCostAfter = heldCost.add(estimatedValue).divide(holdingQuantityAfter, 4, RoundingMode.HALF_UP);
+            }
         } 
         else {
             cashAfter = cashAvailable.add(estimatedValue);
@@ -212,7 +274,9 @@ public class OrderProcessor {
         return new TradeOrderPreviewResponseDto(
             instrument.getInstrumentSymbol(),
             side,
+            mode,
             quantity,
+            requestedAmount,
             livePrice,
             estimatedValue,
             cashAvailable,
@@ -222,7 +286,10 @@ public class OrderProcessor {
             averageCostAfter,
             realizedPnL,
             result.isValid(),
-            result.getReason()
+            result.getReason(),
+            instrument.getCurrencyCode(),
+            exchangeRate,
+            nativeValue
         );
     }
 
@@ -286,11 +353,14 @@ public class OrderProcessor {
         }
 
         order.setPrice(executionPrice);
-        order.setValue(executionPrice.multiply(order.getQuantity()).setScale(2, RoundingMode.HALF_UP));
+        order.setTradeValue(exchangeRateService.toUsd(
+            executionPrice.multiply(order.getQuantity()), order.getNativeCurrency()));
         try {
             tradeOrderRepository.save(order);
             if (order.getSide() == OrderSide.BUY) {
-                orderExecutor.executeBuyOrder(account, order.getInstrument(), order, acceptedPrice);
+                BigDecimal acceptedUsdValue = exchangeRateService.toUsd(
+                    acceptedPrice.multiply(order.getQuantity()), order.getNativeCurrency());
+                orderExecutor.executeBuyOrder(account, order.getInstrument(), order, acceptedUsdValue);
             }
             else {
                 orderExecutor.executeSellOrder(account, order.getInstrument(), order);
@@ -322,10 +392,11 @@ public class OrderProcessor {
 
     private void releaseReservedCash(TradeOrder order, Account account, BigDecimal acceptedPrice) {
         Account currentAccount = accountRepository.findById(account.getId()).orElse(account);
-        BigDecimal reservedCash = acceptedPrice.multiply(order.getQuantity());
-        currentAccount.setCashReserved(account.getCashReserved().subtract(reservedCash));
-        currentAccount.setCashAvailable(account.getCashAvailable().add(reservedCash));
-        accountRepository.save(account);
+        BigDecimal reservedCash = acceptedPrice.multiply(order.getQuantity())
+            .multiply(order.getExchangeRate()).setScale(2, RoundingMode.HALF_UP);
+        currentAccount.setCashReserved(currentAccount.getCashReserved().subtract(reservedCash));
+        currentAccount.setCashAvailable(currentAccount.getCashAvailable().add(reservedCash));
+        accountRepository.save(currentAccount);
         logger.info("Cash restored for rejected BUY order ID: {} - Amount: {}", order.getId(), reservedCash);
     }   
 

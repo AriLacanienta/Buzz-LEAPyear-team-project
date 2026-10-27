@@ -5,4 +5,10 @@ export interface InstrumentSearchResponse {
     percentChange: number;
     assetType: string;
     currencyCode: string;
+    tradingSession: string;
+    marketOpen: boolean;
+    wholeSharesAllowed: boolean;
+    fractionalAllowed: boolean;
+    quantityPrecision: number;
+    minOrderAmount: number;
 }

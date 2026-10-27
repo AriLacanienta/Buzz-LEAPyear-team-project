@@ -156,7 +156,7 @@ public class DisputeService {
         TradeOrder order = dispute.getTradeOrder();
         User user = order.getAccount().getClient().getUser();
         return new DisputeResponse(dispute.getId(), order.getId(), user.getFirstName() + " " + user.getLastName(), order.getAccount().getId(),
-            order.getValue(), dispute.getMessage(), dispute.getStatus(), severityOf(order),
+            order.getTradeValue(), dispute.getMessage(), dispute.getStatus(), severityOf(order),
             dispute.getCreatedAt(), dispute.getResolvedAt(), dispute.getResolutionMessage());
     }
 
