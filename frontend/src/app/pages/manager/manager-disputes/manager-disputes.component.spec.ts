@@ -45,6 +45,9 @@ describe('ManagerDisputesComponent', () => {
       'Dispute ID', 'Client Name', 'Status', 'Severity', 'Message', 'Resolved', 'Actions'
     ]);
     expect(fixture.nativeElement.querySelector('.dispute-summary').cells.length).toBe(7);
+    expect(fixture.nativeElement.querySelector('.status-open')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('.severity-critical')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('.resolution-pending')).not.toBeNull();
     expect(fixture.nativeElement.querySelector('.dispute-details').hidden).toBeTrue();
     expect(fixture.nativeElement.querySelector('dl')).toBeNull();
     expect(text).not.toContain('10,000.00');
@@ -124,6 +127,9 @@ describe('ManagerDisputesComponent', () => {
       '1', 'Alex Smith', '12', '7', '10,000.00', 'OPEN', 'CRITICAL',
       jasmine.stringMatching(/2026/), 'Not resolved', '<script>not HTML</script>', 'No resolution message'
     ]);
+    expect(details.querySelector('.status-open')).not.toBeNull();
+    expect(details.querySelector('.severity-critical')).not.toBeNull();
+    expect(details.querySelector('.resolution-pending')).not.toBeNull();
     expect(details.querySelector('script')).toBeNull();
     button.click();
     fixture.detectChanges();
@@ -132,6 +138,17 @@ describe('ManagerDisputesComponent', () => {
     button.click();
     fixture.detectChanges();
     expect(button.getAttribute('aria-expanded')).toBe('true');
+  });
+
+  it('uses green outlined badges for resolved disputes and normal severity', () => {
+    service.search.and.returnValue(of({
+      ...page,
+      content: [{ ...page.content[0], status: 'RESOLVED', severity: 'NORMAL', resolvedAt: '2026-10-23T12:00:00' }]
+    }));
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.status-resolved')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('.severity-normal')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('.resolution-complete')).not.toBeNull();
   });
 
   for (const message of [null, '', 'Short message', 'x'.repeat(50), 'x'.repeat(51)]) {
