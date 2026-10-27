@@ -3,6 +3,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule, Routes } from '@angular/router';
 import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 
@@ -45,6 +46,7 @@ const routes: Routes = [
     BrowserModule,
     BrowserAnimationsModule,
     ReactiveFormsModule,
+    FormsModule,
     CommonModule,
     HttpClientModule,
     RouterModule.forRoot(routes),

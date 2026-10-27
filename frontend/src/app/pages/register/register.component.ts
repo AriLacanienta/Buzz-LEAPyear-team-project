@@ -1,34 +1,42 @@
-import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
+import { Component } from "@angular/core";
+import { FormBuilder, FormGroup, Validators } from "@angular/forms";
+import { Router } from "@angular/router";
+import { AuthService } from "../../services/auth.service";
+import { COUNTRY_OPTIONS } from "../../utils/country-options";
 
 @Component({
-  selector: 'app-register',
-  templateUrl: './register.component.html',
-  styleUrls: ['./register.component.scss']
+  selector: "app-register",
+  templateUrl: "./register.component.html",
+  styleUrls: ["./register.component.scss"],
 })
 export class RegisterComponent {
   registerForm: FormGroup;
   loading = false;
   submitted = false;
-  errorMessage = '';
+  errorMessage = "";
+  readonly countryOptions = COUNTRY_OPTIONS;
 
   constructor(
     private formBuilder: FormBuilder,
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
   ) {
     this.registerForm = this.formBuilder.group({
-      username: ['', [Validators.required, Validators.minLength(3)]],
-      email: ['', [Validators.required, Validators.email]],
-      firstName: ['', Validators.required],
-      lastName: ['', Validators.required],
-      password: ['', [
-        Validators.required,
-        Validators.minLength(8),
-        Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).+$/)
-      ]]
+      username: ["", [Validators.required, Validators.minLength(3)]],
+      email: ["", [Validators.required, Validators.email]],
+      firstName: ["", Validators.required],
+      lastName: ["", Validators.required],
+      country: ["", Validators.required],
+      password: [
+        "",
+        [
+          Validators.required,
+          Validators.minLength(8),
+          Validators.pattern(
+            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).+$/,
+          ),
+        ],
+      ],
     });
   }
 
@@ -38,7 +46,7 @@ export class RegisterComponent {
 
   onSubmit() {
     this.submitted = true;
-    this.errorMessage = '';
+    this.errorMessage = "";
 
     if (this.registerForm.invalid) {
       return;
@@ -46,9 +54,10 @@ export class RegisterComponent {
 
     this.loading = true;
 
-    const { username, email, firstName, lastName, password } = this.registerForm.value;
+    const { username, email, firstName, lastName, country, password } =
+      this.registerForm.value;
 
-    this.authService.register(username, email, firstName, lastName, password).subscribe(
+      this.authService.register(username, email, firstName, lastName, country, password).subscribe(
       (response) => {
         this.authService.setAuthSessionFromResponse(response);
         this.loading = false;
@@ -70,7 +79,8 @@ export class RegisterComponent {
     );
   }
 
+
   goToLogin() {
-    this.router.navigate(['/login']);
+    this.router.navigate(["/login"]);
   }
 }

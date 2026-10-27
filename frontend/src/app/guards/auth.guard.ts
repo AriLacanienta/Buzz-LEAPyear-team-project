@@ -9,6 +9,7 @@ export const authGuard: CanActivateFn = (route, state) => {
   const router = inject(Router);
   const requiredRoles = route.data?.['roles'] as string[] | undefined;
 
+  // Recover the in-memory access token after a reload before validating it.
   return authService.restoreSession().pipe(
     switchMap(restored => {
       if (!restored) {

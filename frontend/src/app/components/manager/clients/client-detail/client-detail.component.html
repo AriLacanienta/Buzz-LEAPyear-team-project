@@ -64,6 +64,60 @@
     <app-manager-disputes [userId]="selectedClient.id" />
   </section>
 
+  <section class="detail-section access-section">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">Security</p>
+        <h3>Session access</h3>
+      </div>
+      <span class="session-status" [ngClass]="'session-' + sessionStatus">
+        {{
+          sessionStatus === 'loading' ? 'Checking...' :
+          sessionStatus === 'active' ? 'Active session' :
+          sessionStatus === 'inactive' ? 'No active session' :
+          'Status unavailable'
+        }}
+      </span>
+    </div>
+
+    <p>
+      Revoking signs {{ selectedClient.name }} out from every device: their refresh tokens are
+      revoked and any access tokens they hold will stop working immediately.
+    </p>
+
+    <div class="access-actions">
+      <span *ngIf="revokeMessage" class="revoke-success" role="status">{{ revokeMessage }}</span>
+      <span *ngIf="revokeError" class="revoke-error" role="alert">{{ revokeError }}</span>
+
+      <ng-container *ngIf="!confirmingRevoke; else confirmRevoke">
+        <button
+          type="button"
+          class="revoke-button"
+          (click)="confirmingRevoke = true; revokeMessage = ''">
+          Revoke access
+        </button>
+      </ng-container>
+
+      <ng-template #confirmRevoke>
+        <span class="confirm-text">Revoke all tokens for {{ selectedClient.name }}?</span>
+        <button
+          type="button"
+          class="cancel-button"
+          [disabled]="revoking"
+          (click)="confirmingRevoke = false">
+          Cancel
+        </button>
+        <button
+          type="button"
+          class="revoke-button confirm"
+          [disabled]="revoking"
+          (click)="revokeAccess()">
+          {{ revoking ? 'Revoking...' : 'Confirm revoke' }}
+        </button>
+      </ng-template>
+    </div>
+  </section>
+
   <section class="detail-section notes-section">
     <div class="section-heading">
       <div>

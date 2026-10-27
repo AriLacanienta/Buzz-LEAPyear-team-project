@@ -5,15 +5,21 @@ public class RegistrationRequest {
     private String email;
     private String firstName;
     private String lastName;
+    private String country;
     private String password;
 
     public RegistrationRequest() {}
 
     public RegistrationRequest(String username, String email, String firstName, String lastName, String password) {
+        this(username, email, firstName, lastName, null, password);
+    }
+
+    public RegistrationRequest(String username, String email, String firstName, String lastName, String country, String password) {
         this.username = username;
         this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;
+        this.country = country;
         this.password = password;
     }
 
@@ -47,6 +53,14 @@ public class RegistrationRequest {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
     }
 
     public String getPassword() {
