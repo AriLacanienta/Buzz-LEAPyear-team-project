@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { Observable, of, tap } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import { environment } from '@environments/environment';
 
 interface AuthApiResponse {
@@ -83,7 +84,18 @@ export class AuthService {
   refreshAccessToken(): Observable<AuthApiResponse> {
     return this.http.post<AuthApiResponse>(`${this.apiUrl}/refresh`, {}, {
       withCredentials: true
-    });
+    }).pipe(tap(response => this.storeAuthResponse(response)));
+  }
+
+  restoreSession(): Observable<boolean> {
+    if (this.isLoggedIn()) {
+      return of(true);
+    }
+
+    return this.refreshAccessToken().pipe(
+      map(() => true),
+      catchError(() => of(false))
+    );
   }
 
   /**
