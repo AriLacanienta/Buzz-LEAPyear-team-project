@@ -66,7 +66,7 @@ public class OrderProcessor {
             HoldingRepository holdingRepository,
             AccountRepository accountRepository,
             QuoteService quoteService,
-            TradeOrderEventService tradeOrderEventService) {
+            TradeOrderEventService tradeOrderEventService,
             ExchangeRateService exchangeRateService) {
         this.orderValidator = orderValidator;
         this.orderExecutor = orderExecutor;
