@@ -73,7 +73,7 @@ public class TradeOrderController {
             TradeOrderService tradeOrderService,
             AccountService accountService,
             OrderProcessor orderProcessor,
-            TradeOrderEventService tradeOrderEventService) {
+            TradeOrderEventService tradeOrderEventService,
             HoldingRepository holdingRepository) {
         this.processOrderService = processOrderService;
         this.tradeOrderRepository = tradeOrderRepository;
