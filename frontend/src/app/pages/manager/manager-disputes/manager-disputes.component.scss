@@ -53,6 +53,20 @@ button {
 	gap: 0.75rem;
 }
 
+.actions {
+	row-gap: 0;
+
+	button {
+		font-size: 0.85rem;
+	}
+
+	&::before {
+		content: '';
+		flex: 0 0 100%;
+		height: calc(0.85rem + 0.4rem);
+	}
+}
+
 nav {
 	margin-top: 1rem;
 }
@@ -62,8 +76,43 @@ nav {
 	font-size: 0.8rem;
 }
 
-[role='alert'], .critical {
+[role='alert'] {
 	color: #f59e0b;
+}
+
+.dispute-badge {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border: 1px solid currentColor;
+	border-radius: 999px;
+	padding: 0.15rem 0.55rem;
+	font-size: 0.75rem;
+	font-weight: 600;
+	line-height: 1.2;
+	white-space: nowrap;
+}
+
+.status-open,
+.severity-critical {
+	color: #f87171;
+	background: rgba(248, 113, 113, 0.08);
+}
+
+.status-resolved,
+.severity-normal {
+	color: #34d399;
+	background: rgba(52, 211, 153, 0.08);
+}
+
+.resolution-complete {
+	color: #34d399;
+	background: rgba(52, 211, 153, 0.08);
+}
+
+.resolution-pending {
+	color: #f87171;
+	background: rgba(248, 113, 113, 0.08);
 }
 
 .table-wrapper {

@@ -21,8 +21,8 @@ $spacing-lg: 2rem;
 $avatar-size: 1.5rem;
 
 .table-header {
-  padding: 0.75rem 1.25rem;
-  background-color: $bg-darker;
+  padding: 1rem 1.25rem;
+  background: linear-gradient(180deg, #121b29, $bg-darker);
   border-bottom: 0.0625rem solid $border-dark;
 }
 
@@ -40,19 +40,37 @@ table {
   border: none;
   width: 100%;
   min-width: 42rem;
-  font-size: $text-xs;
+  font-size: 0.78rem;
+
+  .mat-mdc-header-row {
+    background: rgba(255, 255, 255, 0.018);
+  }
+
+  .mat-mdc-row {
+    cursor: pointer;
+    transition: background-color 140ms ease;
+
+    &:hover {
+      background-color: rgba(81, 162, 255, 0.045);
+    }
+
+    &:focus-visible {
+      outline: 2px solid $color-primary-light;
+      outline-offset: -2px;
+    }
+  }
 
   .mat-mdc-header-cell,
   .mat-mdc-cell {
-    padding: 0.75rem 1rem;
+    padding: 0.9rem 1rem;
     border-bottom-color: $border-dark;
   }
   
   th {
     color: $color-slate-500;
-    font-size: 0.8rem;
+    font-size: 0.68rem;
     font-weight: $font-weight-semibold;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     white-space: nowrap;
     border-bottom: 0.0625rem solid $border-dark;
@@ -77,33 +95,63 @@ table {
   }
 
   .cdk-column-instrumentName {
-    max-width: 7.5rem;
+    max-width: 13rem;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
   .cdk-column-watchlist {
-    width: 5.5rem;
+    width: 3.5rem;
     text-align: center;
   }
 
   .watchlist-button {
-    width: 1.75rem;
-    height: 1.75rem;
+    display: inline-grid;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
     padding: 0;
-    border: 0.0625rem solid $color-slate-500;
-    border-radius: 0.25rem;
+    border: 0;
+    border-radius: 50%;
     background: transparent;
     color: $color-slate-400;
     cursor: pointer;
-    font-size: 1.25rem;
+    transition: background-color 160ms ease, color 160ms ease, transform 160ms ease;
+  }
+
+  .watchlist-icon {
+    font-size: 1.5rem;
     line-height: 1;
   }
 
-  .watchlist-button:hover,
-  .watchlist-button.is-added {
-    border-color: $color-primary-light;
+  .watchlist-button:hover {
+    background: $color-primary-light-bg;
     color: $color-primary-light;
+    transform: translateY(-0.0625rem);
+  }
+
+  .watchlist-button:focus-visible {
+    outline: 0.125rem solid $color-primary-light;
+    outline-offset: 0.125rem;
+  }
+
+  .watchlist-button.is-added {
+    color: #fbbf24;
+  }
+
+  .watchlist-button.is-added:hover {
+    background: rgba(251, 191, 36, 0.16);
+    color: #fcd34d;
+  }
+
+  .watchlist-button:active {
+    transform: scale(0.94);
+  }
+
+  .watchlist-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
   }
 
   .cdk-column-currentPrice {
@@ -163,9 +211,16 @@ table {
 }
 
 .no-data-message {
-  padding: $spacing-lg;
+  padding: 3rem 1.5rem;
   background-color: $bg-darker;
-  border: 0.125rem solid $border-dark;
-  color: $color-slate-500;
+  color: $color-slate-400;
   text-align: center;
+
+  &::before {
+    display: block;
+    margin-bottom: 0.6rem;
+    color: #71829a;
+    content: '⌕';
+    font-size: 1.7rem;
+  }
 }

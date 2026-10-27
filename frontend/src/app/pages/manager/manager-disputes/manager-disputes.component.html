@@ -87,10 +87,21 @@
                   </button>
                 </td>
                 <td>{{ dispute.clientName }}</td>
-                <td>{{ dispute.status }}</td>
-                <td [class.critical]="dispute.severity === 'CRITICAL'">{{ dispute.severity }}</td>
+                <td>
+                  <span class="dispute-badge" [class.status-open]="dispute.status === 'OPEN'"
+                    [class.status-resolved]="dispute.status === 'RESOLVED'">{{ dispute.status }}</span>
+                </td>
+                <td>
+                  <span class="dispute-badge" [class.severity-critical]="dispute.severity === 'CRITICAL'"
+                    [class.severity-normal]="dispute.severity === 'NORMAL'">{{ dispute.severity }}</span>
+                </td>
                 <td class="message">{{ dispute.message ? ((dispute.message | slice:0:50) + (dispute.message.length > 50 ? '...' : '')) : 'No additional details' }}</td>
-                <td>{{ dispute.resolvedAt ? (dispute.resolvedAt | date:'medium') : 'Not resolved' }}</td>
+                <td>
+                  <span class="dispute-badge" [class.resolution-complete]="dispute.resolvedAt"
+                    [class.resolution-pending]="!dispute.resolvedAt">
+                    {{ dispute.resolvedAt ? (dispute.resolvedAt | date:'medium') : 'Not resolved' }}
+                  </span>
+                </td>
                 <td>
                   <button *ngIf="dispute.status === 'OPEN'" type="button" class="resolve-button"
                     [attr.aria-label]="'Resolve dispute ' + dispute.id"
@@ -106,10 +117,15 @@
                     <div><dt>Account ID</dt><dd>{{ dispute.accountId }}</dd></div>
                     <div><dt>Order ID</dt><dd>{{ dispute.tradeOrderId }}</dd></div>
                     <div><dt>Trade value</dt><dd>{{ dispute.tradeValue | number:'1.2-2' }}</dd></div>
-                    <div><dt>Status</dt><dd>{{ dispute.status }}</dd></div>
-                    <div><dt>Severity</dt><dd [class.critical]="dispute.severity === 'CRITICAL'">{{ dispute.severity }}</dd></div>
+                    <div><dt>Status</dt><dd><span class="dispute-badge" [class.status-open]="dispute.status === 'OPEN'"
+                      [class.status-resolved]="dispute.status === 'RESOLVED'">{{ dispute.status }}</span></dd></div>
+                    <div><dt>Severity</dt><dd><span class="dispute-badge" [class.severity-critical]="dispute.severity === 'CRITICAL'"
+                      [class.severity-normal]="dispute.severity === 'NORMAL'">{{ dispute.severity }}</span></dd></div>
                     <div><dt>Created</dt><dd>{{ dispute.createdAt | date:'medium' }}</dd></div>
-                    <div><dt>Resolved</dt><dd>{{ dispute.resolvedAt ? (dispute.resolvedAt | date:'medium') : 'Not resolved' }}</dd></div>
+                    <div><dt>Resolved</dt><dd><span class="dispute-badge" [class.resolution-complete]="dispute.resolvedAt"
+                      [class.resolution-pending]="!dispute.resolvedAt">
+                      {{ dispute.resolvedAt ? (dispute.resolvedAt | date:'medium') : 'Not resolved' }}
+                    </span></dd></div>
                     <div class="full-message"><dt>Message</dt><dd class="message">{{ dispute.message || 'No additional details' }}</dd></div>
                     <div class="full-message"><dt>Resolution message</dt><dd class="message">{{ dispute.resolutionMessage || 'No resolution message' }}</dd></div>
                   </dl>

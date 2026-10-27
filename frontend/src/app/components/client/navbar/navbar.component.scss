@@ -70,6 +70,15 @@ header {
   align-items: center;
   display: flex;
   gap: $spacing-xs;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid $color-rocket-dark;
+    outline-offset: 3px;
+    border-radius: $border-radius-sm;
+  }
 }
 
 .rocket {

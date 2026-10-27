@@ -8,7 +8,22 @@ export interface QuoteResponse {
   symbol: string;
   price: number;
   changePercent: number;
-  name: string;
+  name?: string;
+  highPrice?: number | null;
+  lowPrice?: number | null;
+  openPrice?: number | null;
+  previousClosePrice?: number | null;
+  change?: number | null;
+  volume?: number | null;
+  marketCap?: number | null;
+  timestamp?: string | null;
+}
+
+export interface InstrumentDetailsResponse {
+  instrumentName: string;
+  instrumentSymbol: string;
+  assetType: string;
+  currencyCode: string;
 }
 
 @Injectable({
@@ -29,6 +44,12 @@ export class InstrumentService {
 
   getQuote(symbol: string): Observable<QuoteResponse> {
     return this.http.get<QuoteResponse>(`${this.apiUrl}/${encodeURIComponent(symbol)}`);
+  }
+
+  getInstrumentDetails(symbol: string): Observable<InstrumentDetailsResponse> {
+    return this.http.get<InstrumentDetailsResponse>(
+      `${environment.apiUrl}/instruments/${encodeURIComponent(symbol)}/details`
+    );
   }
 
   getInstruments(assetType: string = 'EQUITY', market: string | null = null, page: number = 0, size: number = 10): Observable<any> {

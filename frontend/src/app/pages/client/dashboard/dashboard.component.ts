@@ -149,7 +149,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (gainers) => {
           console.log('Top gainers:', gainers);
-          this.topGainers = gainers;
+          this.topGainers = gainers.map(item => ({ ...item, name: item.name ?? item.symbol }));
         },
         error: (error) => {
           console.error('Error loading top gainers:', error);
@@ -164,7 +164,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (losers) => {
           console.log('Top losers:', losers);
-          this.topLosers = losers;
+          this.topLosers = losers.map(item => ({ ...item, name: item.name ?? item.symbol }));
         },
         error: (error) => {
           console.error('Error loading top losers:', error);

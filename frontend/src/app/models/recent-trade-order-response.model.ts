@@ -24,6 +24,7 @@ export interface RecentTradeOrderResponse {
   status: OrderStatus | null;
   timeUpdated: string | Date | null;
   reasonText: string | null;
+  hasOpenDispute: boolean;
 }
 
 export interface SpringPage<T> {

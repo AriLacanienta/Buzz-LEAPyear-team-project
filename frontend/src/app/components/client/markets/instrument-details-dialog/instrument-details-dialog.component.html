@@ -1,0 +1,66 @@
+<div class="dialog-backdrop" (click)="close()">
+  <section
+    class="instrument-dialog"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="instrument-dialog-title"
+    (click)="$event.stopPropagation()">
+    <header class="dialog-header">
+      <div class="instrument-identity">
+        <span class="symbol-avatar" aria-hidden="true">{{ instrument.instrumentSymbol.slice(0, 1) }}</span>
+        <div>
+          <p class="eyebrow">INSTRUMENT DETAILS</p>
+          <div class="instrument-title-row">
+            <h2 id="instrument-dialog-title">{{ details?.instrumentName || instrument.instrumentName }}</h2>
+            <button
+              type="button"
+              class="favorite-button"
+              [class.is-favorite]="isFavorite"
+              [disabled]="favoritePending"
+              [attr.aria-pressed]="isFavorite"
+              [attr.aria-label]="isFavorite ? 'Remove ' + instrument.instrumentSymbol + ' from favorites' : 'Add ' + instrument.instrumentSymbol + ' to favorites'"
+              [title]="isFavorite ? 'Remove from favorites' : 'Add to favorites'"
+              (click)="favoriteToggled.emit()">
+              <span aria-hidden="true">{{ isFavorite ? '★' : '☆' }}</span>
+            </button>
+          </div>
+          <span class="symbol-label">{{ instrument.instrumentSymbol }}<span *ngIf="details?.assetType"> · {{ details?.assetType }}</span></span>
+        </div>
+      </div>
+      <button type="button" class="close-button" aria-label="Close instrument details" (click)="close()">×</button>
+    </header>
+
+    <div *ngIf="favoriteError" class="dialog-status error" role="alert">{{ favoriteError }}</div>
+    <div *ngIf="isLoading" class="dialog-status" role="status">Loading latest quote…</div>
+    <div *ngIf="hasError && !isLoading" class="dialog-status error" role="status">
+      Some quote details are unavailable. Showing the latest market-list data where possible.
+    </div>
+
+    <div class="price-summary">
+      <div>
+        <span class="field-label">LATEST PRICE</span>
+        <strong class="price-value">{{ price | currency: currencyCode : 'symbol' : '1.2-2' }}</strong>
+      </div>
+      <div class="change-pill" [class.positive]="change >= 0" [class.negative]="change < 0">
+        <strong>{{ change >= 0 ? '+' : '' }}{{ change | currency: currencyCode : 'symbol' : '1.2-2' }}</strong>
+        <span>{{ changePercent >= 0 ? '+' : '' }}{{ changePercent | number: '1.2-2' }}%</span>
+      </div>
+    </div>
+
+    <div class="detail-grid">
+      <div class="detail-item"><span class="field-label">OPEN</span><strong>{{ quote?.openPrice != null ? (quote?.openPrice | currency: currencyCode : 'symbol' : '1.2-2') : '—' }}</strong></div>
+      <div class="detail-item"><span class="field-label">PREVIOUS CLOSE</span><strong>{{ quote?.previousClosePrice != null ? (quote?.previousClosePrice | currency: currencyCode : 'symbol' : '1.2-2') : '—' }}</strong></div>
+      <div class="detail-item"><span class="field-label">DAY HIGH</span><strong>{{ quote?.highPrice != null ? (quote?.highPrice | currency: currencyCode : 'symbol' : '1.2-2') : '—' }}</strong></div>
+      <div class="detail-item"><span class="field-label">DAY LOW</span><strong>{{ quote?.lowPrice != null ? (quote?.lowPrice | currency: currencyCode : 'symbol' : '1.2-2') : '—' }}</strong></div>
+      <div class="detail-item"><span class="field-label">VOLUME</span><strong>{{ volume != null ? (volume | number) : '—' }}</strong></div>
+      <div class="detail-item"><span class="field-label">MARKET CAP</span><strong>{{ marketCap != null ? (marketCap | currency: currencyCode : 'symbol' : '1.0-0') : '—' }}</strong></div>
+      <div class="detail-item"><span class="field-label">CURRENCY</span><strong>{{ details?.currencyCode || '—' }}</strong></div>
+      <div class="detail-item"><span class="field-label">QUOTE UPDATED</span><strong>{{ quote?.timestamp ? (quote?.timestamp | date: 'medium') : '—' }}</strong></div>
+    </div>
+
+    <footer class="dialog-footer">
+      <span>Market data may be delayed.</span>
+      <button type="button" class="done-button" (click)="close()">Done</button>
+    </footer>
+  </section>
+</div>
