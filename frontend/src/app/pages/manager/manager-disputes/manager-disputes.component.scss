@@ -53,6 +53,20 @@ button {
 	gap: 0.75rem;
 }
 
+.actions {
+	row-gap: 0;
+
+	button {
+		font-size: 0.85rem;
+	}
+
+	&::before {
+		content: '';
+		flex: 0 0 100%;
+		height: calc(0.85rem + 0.4rem);
+	}
+}
+
 nav {
 	margin-top: 1rem;
 }
