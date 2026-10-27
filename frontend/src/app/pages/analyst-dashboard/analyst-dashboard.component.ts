@@ -6,11 +6,11 @@ import { Subject, interval, merge, of } from 'rxjs';
 import { catchError, map, startWith, switchMap, takeUntil } from 'rxjs/operators';
 import { AnalystTrade, AnalystTradePage } from '../../models/analyst-trade.model';
 import { AnalystTradeService } from '../../services/analyst-trade.service';
-import { AuthService } from '../../services/auth.service';
-import { Router } from '@angular/router';
 import { HighchartsChartModule } from 'highcharts-angular';
 import * as Highcharts from 'highcharts';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
+import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-analyst-dashboard',
@@ -52,16 +52,21 @@ export class AnalystDashboardComponent implements OnInit, OnDestroy {
   }
 
   dropWidget(event: CdkDragDrop<string[]>): void {
-    if (event.previousIndex === event.currentIndex) {
-      return;
-    }
     moveItemInArray(this.widgetOrder, event.previousIndex, event.currentIndex);
-    localStorage.setItem('analyst-dashboard-widget-order', JSON.stringify(this.widgetOrder));
+    try {
+      localStorage.setItem('analyst-dashboard-widget-order', JSON.stringify(this.widgetOrder));
+    } catch {
+      // Keep the layout usable when browser storage is unavailable.
+    }
   }
 
   resetWidgetOrder(): void {
     this.widgetOrder = [...this.defaultWidgetOrder];
-    localStorage.removeItem('analyst-dashboard-widget-order');
+    try {
+      localStorage.removeItem('analyst-dashboard-widget-order');
+    } catch {
+      // The default layout still applies for the current session.
+    }
   }
 
   widgetPosition(widget: string): number {
@@ -70,12 +75,14 @@ export class AnalystDashboardComponent implements OnInit, OnDestroy {
 
   private loadWidgetOrder(): void {
     try {
-      const saved = JSON.parse(localStorage.getItem('analyst-dashboard-widget-order') || 'null');
-      if (Array.isArray(saved) && this.defaultWidgetOrder.every(widget => saved.includes(widget))) {
+      const saved: unknown = JSON.parse(localStorage.getItem('analyst-dashboard-widget-order') || 'null');
+      if (Array.isArray(saved) && saved.length === this.defaultWidgetOrder.length &&
+          new Set(saved).size === this.defaultWidgetOrder.length &&
+          saved.every(widget => this.defaultWidgetOrder.includes(widget))) {
         this.widgetOrder = saved;
       }
     } catch {
-      this.widgetOrder = [...this.defaultWidgetOrder];
+      // Ignore invalid or unavailable saved layout data.
     }
   }
 
@@ -231,27 +238,40 @@ export class AnalystDashboardComponent implements OnInit, OnDestroy {
       series: [{ type: 'pie', name: 'Trades', data: assetData }]
     };
 
-    const flowBuckets = new Map<string, { buy: number; sell: number; sortValue: number }>();
+    const flowBuckets = new Map<number, { buy: number; sell: number }>();
     this.trades.forEach(trade => {
       const date = new Date(trade.orderDate);
-      const bucket = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-      const current = flowBuckets.get(bucket) || { buy: 0, sell: 0, sortValue: date.getTime() };
+      if (Number.isNaN(date.getTime())) return;
+      const bucket = Math.floor(date.getTime() / 60000) * 60000;
+      const current = flowBuckets.get(bucket) || { buy: 0, sell: 0 };
       trade.side === 'BUY' ? current.buy++ : current.sell++;
       flowBuckets.set(bucket, current);
     });
 
-    const flow = Array.from(flowBuckets.entries()).sort((first, second) => first[1].sortValue - second[1].sortValue);
+    const flow = Array.from(flowBuckets.entries()).sort((first, second) => first[0] - second[0]);
     this.orderFlowChartOptions = {
       chart: { type: 'line', backgroundColor: 'transparent', height: 220 },
+      time: { timezone: Intl.DateTimeFormat().resolvedOptions().timeZone },
       title: { text: '' },
       credits: { enabled: false },
-      xAxis: { categories: flow.map(([label]) => label), labels: { style: { color: '#62748E', fontSize: '10px' } }, lineColor: '#1E2D45', tickColor: '#1E2D45' },
+      xAxis: {
+        type: 'datetime',
+        title: { text: 'Order timestamp (local time)', style: { color: '#9aa1ad', fontSize: '11px' } },
+        labels: {
+          format: this.fromDate === this.toDate ? '{value:%H:%M}' : '{value:%b %e, %H:%M}',
+          style: { color: '#9aa1ad', fontSize: '10px' }
+        },
+        lineWidth: 1,
+        lineColor: '#1E2D45',
+        tickColor: '#1E2D45',
+        tickLength: 5
+      },
       yAxis: { title: { text: '' }, allowDecimals: false, labels: { style: { color: '#62748E', fontSize: '10px' } }, gridLineColor: '#1E2D45' },
-      tooltip: { shared: true, backgroundColor: 'rgba(15, 21, 32, 0.95)', borderColor: '#1E2D45', style: { color: '#FFFFFF' } },
+      tooltip: { shared: true, xDateFormat: '%b %e, %Y %H:%M', backgroundColor: 'rgba(15, 21, 32, 0.95)', borderColor: '#1E2D45', style: { color: '#FFFFFF' } },
       legend: { itemStyle: { color: '#9aa1ad' } },
       series: [
-        { type: 'line', name: 'Buys', color: '#10B981', data: flow.map(([, values]) => values.buy) },
-        { type: 'line', name: 'Sells', color: '#EF4444', data: flow.map(([, values]) => values.sell) }
+        { type: 'line', name: 'Buys', color: '#10B981', data: flow.map(([timestamp, values]) => [timestamp, values.buy]) },
+        { type: 'line', name: 'Sells', color: '#EF4444', data: flow.map(([timestamp, values]) => [timestamp, values.sell]) }
       ]
     };
   }

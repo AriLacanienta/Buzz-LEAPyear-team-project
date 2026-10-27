@@ -12,6 +12,7 @@
   <app-portfolio-holding-card 
     *ngFor="let holding of visibleHoldings; let i = index; trackBy: trackBySymbol"
     [holding]="holding"
+    [accountId]="accountId"
     [index]="i">
   </app-portfolio-holding-card>
 </div>

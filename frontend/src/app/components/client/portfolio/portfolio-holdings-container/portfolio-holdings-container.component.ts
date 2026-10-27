@@ -12,6 +12,7 @@ import { PortfolioHoldingCardComponent } from '@app/components/client//portfolio
 export class PortfolioHoldingsContainerComponent implements OnInit, OnDestroy, OnChanges {
   @Input() title: string = '';
   @Input() holdings: any[] = [];
+  @Input() accountId: number | null = null;
   @Input() isLoading: boolean = false;
   
   visibleHoldings: any[] = [];
