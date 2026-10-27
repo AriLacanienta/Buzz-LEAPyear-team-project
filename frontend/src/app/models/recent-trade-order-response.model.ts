@@ -17,6 +17,9 @@ export interface RecentTradeOrderResponse {
   side: OrderSide;
   quantity: number;
   price: number;
+  nativeCurrency: string;
+  exchangeRate: number;
+  tradeValue: number;
   orderDate: string | Date;
   status: OrderStatus | null;
   timeUpdated: string | Date | null;

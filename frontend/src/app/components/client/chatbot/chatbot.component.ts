@@ -5,15 +5,15 @@ import { finalize, switchMap } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ChatbotService } from '../../../services/chatbot.service';
 import { ChatMessage, StockComparisonResponse, TopMoversResponse } from '../../../models/chatbot.model';
 import { TradeOrderPreviewResponse } from '../../../models/trade-order.model';
 import { PortfolioSummaryResponse } from '../../../models/portfolio-summary-response.model';
 import { DisputeCard } from '../../../models/dispute.model';
 import { DisputeService } from '../../../services/dispute.service';
 import { AccountService } from '../../../services/account.service';
-import { DisputeComposerService } from '../../../services/dispute-composer.service';
 import { RecentTradeOrderResponse } from '../../../models/recent-trade-order-response.model';
+import { ChatbotService } from '@app/services/chatbot.service';
+import { DisputeComposerService } from '@app/services/dispute-composer.service';
 
 @Component({
   selector: 'app-chatbot',

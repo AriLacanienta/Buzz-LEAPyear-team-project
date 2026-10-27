@@ -8,16 +8,16 @@
                 <tr>
                     <th>Instrument</th>
                     <th>Shares</th>
-                    <th>Price</th>
-                    <th>Value</th>
+                    <th>Price (Native)</th>
+                    <th>Value (USD)</th>
                 </tr>
             </thead>
             <tbody>
                 <tr *ngFor="let holding of currentHoldings">
                     <td class="ticker">{{ holding.instrumentSymbol }}</td>
                     <td class="quantity">{{ holding.quantity }}</td>
-                    <td class="price">{{ holding.currentPrice | currency: 'USD': 'symbol': '1.2-2' }}</td>
-                    <td class="value">{{ holding.totalValue | currency: 'USD': 'symbol': '1.2-2' }}</td>
+                    <td class="price">{{ holding.currentPrice | currency: holding.currencyCode: 'symbol': '1.2-2' }}</td>
+                    <td class="value">{{ holding.usdValue | currency: 'USD': 'symbol': '1.2-2' }}</td>
                 </tr>
             </tbody>
         </table>

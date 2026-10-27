@@ -34,8 +34,9 @@ export class InstrumentService {
 
   constructor(private http: HttpClient) {}
   
-  searchInstruments(query: string): Observable<InstrumentSearchResponse[]> {
-    const params = new HttpParams().set('q', query);
+  searchInstruments(query: string, assetTypes: string[] = ['EQUITY', 'ETF', 'BOND'], market: string = 'US'): Observable<InstrumentSearchResponse[]> {
+    let params = new HttpParams().set('q', query).set('market', market);
+    assetTypes.forEach(assetType => params = params.append('assetType', assetType));
     return this.http.get<{ content: InstrumentSearchResponse[] }>(`${this.apiUrl}/search`, { params }).pipe(
       map(page => page.content ?? [])
     );

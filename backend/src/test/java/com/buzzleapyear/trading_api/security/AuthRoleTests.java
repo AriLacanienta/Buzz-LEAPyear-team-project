@@ -58,13 +58,13 @@ class AuthRoleTests {
     private RoleRepository roleRepository;
 
     @Mock
+    private RefreshSessionRepository refreshSessionRepository;
+
+    @Mock
     private PasswordEncoder passwordEncoder;
 
     @Mock
     private JwtTokenProvider tokenProvider;
-
-    @Mock
-    private RefreshSessionRepository refreshSessionRepository;
 
     @Mock
     private LoginAttemptRepository loginAttemptRepository;
@@ -173,6 +173,8 @@ class AuthRoleTests {
 
     @Test
     void registrationAssignsClientRoleAndReturnsItInAuthResponse() {
+        org.springframework.test.util.ReflectionTestUtils.setField(
+            authController, "refreshSessionRepository", refreshSessionRepository);
         RegistrationRequest request = new RegistrationRequest();
         request.setUsername("new-client");
         request.setEmail("new-client@example.com");
@@ -192,10 +194,14 @@ class AuthRoleTests {
         ResponseEntity<?> response = authController.register(request, httpServletRequest);
 
         AuthResponse authResponse = assertInstanceOf(AuthResponse.class, response.getBody());
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
         assertEquals(List.of("CLIENT"), authResponse.getRoles());
         assertEquals("new-client", authResponse.getUsername());
         assertEquals("new-client@example.com", authResponse.getEmail());
+        assertEquals(List.of("CLIENT"), authResponse.getRoles());
+        assertEquals("token", authResponse.getAccessToken());
+        assertEquals("token", authResponse.getToken());
+        assertNull(authResponse.getRefreshToken());
         User savedUser = org.mockito.Mockito.mockingDetails(userRepository).getInvocations().stream()
             .filter(invocation -> invocation.getMethod().getName().equals("save"))
             .map(invocation -> (User) invocation.getArgument(0))

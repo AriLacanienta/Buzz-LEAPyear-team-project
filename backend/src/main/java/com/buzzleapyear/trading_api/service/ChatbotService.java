@@ -9,6 +9,7 @@ import com.buzzleapyear.trading_api.dto.StockComparisonResponseDto;
 import com.buzzleapyear.trading_api.entity.Account;
 import com.buzzleapyear.trading_api.entity.Instrument;
 import com.buzzleapyear.trading_api.entity.TradeOrder.OrderSide;
+import com.buzzleapyear.trading_api.entity.TradeOrder.QuantityMode;
 import com.buzzleapyear.trading_api.repository.InstrumentRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -290,7 +291,9 @@ public class ChatbotService {
                 account,
                 instrument,
                 side,
-                quantity
+                QuantityMode.SHARES,
+                quantity,
+                null
             );
 
         String message = preview.valid()

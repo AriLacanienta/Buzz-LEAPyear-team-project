@@ -151,7 +151,7 @@ public class ImportCSVService {
                     tradeOrder.setOrderDate(values.trade_date);
                     tradeOrder.setQuantity(BigDecimal.valueOf(values.quantity));
                     tradeOrder.setPrice(BigDecimal.valueOf(values.price));
-                    tradeOrder.setValue(BigDecimal.valueOf(values.value));
+                    tradeOrder.setTradeValue(BigDecimal.valueOf(values.value));
                     tradeOrder.setSide(values.side);
                     em.persist(tradeOrder);
                     em.flush();
