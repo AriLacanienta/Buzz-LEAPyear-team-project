@@ -6,6 +6,8 @@ import com.buzzleapyear.trading_api.dto.ManagerDashboardSummary;
 import com.buzzleapyear.trading_api.repository.UserRepository;
 import com.buzzleapyear.trading_api.service.DisputeService;
 import com.buzzleapyear.trading_api.service.ManagerDashboardService;
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.RequestDispatcher;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -39,6 +41,19 @@ class DashboardSummarySecurityTests {
     @Test
     void anonymousCannotReadSummary() throws Exception {
         mvc.perform(get("/api/v1/dispute/summary")).andExpect(status().isUnauthorized());
+        verifyNoInteractions(summaryService, disputeService);
+    }
+
+    @Test
+    void errorDispatchPreservesServerErrorInsteadOfReturningUnauthorized() throws Exception {
+        mvc.perform(get("/error")
+                .with(request -> {
+                    request.setDispatcherType(DispatcherType.ERROR);
+                    return request;
+                })
+                .requestAttr(RequestDispatcher.ERROR_STATUS_CODE, 500)
+                .requestAttr(RequestDispatcher.ERROR_REQUEST_URI, "/api/v1/dispute/summary"))
+            .andExpect(status().isInternalServerError());
         verifyNoInteractions(summaryService, disputeService);
     }
 

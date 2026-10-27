@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.InitializingBean;
 import org.flywaydb.core.Flyway;
@@ -26,6 +27,13 @@ public class AnalyticsDataSourceConfig {
     @Primary
     DataSource tradingDataSource() {
         return tradingDataSourceProperties().initializeDataSourceBuilder().build();
+    }
+
+    @Bean
+    @Primary
+    NamedParameterJdbcTemplate tradingNamedParameterJdbcTemplate(
+            @Qualifier("tradingDataSource") DataSource dataSource) {
+        return new NamedParameterJdbcTemplate(dataSource);
     }
 
     @Bean
