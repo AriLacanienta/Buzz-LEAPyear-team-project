@@ -40,7 +40,7 @@ public class SecurityConfig {
                 (request, response, authException) -> response.sendError(HttpStatus.UNAUTHORIZED.value())
             ))
             .authorizeHttpRequests(authorize -> authorize
-                // PUBLIC 
+                // PUBLIC
                 .requestMatchers("/error").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/v1/auth/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/auth/validate").authenticated()
@@ -65,7 +65,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/user/allUsers").hasRole(ROLE_MANAGER)
                 .requestMatchers("/api/v1/user/**").authenticated()
 
-                
+
 
                 // RESTRICTED (RBAC)
                 .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
