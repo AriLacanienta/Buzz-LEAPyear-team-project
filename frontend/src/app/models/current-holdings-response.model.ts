@@ -3,7 +3,9 @@ export interface CurrentHoldingsResponse {
     instrumentSymbol: string;
     quantity: number;
     currentPrice: number;
+    currencyCode: string;
     totalValue: number;
+    usdValue: number;
     change: number;
     changePercent: number;
     totalCost: number;

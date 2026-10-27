@@ -397,7 +397,7 @@ class DisputeServiceTests {
         TradeOrder order = new TradeOrder();
         order.setId(7L);
         order.setAccount(account);
-        order.setValue(new BigDecimal("25.00"));
+        order.setTradeValue(new BigDecimal("25.00"));
         order.setQuantity(BigDecimal.ONE);
         order.setPrice(new BigDecimal("25.00"));
         TradeOrderStatus filled = new TradeOrderStatus();

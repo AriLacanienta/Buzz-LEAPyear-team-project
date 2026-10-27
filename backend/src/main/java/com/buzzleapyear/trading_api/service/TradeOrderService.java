@@ -59,7 +59,7 @@ public class TradeOrderService {
             order.getQuantity(),
             order.getPrice(),
             currency,
-            order.getValue()
+            order.getTradeValue()
         );
     }
 }

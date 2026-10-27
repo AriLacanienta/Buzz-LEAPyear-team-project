@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter, OnInit, DestroyRef } from '@angular/core';
+import { Component, Output, EventEmitter, OnInit, DestroyRef, Input } from '@angular/core';
 import { BehaviorSubject, catchError, debounceTime, distinctUntilChanged, of, switchMap, timer, map, EMPTY, combineLatest, Observable } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { InstrumentService } from '@app/services/instrument.service';
@@ -20,9 +20,18 @@ const DEBOUNCE_TIME_MS = 500;
 export class SearchComponent implements OnInit {
   @Output() itemSelected = new EventEmitter<InstrumentSearchResponse | null>();
 
+  @Input() set assetTypes(value: string[]) {
+    this.assetTypes$.next(value);
+  }
+  @Input() set market(value: string) {
+    this.market$.next(value || 'US');
+  }
+
   private searchTerm$ = new BehaviorSubject<string>('');
   private selectedItem$ = new BehaviorSubject<InstrumentSearchResponse | null>(null);
   private focused$ = new BehaviorSubject<boolean>(false);
+  private assetTypes$ = new BehaviorSubject<string[]>(['EQUITY', 'ETF', 'BOND']);
+  private market$ = new BehaviorSubject<string>('US');
   searchInput: string = '';
   searchResults: InstrumentSearchResponse[] = [];
   isSearchBoxFocused: boolean = false;
@@ -37,9 +46,9 @@ export class SearchComponent implements OnInit {
       distinctUntilChanged()
     );
 
-    combineLatest([this.focused$, term$]).pipe(
-      switchMap(([focused, term]) => 
-        focused ? timer (0, POLL_INTERVAL_MS).pipe(switchMap(() => this.fetchResults(term))) : EMPTY
+    combineLatest([this.focused$, term$, this.assetTypes$.pipe(distinctUntilChanged()), this.market$.pipe(distinctUntilChanged())]).pipe(
+      switchMap(([focused, term, assetTypes, market]) =>
+        focused ? timer (0, POLL_INTERVAL_MS).pipe(switchMap(() => this.fetchResults(term, assetTypes, market))) : EMPTY
       ),
       takeUntilDestroyed(this.destroyRef)
     ).subscribe(results => this.searchResults = results);
@@ -55,12 +64,17 @@ export class SearchComponent implements OnInit {
     ).subscribe(updated => this.itemSelected.emit(updated));
   }
 
-  private fetchResults(term: string): Observable<InstrumentSearchResponse[]> {
-    const request$: Observable<InstrumentSearchResponse[]> = this.instrumentService.searchInstruments(term);
+  private fetchResults(term: string, assetTypes: string[], market: string): Observable<InstrumentSearchResponse[]> {
+    const request$: Observable<InstrumentSearchResponse[]> = this.instrumentService.searchInstruments(term, assetTypes, market);
 
     return request$.pipe(
       catchError(() => of(this.searchResults))
     );
+  }
+
+  get placeholder(): string {
+    if (this.assetTypes$.value.includes('CRYPTO')) return 'Search crypto...';
+    return this.market$.value === 'FOREIGN' ? 'Search foreign stocks, ETFs, bonds...' : 'Search US stocks, ETFs, bonds...';
   }
 
   onSearchBoxFocus(): void {

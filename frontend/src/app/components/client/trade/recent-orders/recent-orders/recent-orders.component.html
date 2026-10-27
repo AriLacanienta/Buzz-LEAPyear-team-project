@@ -25,8 +25,8 @@
                     </td>
                     <td class="instrument">{{ order.instrumentSymbol }}</td>
                     <td class="quantity">{{ order.quantity }}</td>
-                    <td class="price">{{ order.price | currency: 'USD': 'symbol': '1.2-2' }}</td>
-                    <td class="total">{{ (order.quantity * order.price) | currency: 'USD': 'symbol': '1.2-2' }}</td>
+                    <td class="price">{{ order.price | currency: order.nativeCurrency: 'symbol': '1.2-2' }}</td>
+                    <td class="total">{{ order.tradeValue | currency: 'USD': 'symbol': '1.2-2' }}</td>
                     <td class="status">
                         <span class="status-badge" [class]="'status-' + (order.status?.toLowerCase() ?? 'unknown')"
                             [attr.title]="order.reasonText">

@@ -360,7 +360,7 @@ class CsvImportServiceTests {
                     "TradeOrder side should be BUY or SELL"),
                 () -> Assertions.assertEquals(new BigDecimal("120"), persistedTradeOrder.getQuantity().setScale(0)),
                 () -> Assertions.assertEquals(new BigDecimal("185.32").setScale(2), persistedTradeOrder.getPrice().setScale(2)),
-                () -> Assertions.assertEquals(new BigDecimal("22238.40").setScale(2), persistedTradeOrder.getValue().setScale(2)),
+                () -> Assertions.assertEquals(new BigDecimal("22238.40").setScale(2), persistedTradeOrder.getTradeValue().setScale(2)),
                 () -> Assertions.assertNotNull(persistedTradeOrder.getOrderDate())
             );
         }

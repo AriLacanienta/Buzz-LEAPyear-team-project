@@ -7,7 +7,7 @@
       <div class="result-name">{{ selectedResult.instrumentName }}</div>
     </div>
     <div class="result-right">
-      <div class="result-price">${{ selectedResult.currentPrice.toFixed(2) }}</div>
+      <div class="result-price">{{ selectedResult.currentPrice | currency:selectedResult.currencyCode:'symbol':'1.2-2' }}</div>
       <div class="result-change" [class.positive]="selectedResult.percentChange >= 0" [class.negative]="selectedResult.percentChange < 0">
         {{ selectedResult.percentChange >= 0 ? '+' : '' }}{{ selectedResult.percentChange.toFixed(2) }}% today
       </div>
@@ -16,5 +16,6 @@
   <div class="result-tags">
     <span class="tag tradable">Tradable</span>
     <span class="tag stocks">{{ selectedResult.assetType }}</span>
+    <span class="tag stocks">{{ selectedResult.currencyCode }}</span>
   </div>
 </div>

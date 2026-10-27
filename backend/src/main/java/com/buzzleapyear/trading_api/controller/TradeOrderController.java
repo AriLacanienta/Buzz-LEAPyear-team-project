@@ -1,5 +1,6 @@
 package com.buzzleapyear.trading_api.controller;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -23,6 +24,7 @@ import com.buzzleapyear.trading_api.dto.TradeOrderResponseDTO;
 import com.buzzleapyear.trading_api.dto.TradeOrderPreviewRequestDto;
 import com.buzzleapyear.trading_api.dto.TradeOrderPreviewResponseDto;
 import com.buzzleapyear.trading_api.entity.Account;
+import com.buzzleapyear.trading_api.entity.Holding;
 import com.buzzleapyear.trading_api.entity.Instrument;
 import com.buzzleapyear.trading_api.entity.TradeOrder;
 import com.buzzleapyear.trading_api.entity.TradeOrderStatus;
@@ -35,6 +37,7 @@ import com.buzzleapyear.trading_api.service.TradeOrderService;
 import com.buzzleapyear.trading_api.service.AccountService;
 import com.buzzleapyear.trading_api.service.OrderProcessor;
 import com.buzzleapyear.trading_api.service.TradeOrderEventService;
+import com.buzzleapyear.trading_api.repository.HoldingRepository;
 
 import jakarta.validation.Valid;
 
@@ -59,6 +62,7 @@ public class TradeOrderController {
     private final AccountService accountService;
     private final OrderProcessor orderProcessor;
     private final TradeOrderEventService tradeOrderEventService;
+    private final HoldingRepository holdingRepository;
 
     public TradeOrderController(
             ProcessOrderService processOrderService,
@@ -70,6 +74,7 @@ public class TradeOrderController {
             AccountService accountService,
             OrderProcessor orderProcessor,
             TradeOrderEventService tradeOrderEventService) {
+            HoldingRepository holdingRepository) {
         this.processOrderService = processOrderService;
         this.tradeOrderRepository = tradeOrderRepository;
         this.tradeOrderStatusRepository = tradeOrderStatusRepository;
@@ -79,6 +84,7 @@ public class TradeOrderController {
         this.accountService = accountService;
         this.orderProcessor = orderProcessor;
         this.tradeOrderEventService = tradeOrderEventService;
+        this.holdingRepository = holdingRepository;
     }
 
     /*
@@ -95,7 +101,7 @@ public class TradeOrderController {
         if (instrument == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(orderProcessor.previewOrder(account, instrument, request.side(), request.quantity()));
+        return ResponseEntity.ok(orderProcessor.previewOrder(account, instrument, request.side(), request.mode(), request.quantity(), request.amount()));
     }
 
     /**
@@ -108,8 +114,8 @@ public class TradeOrderController {
      */
     @PostMapping
     public ResponseEntity<TradeOrderResponseDTO> submitOrder(@Valid @RequestBody TradeOrderDTO orderDTO, Authentication authentication) {
-        logger.info("Received POST /api/v1/tradeorders - side: {}, instrument: {}, qty: {}, price: {}",
-            orderDTO.side(), orderDTO.instrumentSymbol(), orderDTO.quantity(), orderDTO.price());
+        logger.info("Received POST /api/v1/tradeorders - side: {}, instrument: {}, mode: {}, qty: {}, amount: {}, price: {}",
+            orderDTO.side(), orderDTO.instrumentSymbol(), orderDTO.mode(), orderDTO.quantity(), orderDTO.amount(), orderDTO.price());
         
         try {
             // Validate and load account
@@ -121,15 +127,26 @@ public class TradeOrderController {
             // Validate and load instrument
             Instrument instrument = instrumentRepository.findByInstrumentSymbol(orderDTO.instrumentSymbol())
                 .orElseThrow(() -> new IllegalArgumentException("Instrument not found: " + orderDTO.instrumentSymbol()));
-            
+
+            // Provisional quantity for AMOUNT orders - re-resolved at live price during processing
+            BigDecimal heldQuantity = holdingRepository.findByAccountIdAndInstrumentId(account.getId(), instrument.getId())
+                .map(Holding::getQuantity)
+                .orElse(BigDecimal.ZERO);
+            BigDecimal quantity = orderProcessor.resolveQuantity(instrument, orderDTO.mode(), orderDTO.quantity(), orderDTO.amount(), orderDTO.price(), orderDTO.side(), heldQuantity);
+            if (quantity == null || quantity.signum() <= 0) {
+                throw new IllegalArgumentException("Order amount too small to buy any quantity");
+            }
+
             // Create TradeOrder entity from DTO
             TradeOrder order = new TradeOrder();
             order.setAccount(account);
             order.setInstrument(instrument);
             order.setSide(orderDTO.side());
-            order.setQuantity(orderDTO.quantity());
+            order.setQuantityMode(orderDTO.mode());
+            order.setRequestedAmount(orderDTO.mode() == TradeOrder.QuantityMode.AMOUNT ? orderDTO.amount() : null);
+            order.setQuantity(quantity);
             order.setPrice(orderDTO.price());
-            order.setValue(orderDTO.price().multiply(orderDTO.quantity()));
+            order.setTradeValue(orderDTO.price().multiply(quantity));
             order.setOrderDate(LocalDateTime.now());
             
             // Save order to database (generates ID)
